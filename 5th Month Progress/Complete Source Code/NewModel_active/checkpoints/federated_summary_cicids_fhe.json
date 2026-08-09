@@ -1,0 +1,13 @@
+{
+  "dataset": "cicids",
+  "use_fhe": true,
+  "n_clients": 10,
+  "rounds": 5,
+  "local_epochs": 2,
+  "alpha": 0.3,
+  "parameters": 43394,
+  "training_time_sec": 457.57543897628784,
+  "test_accuracy": 0.9818473717587539,
+  "test_macro_f1": 0.9712995524687404,
+  "test_roc_auc": 0.9978071155509498
+}

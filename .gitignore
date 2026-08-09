@@ -1,0 +1,59 @@
+# ─────────────────────────────────────────────────────────────────────────
+# Datasets — 8.6 GB, and VeReMi alone is 6.9 GB.
+# GitHub hard-blocks any single file over 100 MB; eleven of these exceed it.
+# Provenance, inventory and re-acquisition instructions are in
+# "5th Month Progress/Dataset/README.md" instead.
+# ─────────────────────────────────────────────────────────────────────────
+Preprocessed_Dataset/
+**/Preprocessed_Dataset/
+*.csv.gz
+
+# ─── Build artefacts and environments ────────────────────────────────────
+node_modules/
+**/node_modules/
+.venv/
+**/.venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+**/.pytest_cache/
+.vite/
+dist/
+build/
+
+# ─── Local tool / editor state ───────────────────────────────────────────
+.claude/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ─────────────────────────────────────────────────────────────────────────
+# Third-party personal document.
+# This repository is PUBLIC. Saurabh_LGSI_Student_Declaration.pdf is a named
+# individual's personal declaration; publishing it is not ours to do.
+# Remove this line only with that person's agreement.
+# ─────────────────────────────────────────────────────────────────────────
+**/Saurabh_LGSI_Student_Declaration.pdf
+
+# ─────────────────────────────────────────────────────────────────────────
+# Unrelated work that happens to share this directory.
+# These belong to a separate digital-forensics exercise, not to LG-IoV.
+# ─────────────────────────────────────────────────────────────────────────
+/bruteforce_hash.py
+/dump_e01.py
+/entropy_scan.py
+/entropy_scan_mem.py
+/explore_e01.py
+/find_orphans.py
+/parse_mft.py
+/poc.py
+
+# ─── Scratch ─────────────────────────────────────────────────────────────
+*.log.tmp
+scratch/
+tmp/

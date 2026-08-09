@@ -1,0 +1,83 @@
++ PY=/c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe
++ LOG_DIR=run_logs
++ mkdir -p run_logs
++ run can_vtc '' fhe
++ local dataset=can_vtc
++ local mode_flag=
++ local tag=fhe
+++ date
++ echo '=== Starting can_vtc fhe at Mon Jul 27 23:38:18 IST 2026 ==='
+=== Starting can_vtc fhe at Mon Jul 27 23:38:18 IST 2026 ===
++ /c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe train_federated.py --dataset can_vtc --seed 2025
+++ date
++ echo '=== Finished can_vtc fhe at Mon Jul 27 23:42:51 IST 2026 with exit code 0 ==='
+=== Finished can_vtc fhe at Mon Jul 27 23:42:51 IST 2026 with exit code 0 ===
++ run car_hack '' fhe
++ local dataset=car_hack
++ local mode_flag=
++ local tag=fhe
+++ date
++ echo '=== Starting car_hack fhe at Mon Jul 27 23:42:51 IST 2026 ==='
+=== Starting car_hack fhe at Mon Jul 27 23:42:51 IST 2026 ===
++ /c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe train_federated.py --dataset car_hack --seed 2025
+++ date
++ echo '=== Finished car_hack fhe at Mon Jul 27 23:52:55 IST 2026 with exit code 0 ==='
+=== Finished car_hack fhe at Mon Jul 27 23:52:55 IST 2026 with exit code 0 ===
++ run car_hack --no-fhe nofhe
++ local dataset=car_hack
++ local mode_flag=--no-fhe
++ local tag=nofhe
+++ date
++ echo '=== Starting car_hack nofhe at Mon Jul 27 23:52:55 IST 2026 ==='
+=== Starting car_hack nofhe at Mon Jul 27 23:52:55 IST 2026 ===
++ /c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe train_federated.py --dataset car_hack --no-fhe --seed 2025
+++ date
++ echo '=== Finished car_hack nofhe at Tue Jul 28 00:01:49 IST 2026 with exit code 0 ==='
+=== Finished car_hack nofhe at Tue Jul 28 00:01:49 IST 2026 with exit code 0 ===
++ run cicids '' fhe
++ local dataset=cicids
++ local mode_flag=
++ local tag=fhe
+++ date
++ echo '=== Starting cicids fhe at Tue Jul 28 00:01:49 IST 2026 ==='
+=== Starting cicids fhe at Tue Jul 28 00:01:49 IST 2026 ===
++ /c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe train_federated.py --dataset cicids --seed 2025
+++ date
++ echo '=== Finished cicids fhe at Tue Jul 28 00:13:19 IST 2026 with exit code 0 ==='
+=== Finished cicids fhe at Tue Jul 28 00:13:19 IST 2026 with exit code 0 ===
++ run cicids --no-fhe nofhe
++ local dataset=cicids
++ local mode_flag=--no-fhe
++ local tag=nofhe
+++ date
++ echo '=== Starting cicids nofhe at Tue Jul 28 00:13:19 IST 2026 ==='
+=== Starting cicids nofhe at Tue Jul 28 00:13:19 IST 2026 ===
++ /c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe train_federated.py --dataset cicids --no-fhe --seed 2025
+++ date
++ echo '=== Finished cicids nofhe at Tue Jul 28 00:24:51 IST 2026 with exit code 0 ==='
+=== Finished cicids nofhe at Tue Jul 28 00:24:51 IST 2026 with exit code 0 ===
++ run veremi '' fhe
++ local dataset=veremi
++ local mode_flag=
++ local tag=fhe
+++ date
++ echo '=== Starting veremi fhe at Tue Jul 28 00:24:51 IST 2026 ==='
+=== Starting veremi fhe at Tue Jul 28 00:24:51 IST 2026 ===
++ /c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe train_federated.py --dataset veremi --seed 2025
+++ date
++ echo '=== Finished veremi fhe at Tue Jul 28 00:32:50 IST 2026 with exit code 0 ==='
+=== Finished veremi fhe at Tue Jul 28 00:32:50 IST 2026 with exit code 0 ===
++ run veremi --no-fhe nofhe
++ local dataset=veremi
++ local mode_flag=--no-fhe
++ local tag=nofhe
+++ date
++ echo '=== Starting veremi nofhe at Tue Jul 28 00:32:50 IST 2026 ==='
+=== Starting veremi nofhe at Tue Jul 28 00:32:50 IST 2026 ===
++ /c/Users/Thrish_Sudha/AppData/Local/Programs/Python/Python312/python.exe train_federated.py --dataset veremi --no-fhe --seed 2025
+++ date
++ echo '=== Finished veremi nofhe at Tue Jul 28 00:40:51 IST 2026 with exit code 0 ==='
+=== Finished veremi nofhe at Tue Jul 28 00:40:51 IST 2026 with exit code 0 ===
+++ date
++ echo '=== ALL RUNS COMPLETE at Tue Jul 28 00:40:51 IST 2026 ==='
+=== ALL RUNS COMPLETE at Tue Jul 28 00:40:51 IST 2026 ===

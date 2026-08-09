@@ -1,0 +1,305 @@
+[helpers] Random seed fixed at: 2025
+
+[init] device=cpu dataset=cicids backend=none seed=2025
+[preprocess] Loading raw data for 'cicids' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[cicids]   rows kept: 149,982  blocks: 8
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[cicids]   rows kept: 149,845  blocks: 8
+[cicids] reading cleaned_Friday-WorkingHours-Morning.pcap_ISCX.csv
+[cicids]   rows kept: 149,894  blocks: 8
+[cicids] reading cleaned_Monday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,863  blocks: 8
+[cicids] reading cleaned_Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[cicids]   rows kept: 149,921  blocks: 8
+[cicids] reading cleaned_Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[cicids]   rows kept: 149,888  blocks: 8
+[cicids] reading cleaned_Tuesday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,899  blocks: 8
+[cicids] reading cleaned_Wednesday-workingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,719  blocks: 8
+[preprocess] blocks: total=64 train=46 val=9 test=9
+[preprocess] cicids split sizes: train=849123, val=169888, test=180000
+[preprocess] Classes: ('BENIGN', 'ATTACK')
+[preprocess] Class counts (train): [658135.0, 190988.0]
+[preprocess] Class weights: [0.6450979113578796, 2.2229747772216797]
+[server] global model: 43,394 parameters, backend=none, disclosure=practical
+[init] 10 vehicles registered over ECDH+AES-256-GCM channels (mutual Ed25519 auth)
+
+--- round 01/05 | active 7/10 [1, 2, 4, 5, 6, 7, 8] ---
+  vehicle-0002: trained on 79,099 samples
+  vehicle-0005: trained on 6,002 samples
+  vehicle-0001: trained on 53,770 samples
+  vehicle-0004: trained on 3,908 samples
+  vehicle-0006: trained on 240,763 samples
+  vehicle-0007: trained on 115,382 samples
+  vehicle-0008: trained on 18,074 samples
+round 01 | loss 0.3749 | acc 0.8188 | 46.5s | p^u [0.14, 0.164, 0.158, 0.165, 0.087, 0.128, 0.158]
+
+--- round 02/05 | active 7/10 [1, 2, 5, 6, 7, 8, 9] ---
+  vehicle-0002: trained on 79,099 samples
+  vehicle-0006: trained on 240,763 samples
+  vehicle-0007: trained on 115,382 samples
+  vehicle-0009: trained on 56,824 samples
+  vehicle-0008: trained on 18,074 samples
+  vehicle-0005: trained on 6,002 samples
+  vehicle-0001: trained on 53,770 samples
+round 02 | loss 0.0633 | acc 0.9746 | 47.4s | p^u [0.143, 0.086, 0.132, 0.152, 0.161, 0.165, 0.161]
+
+--- round 03/05 | active 7/10 [0, 1, 2, 3, 5, 6, 9] ---
+  vehicle-0000: trained on 227,640 samples
+  vehicle-0006: trained on 240,763 samples
+  vehicle-0009: trained on 56,824 samples
+  vehicle-0005: trained on 6,002 samples
+  vehicle-0002: trained on 79,099 samples
+  vehicle-0003: trained on 47,661 samples
+  vehicle-0001: trained on 53,770 samples
+round 03 | loss 0.1432 | acc 0.9873 | 57.6s | p^u [0.117, 0.105, 0.154, 0.165, 0.149, 0.157, 0.153]
+
+--- round 04/05 | active 7/10 [0, 1, 4, 5, 6, 7, 8] ---
+  vehicle-0004: trained on 3,908 samples
+  vehicle-0007: trained on 115,382 samples
+  vehicle-0005: trained on 6,002 samples
+  vehicle-0000: trained on 227,640 samples
+  vehicle-0001: trained on 53,770 samples
+  vehicle-0008: trained on 18,074 samples
+  vehicle-0006: trained on 240,763 samples
+round 04 | loss 0.0925 | acc 0.9552 | 55.1s | p^u [0.165, 0.14, 0.165, 0.111, 0.152, 0.162, 0.105]
+
+--- round 05/05 | active 7/10 [1, 3, 4, 5, 7, 8, 9] ---
+  vehicle-0004: trained on 3,908 samples
+  vehicle-0001: trained on 53,770 samples
+  vehicle-0005: trained on 6,002 samples
+  vehicle-0007: trained on 115,382 samples
+  vehicle-0003: trained on 47,661 samples
+  vehicle-0008: trained on 18,074 samples
+  vehicle-0009: trained on 56,824 samples
+round 05 | loss 0.0613 | acc 0.9679 | 26.4s | p^u [0.164, 0.145, 0.161, 0.098, 0.141, 0.158, 0.133]
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.9679
+Macro F1:  0.9411
+Precision: 0.9175
+Recall:    0.9698
+ROC-AUC:   0.9975
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+BENIGN                    | 0.9950     | 0.9672     | 0.9809     | 152893  
+ATTACK                    | 0.8400     | 0.9724     | 0.9013     | 27107   
+
+Confusion Matrix:
+[[147871   5022]
+ [   748  26359]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_cicids_none_s2025.pt
+[helpers] Random seed fixed at: 2026
+
+[init] device=cpu dataset=cicids backend=none seed=2026
+[preprocess] Loading raw data for 'cicids' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[cicids]   rows kept: 149,982  blocks: 8
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[cicids]   rows kept: 149,845  blocks: 8
+[cicids] reading cleaned_Friday-WorkingHours-Morning.pcap_ISCX.csv
+[cicids]   rows kept: 149,894  blocks: 8
+[cicids] reading cleaned_Monday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,863  blocks: 8
+[cicids] reading cleaned_Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[cicids]   rows kept: 149,921  blocks: 8
+[cicids] reading cleaned_Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[cicids]   rows kept: 149,888  blocks: 8
+[cicids] reading cleaned_Tuesday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,899  blocks: 8
+[cicids] reading cleaned_Wednesday-workingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,719  blocks: 8
+[preprocess] blocks: total=64 train=46 val=9 test=9
+[preprocess] cicids split sizes: train=869510, val=169894, test=159607
+[preprocess] Classes: ('BENIGN', 'ATTACK')
+[preprocess] Class counts (train): [678450.0, 191060.0]
+[preprocess] Class weights: [0.640806257724762, 2.275489330291748]
+[server] global model: 43,394 parameters, backend=none, disclosure=practical
+[init] 10 vehicles registered over ECDH+AES-256-GCM channels (mutual Ed25519 auth)
+
+--- round 01/05 | active 7/10 [0, 2, 3, 4, 5, 8, 9] ---
+  vehicle-0003: trained on 136,655 samples
+  vehicle-0002: trained on 10,174 samples
+  vehicle-0009: trained on 27,594 samples
+  vehicle-0008: trained on 7 samples
+  vehicle-0000: trained on 34,354 samples
+  vehicle-0004: trained on 25,929 samples
+  vehicle-0005: trained on 254,052 samples
+round 01 | loss 0.6310 | acc 0.6992 | 37.4s | p^u [0.119, 0.161, 0.154, 0.167, 0.165, 0.155, 0.079]
+
+--- round 02/05 | active 7/10 [0, 1, 2, 3, 4, 5, 6] ---
+  vehicle-0001: trained on 30,755 samples
+  vehicle-0002: trained on 10,174 samples
+  vehicle-0003: trained on 136,655 samples
+  vehicle-0005: trained on 254,052 samples
+  vehicle-0006: trained on 237,636 samples
+  vehicle-0000: trained on 34,354 samples
+  vehicle-0004: trained on 25,929 samples
+round 02 | loss 0.1126 | acc 0.9357 | 53.3s | p^u [0.159, 0.164, 0.135, 0.11, 0.108, 0.163, 0.161]
+
+--- round 03/05 | active 7/10 [0, 2, 3, 5, 6, 7, 9] ---
+  vehicle-0005: trained on 254,052 samples
+  vehicle-0007: trained on 112,354 samples
+  vehicle-0009: trained on 27,594 samples
+  vehicle-0002: trained on 10,174 samples
+  vehicle-0003: trained on 136,655 samples
+  vehicle-0000: trained on 34,354 samples
+  vehicle-0006: trained on 237,636 samples
+round 03 | loss 0.1462 | acc 0.9202 | 58.6s | p^u [0.111, 0.146, 0.161, 0.165, 0.136, 0.165, 0.115]
+
+--- round 04/05 | active 7/10 [0, 2, 3, 4, 6, 7, 9] ---
+  vehicle-0006: trained on 237,636 samples
+  vehicle-0009: trained on 27,594 samples
+  vehicle-0007: trained on 112,354 samples
+  vehicle-0004: trained on 25,929 samples
+  vehicle-0003: trained on 136,655 samples
+  vehicle-0000: trained on 34,354 samples
+  vehicle-0002: trained on 10,174 samples
+round 04 | loss 0.2594 | acc 0.8953 | 42.6s | p^u [0.094, 0.159, 0.136, 0.161, 0.127, 0.16, 0.164]
+
+--- round 05/05 | active 7/10 [0, 2, 3, 4, 6, 7, 9] ---
+  vehicle-0000: trained on 34,354 samples
+  vehicle-0007: trained on 112,354 samples
+  vehicle-0009: trained on 27,594 samples
+  vehicle-0006: trained on 237,636 samples
+  vehicle-0004: trained on 25,929 samples
+  vehicle-0003: trained on 136,655 samples
+  vehicle-0002: trained on 10,174 samples
+round 05 | loss 0.0831 | acc 0.9487 | 42.6s | p^u [0.164, 0.137, 0.159, 0.093, 0.16, 0.124, 0.163]
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.9487
+Macro F1:  0.9148
+Precision: 0.8793
+Recall:    0.9666
+ROC-AUC:   0.9976
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+BENIGN                    | 0.9986     | 0.9404     | 0.9686     | 134086  
+ATTACK                    | 0.7601     | 0.9929     | 0.8610     | 25521   
+
+Confusion Matrix:
+[[126088   7998]
+ [   182  25339]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_cicids_none_s2026.pt
+[helpers] Random seed fixed at: 2027
+
+[init] device=cpu dataset=cicids backend=none seed=2027
+[preprocess] Loading raw data for 'cicids' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[cicids]   rows kept: 149,982  blocks: 8
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[cicids]   rows kept: 149,845  blocks: 8
+[cicids] reading cleaned_Friday-WorkingHours-Morning.pcap_ISCX.csv
+[cicids]   rows kept: 149,894  blocks: 8
+[cicids] reading cleaned_Monday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,863  blocks: 8
+[cicids] reading cleaned_Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[cicids]   rows kept: 149,921  blocks: 8
+[cicids] reading cleaned_Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[cicids]   rows kept: 149,888  blocks: 8
+[cicids] reading cleaned_Tuesday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,899  blocks: 8
+[cicids] reading cleaned_Wednesday-workingHours.pcap_ISCX.csv
+[cicids]   rows kept: 149,719  blocks: 8
+[preprocess] blocks: total=64 train=46 val=9 test=9
+[preprocess] cicids split sizes: train=869584, val=180000, test=149427
+[preprocess] Classes: ('BENIGN', 'ATTACK')
+[preprocess] Class counts (train): [672096.0, 197488.0]
+[preprocess] Class weights: [0.6469194889068604, 2.2016122341156006]
+[server] global model: 43,394 parameters, backend=none, disclosure=practical
+[init] 10 vehicles registered over ECDH+AES-256-GCM channels (mutual Ed25519 auth)
+
+--- round 01/05 | active 7/10 [0, 2, 4, 5, 6, 7, 8] ---
+  vehicle-0002: trained on 99,449 samples
+  vehicle-0000: trained on 46,291 samples
+  vehicle-0004: trained on 255,299 samples
+  vehicle-0007: trained on 3,099 samples
+  vehicle-0005: trained on 45,737 samples
+  vehicle-0008: trained on 80,263 samples
+  vehicle-0006: trained on 39,654 samples
+round 01 | loss 1.5644 | acc 0.8951 | 41.7s | p^u [0.138, 0.153, 0.097, 0.165, 0.151, 0.143, 0.153]
+
+--- round 02/05 | active 7/10 [0, 1, 3, 4, 6, 8, 9] ---
+  vehicle-0009: trained on 271,500 samples
+  vehicle-0006: trained on 39,654 samples
+  vehicle-0004: trained on 255,299 samples
+  vehicle-0000: trained on 46,291 samples
+  vehicle-0003: trained on 17,993 samples
+  vehicle-0001: trained on 10,299 samples
+  vehicle-0008: trained on 80,263 samples
+round 02 | loss 0.3926 | acc 0.9389 | 66.0s | p^u [0.102, 0.159, 0.102, 0.161, 0.165, 0.164, 0.148]
+
+--- round 03/05 | active 7/10 [0, 2, 3, 5, 6, 7, 8] ---
+  vehicle-0003: trained on 17,993 samples
+  vehicle-0005: trained on 45,737 samples
+  vehicle-0000: trained on 46,291 samples
+  vehicle-0007: trained on 3,099 samples
+  vehicle-0002: trained on 99,449 samples
+  vehicle-0006: trained on 39,654 samples
+  vehicle-0008: trained on 80,263 samples
+round 03 | loss 0.5035 | acc 0.9476 | 29.7s | p^u [0.158, 0.143, 0.144, 0.165, 0.115, 0.146, 0.128]
+
+--- round 04/05 | active 7/10 [0, 1, 2, 4, 5, 6, 7] ---
+  vehicle-0000: trained on 46,291 samples
+  vehicle-0001: trained on 10,299 samples
+  vehicle-0005: trained on 45,737 samples
+  vehicle-0006: trained on 39,654 samples
+  vehicle-0004: trained on 255,299 samples
+  vehicle-0007: trained on 3,099 samples
+  vehicle-0002: trained on 99,449 samples
+round 04 | loss 0.4264 | acc 0.9461 | 40.1s | p^u [0.153, 0.163, 0.152, 0.152, 0.078, 0.165, 0.136]
+
+--- round 05/05 | active 7/10 [0, 2, 4, 6, 7, 8, 9] ---
+  vehicle-0009: trained on 271,500 samples
+  vehicle-0004: trained on 255,299 samples
+  vehicle-0008: trained on 80,263 samples
+  vehicle-0002: trained on 99,449 samples
+  vehicle-0006: trained on 39,654 samples
+  vehicle-0007: trained on 3,099 samples
+  vehicle-0000: trained on 46,291 samples
+round 05 | loss 0.6101 | acc 0.9460 | 53.3s | p^u [0.107, 0.111, 0.153, 0.147, 0.16, 0.166, 0.157]
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.9460
+Macro F1:  0.8802
+Precision: 0.9429
+Recall:    0.8381
+ROC-AUC:   0.9844
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+BENIGN                    | 0.9468     | 0.9922     | 0.9690     | 127021  
+ATTACK                    | 0.9390     | 0.6840     | 0.7915     | 22406   
+
+Confusion Matrix:
+[[126025    996]
+ [  7080  15326]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_cicids_none_s2027.pt
+
+==================================================================
+cicids / none over 3 seed(s)
+  accuracy  0.9542 +/- 0.0098
+  macro F1  0.9120 +/- 0.0249
+  ROC-AUC   0.9932 +/- 0.0062
+  audit     {'rounds': 5, 'individual_update_decryptions': 0, 'aggregate_decryptions': 5, 'distance_scalars_revealed': 35}
+  saved     C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\results\federated_cicids_none.json
+==================================================================
+
+---STDERR---

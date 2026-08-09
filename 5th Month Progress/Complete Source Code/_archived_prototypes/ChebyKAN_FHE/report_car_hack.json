@@ -1,0 +1,23 @@
+{
+    "dataset": "car_hack",
+    "rounds": [
+        {
+            "round": 1,
+            "time_s": 8.69075632095337,
+            "rejected": 1,
+            "test_acc": 0.0,
+            "macro_f1": 0.0,
+            "roc_auc": NaN,
+            "confusion_matrix": [
+                [
+                    0,
+                    59
+                ],
+                [
+                    0,
+                    0
+                ]
+            ]
+        }
+    ]
+}

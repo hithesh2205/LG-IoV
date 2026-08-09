@@ -1,0 +1,62 @@
+[
+  {
+    "dataset": "can_vtc",
+    "n_params": 44164,
+    "n_ciphertext_chunks_per_client": 11,
+    "active_clients": 7,
+    "encrypt_time_sec_all_clients": 0.317049200006295,
+    "encrypt_time_sec_per_client": 0.04529274285804214,
+    "homomorphic_aggregate_time_sec": 0.05817259999457747,
+    "decrypt_time_sec": 0.03660309998667799,
+    "real_fhe_round_overhead_sec": 0.1400684428392976,
+    "max_abs_error_vs_plaintext_fedavg": 2.765189546088953e-08,
+    "ciphertext_bytes_per_client_update": 3677028,
+    "plaintext_bytes_per_client_update": 176656,
+    "ciphertext_expansion_factor": 20.81462276967666
+  },
+  {
+    "dataset": "car_hack",
+    "n_params": 44549,
+    "n_ciphertext_chunks_per_client": 11,
+    "active_clients": 7,
+    "encrypt_time_sec_all_clients": 0.3084916000079829,
+    "encrypt_time_sec_per_client": 0.04407022857256899,
+    "homomorphic_aggregate_time_sec": 0.05404459999408573,
+    "decrypt_time_sec": 0.009168899996438995,
+    "real_fhe_round_overhead_sec": 0.1072837285630937,
+    "max_abs_error_vs_plaintext_fedavg": 2.4818970108253513e-08,
+    "ciphertext_bytes_per_client_update": 3676959,
+    "plaintext_bytes_per_client_update": 178196,
+    "ciphertext_expansion_factor": 20.634352061774674
+  },
+  {
+    "dataset": "cicids",
+    "n_params": 43394,
+    "n_ciphertext_chunks_per_client": 11,
+    "active_clients": 7,
+    "encrypt_time_sec_all_clients": 0.30788680000114255,
+    "encrypt_time_sec_per_client": 0.04398382857159179,
+    "homomorphic_aggregate_time_sec": 0.05680570000549778,
+    "decrypt_time_sec": 0.008973199990577996,
+    "real_fhe_round_overhead_sec": 0.10976272856766757,
+    "max_abs_error_vs_plaintext_fedavg": 2.981441403482332e-08,
+    "ciphertext_bytes_per_client_update": 3676740,
+    "plaintext_bytes_per_client_update": 173576,
+    "ciphertext_expansion_factor": 21.18230630962806
+  },
+  {
+    "dataset": "veremi",
+    "n_params": 43394,
+    "n_ciphertext_chunks_per_client": 11,
+    "active_clients": 7,
+    "encrypt_time_sec_all_clients": 0.33727340001496486,
+    "encrypt_time_sec_per_client": 0.04818191428785212,
+    "homomorphic_aggregate_time_sec": 0.05861039998126216,
+    "decrypt_time_sec": 0.008886299998266622,
+    "real_fhe_round_overhead_sec": 0.11567861426738091,
+    "max_abs_error_vs_plaintext_fedavg": 3.5349818471724914e-08,
+    "ciphertext_bytes_per_client_update": 3677308,
+    "plaintext_bytes_per_client_update": 173576,
+    "ciphertext_expansion_factor": 21.185578651426464
+  }
+]

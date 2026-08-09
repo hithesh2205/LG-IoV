@@ -1,0 +1,159 @@
+--- Slide 1 ---
+ 
+Privacy Preserving Collaborative IDS for Internet of vehicle networks
+Thanking,
+Dr. Durga
+Dr. Uma
+Dr. Anusuya
+Dr. Praveen
+
+
+--- Slide 2 ---
+Content:
+1. High-Level Architecture (The Pipeline)
+2. Pure Chebyshev Polynomial KAN (ChebyKAN) Trunk
+3. Full Layer-wise Homomorphic Federated Learning (FHE)
+4. Robust Outlier Aggregation (Multi-Krum on Ciphertexts)
+5. Proof of Work & Federated Simulation Report
+
+--- Slide 3 ---
+Overall Architecture(phases):
+Phase 1: Pure Chebyshev Polynomial KAN Model
+• Input Normalization Layer mapping features to [-1, 1]
+• Input Chebyshev KAN Linear Layer (46 features -> 64 hidden nodes)
+• Hidden Chebyshev KAN Linear Layers with LayerNorm and Dropout
+• Output Chebyshev KAN Linear Layer mapping to class outputs
+
+Phase 2: Layer-wise Homomorphic Federated Learning
+• Dirichlet Non-IID Client Partitions (alpha = 0.3)
+• Full Layer-wise FHE Encryption (Each weight/bias tensor encrypted separately)
+• Robust Aggregator: Homomorphic FedAvg + Multi-Krum on FHE updates
+
+--- Slide 4 ---
+    High-Level Architecture (The Pipeline)
+Goal: Perform secure, privacy-preserving collaborative learning with every model layer/parameter fully encrypted under FHE, eliminating transport-layer ECDH/AES security overhead.
+• Step 1: Preprocess and scale datasets (percentile clipping, z-score)
+• Step 2: Dirichlet non-IID client sharding (alpha = 0.3)
+• Step 3: Initialize Global Model (ChebyKAN) and register client vehicles
+• Step 4: Encrypt Global Model layers separately under FHE (Simulated CKKSVector)
+• Step 5: Broadcast global layer-wise FHE ciphertexts to active clients
+• Step 6: Perform local client training and package layer-wise FHE client updates
+• Step 7: Homomorphic FedAvg + Multi-Krum aggregation layer-by-layer directly on ciphertexts
+
+--- Slide 5 ---
+Data Unification & Real-World Simulation
+Datasets Unified: CAN-VTC, Car-Hacking, CICIDS 2017, and VeReMi.
+• Stratified Splitting: 70% Train | 15% Validation | 15% Test.
+• Preprocessing stats (z-score, clipping) fitted strictly on training split to prevent data leakage.
+Simulating the Fleet (Non-IID Distribution):
+Dirichlet allocation (alpha = 0.3) shards training sets.
+• Distributes data unevenly across simulated client nodes (N = 10 clients in current run).
+• Emulates class skew representing real-world Internet of Vehicles (IoV) environments.
+
+--- Slide 6 ---
+Unified Dataset Adapter Interface:
+Shows how raw data sources are read and converted into sliding windows of message streams.
+For example, in 
+can_vtc_dataset.py
+ (and similarly for other logs), raw logs are parsed into numpy arrays, windowed, and labeled dynamically.
+
+--- Slide 7 ---
+ Unifying Heterogeneous Data to a Timeless 46-D Feature Vector
+Shows the mathematical/structural representation of the timeless CAN descriptors (from can_features.py) that enables dataset-agnostic training.
+
+--- Slide 8 ---
+Normalization & Preprocessing
+Shows how the splits are scaled identically to avoid data leakage (from build_dataset.py).
+
+--- Slide 9 ---
+Dirichlet:
+It partitions a centralized dataset across N client vehicles such that each client receives a highly skewed, non-IID (non-independently and identically distributed) subset of data. This simulates realistic Internet of Vehicles (IoV) environments where different vehicles encounter different ratios of normal traffic and specific cyber-attacks.
+
+--- Slide 10 ---
+Model Comparison
+
+--- Slide 11 ---
+Core Model & Cryptographic Security
+The Model: Pure Chebyshev KAN (ChebyKAN)
+Chebyshev Polynomial KAN: Replaces splines with Chebyshev polynomials of the first kind. Global model has only 44,164 parameters.
+Slices features directly into sequential Chebyshev basis projection layers (T_n(x) polynomials calculated recursively).
+
+Cryptographic Security (Layer-wise FHE):
+No Transport-Layer AES/ECDH: Handshakes, key exchanges, and symmetric transport encryption are completely removed.
+Full Layer-wise FHE Encryption: Clients encrypt each weight and bias tensor separately using Simulated CKKS FHE vectors.
+Homomorphic Aggregation: Aggregator server aggregates weights and biases layer-by-layer directly on ciphertexts, preserving privacy.
+
+--- Slide 12 ---
+Chebyshev KAN & Adapting Weights
+Global Model Layout:
+Features input scaling, recursive Chebyshev polynomial basis projection layers (T_0 to T_degree), stacked Chebyshev KAN Linear Layers with LayerNorm and Dropout, followed by a final output ChebyKAN layer mapping to classes.
+Loading Weights with strict=False:
+The server handles bootstrap weight adaptation to match the exact class structure of the target dataset, allowing the Chebyshev KAN model to support different output class dimensions.
+
+--- Slide 13 ---
+Chebyshev KAN Parameter Breakdown:
+Total Parameters: 44,164 (CAN-VTC Configuration)
+
+• Input Chebyshev KAN Layer (46 -> 64 hidden nodes):
+  - Chebyshev weights: 64 * 46 * 5 = 14,720 parameters
+  - Base weights: 64 * 46 = 2,944 parameters
+  - Bias weights: 64 parameters
+
+• Hidden Chebyshev KAN Layer (64 -> 64 hidden nodes):
+  - Chebyshev weights: 64 * 64 * 5 = 20,480 parameters
+  - Base weights: 64 * 64 = 4,096 parameters
+  - Bias weights: 64 parameters
+
+• Output Chebyshev KAN Layer (64 -> 4 class outputs):
+  - Chebyshev weights: 4 * 64 * 5 = 1,280 parameters
+  - Base weights: 4 * 64 = 256 parameters
+  - Bias weights: 4 parameters
+
+--- Slide 14 ---
+Layer-wise FHE Cryptography
+CKKS Homomorphic Encryption Scheme:
+Supports additions and scalar multiplications directly on real-numbered ciphertext vectors. The private key remains secure on the client (vehicle) and is never transmitted to the server.
+Full Layer-wise FHE Processing:
+Every weight and bias tensor is flattened, encrypted as a SimulatedCKKSVector, and processed. The server performs aggregation on each layer's ciphertext separately, maintaining zero plaintext exposure.
+
+--- Slide 15 ---
+Homomorphic Aggregation & Outlier Filtering
+Homomorphic FedAvg Aggregation:
+Aggregates updates by evaluating additions and scalar weights homomorphically layer-by-layer:
+Enc(W_layer_global) = sum( w_i * Enc(W_layer_i) )
+Decryption is done locally on vehicles using the FHE private key.
+Homomorphic Multi-Krum Outlier Rejection:
+Aggregator server computes Euclidean distances between the encrypted weight updates (concatenating all layer ciphertexts) to run scoring and filter out Byzantine clients before aggregation, protecting against model poisoning attacks.
+End-to-End Privacy: No transport keys or AES; security is guaranteed by FHE mathematical bounds.
+
+--- Slide 16 ---
+Optimization Setup (Genetic Algorithm)
+Purpose: Prepares the system for robust, privacy-preserving federated training across a vehicle fleet.
+Simulation Grid Setup: Dirichlet concentration (alpha = 0.3), sharding the dataset non-IID.
+ Client Settings: N = 10 simulated vehicle nodes, local epochs E = 1 per round, client sampling rate q = 70%.
+ Optimizer Config: AdamW optimizer, batch size = 96, learning rate = 5e-4.
+ Security Context: Simulated CKKS vector context representing FHE encryption.
+
+--- Slide 17 ---
+Integrity Verification & Phase Boundaries
+Homomorphic Aggregation & Validation:
+• Server aggregates layer-wise FHE ciphertexts homomorphically.
+• Clients receive global ciphertexts and decrypt them using their private keys.
+• Integrity Check: Reconstructed weights match mathematical expectations, verifying zero-loss encryption.
+
+Complete FHE Simulation (Phase 2):
+• Centralized transport key handshakes (AES/ECDH) are fully deprecated.
+• Simulated federated rounds are executed sequentially across all 4 target datasets.
+• Results compiled into a simulation report.
+
+--- Slide 18 ---
+Proof of Work & Smoke Test Results
+System Sanity Check:
+FHE Aggregation Time: Completed in ~3.5s to 18.8s depending on dataset size (much faster parameter footprint).
+ Outlier Rejection: Multi-Krum successfully filtered out Byzantine nodes.
+
+Multi-Round Federated FHE Performance (3 Rounds):
+ CAN-VTC: 98.57% Accuracy | 0.9998 ROC-AUC
+ Car-Hacking: 60.43% Accuracy | 0.9360 ROC-AUC
+ CICIDS-2017: 99.58% Accuracy | 0.8236 ROC-AUC
+ VeReMi: 73.81% Accuracy | 0.5305 ROC-AUC (Reflects early round non-IID training)

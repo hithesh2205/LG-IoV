@@ -1,0 +1,338 @@
+--- Slide 1 ---
+Privacy Preserving Collaborative IDS for Internet of vehicle networks
+Faculty Members:             Student Members:
+      
+Mrs. Durga                Hithesh Y
+Mrs. Uma                  Saurabh Krishnan
+Mrs. Anusuya
+Mr. Praveen
+
+
+--- Slide 2 ---
+Content:
+Threat Model
+Threat Matrix and Risk Matrix
+Baseline Architecture
+Model Architecture
+Why FHE in FL
+Security and Performance Report
+HE Schemes
+
+
+--- Slide 3 ---
+Problem Statement
+Challenges in Internet of Vehicles (IoV)
+Increasing Cyber-Attacks on Connected Vehicles: Modern vehicles are vulnerable to in-vehicle network (IVN) exploits (e.g., DoS, Fuzzy, RPM, and Gear spoofing attacks) and V2X wireless threats.
+Privacy Concerns in Sharing Vehicle Data: Strict data privacy regulations (e.g., GDPR, CCPA) prevent vehicles from uploading raw telemetry, location history, or sensor logs to centralized servers.
+Limitations of Centralized IDS:
+Bandwidth bottlenecks from transmitting massive, continuous streams of high-frequency vehicular data.
+Single point of failure: vulnerability to connection drops in high-mobility environments.
+
+
+--- Slide 4 ---
+ 
+Proposed Solution: FedIoV
+Federated Learning (FL) Framework: Enables collaborative training where vehicles train intrusion detection models locally and only share encrypted model updates (gradients) with the server.
+Kolmogorov-Arnold Network (KANConvNet): A lightweight, edge-optimized classifier with learnable activation functions on edges rather than nodes, reducing computational overhead.
+Layer-Wise Fully Homomorphic Encryption (FHE): Selectively encrypts only the most sensitive layers of the KAN model during aggregation, resolving the speed limitations of traditional FHE while preserving privacy.
+
+
+--- Slide 5 ---
+Project Objectives
+Design a Collaborative IDS for IoV: Develop a distributed, cooperative system to detect cyber threats across the fleet without requiring a central database of raw logs.
+Preserve Privacy of Vehicle Data: Leverage secure cryptographic channels and Layer-Wise FHE to ensure vehicle telemetry remains private.
+Support Distributed Learning Across Vehicles: Build a robust Federated Learning client-server architecture capable of handling vehicle churn, communication drops, and non-IID settings.
+Detect Vehicular Cyber Attacks Efficiently: Implement and optimize KANConvNet to detect low-latency attacks (target latency <60<60 ms) on resource-constrained Electronic Control Units (ECUs).
+
+
+--- Slide 6 ---
+Threat Model
+Step 1 – Set Objectives
+Primary Objective: Build a real-time, privacy-preserving Intrusion Detection System (IDS) to secure the Internet of Vehicles (IoV) against cyber-threats.
+Security Goals (CIA-P Triad):
+Confidentiality: Protect vehicle network traffic and machine learning model weights from eavesdroppers.
+Integrity: Ensure model updates are not tampered with, and prevent compromised vehicles from injecting malicious updates.
+Availability: Ensure the system can detect and respond to attacks in real-time (under 60ms).
+Privacy: Guarantee raw vehicle telemetry (GPS location, speed, routes) never leaves the on-board unit.
+
+
+--- Slide 7 ---
+
+Step 2 – Visualize
+The Architecture (FedIoV / DCANFL):
+Edge Client (Vehicle): Collects local CAN bus traffic →→ extracts a 46-dimensional "timeless" feature vector →→ trains a local KANConvNet model.
+
+Secure Communication Channel: Vehicle handshakes with the Edge Server using Ed25519 (authentication) and ECDH-P256 (key exchange) to encrypt updates with AES-256-GCM.
+
+Edge Server (Aggregator): Collects encrypted updates →→ runs Multi-Krum to filter outliers →→ averages updates →→ broadcasts the new global model.
+
+Layer-Wise FHE (Fully Homomorphic Encryption): Selectively encrypts the most sensitive layer weights of the KAN ConvNet, allowing the server to aggregate them without decrypting them.
+
+
+
+--- Slide 8 ---
+
+Step 3 – Identify Threats
+Threat 1: In-Vehicle Network Attacks (CAN Bus Exploitation)
+Denial of Service (DoS): Attackers flood the CAN bus with high-priority messages, freezing brakes or steering controls.
+Fuzzy / Impersonation Attacks: Attackers inject random or spoofed packets to confuse onboard ECUs.
+Threat 2: Byzantine / Poisoning Attacks (Machine Learning Level)
+Model Poisoning: Hacked vehicles upload corrupt model weights during federated training to blind the global model to specific attacks.
+Threat 3: Communication Eavesdropping & Privacy Leakage
+Man-in-the-Middle (MitM): Intercepting and modifying model updates in transit.
+Reconstruction Attacks: Eavesdroppers reverse-engineering plaintext model weights to reconstruct raw driving telemetry
+
+
+
+--- Slide 9 ---
+
+Step 4 – Mitigate
+Mitigating In-Vehicle Attacks:
+KANConvNet IDS: Runs locally on the vehicle, analyzing overlapping sliding windows (W=64W=64, S=16S=16) to flag anomalous entropy, payload patterns, or ID frequencies.
+Mitigating Federated Poisoning (Byzantine Attacks):
+Multi-Krum & TOPSIS: The edge server calculates distance metrics between updates. Outliers (e.g., poisoned updates from hacked cars) are isolated and discarded.
+Mitigating Network & Privacy Threats:
+ECDH + AES-256-GCM: Establishes ephemeral key encryption for all transmissions (perfect forward secrecy).
+Layer-Wise FHE: Fully Homomorphic Encryption is applied only to the most sensitive layers of the KANConvNet, keeping performance fast while guaranteeing cryptographic privacy.
+
+
+
+--- Slide 10 ---
+Threat Matrix
+
+--- Slide 11 ---
+Dataset Acquisition
+Car-Hacking Dataset(HCRL): (1 year ago)
+Scope: Labeled CAN bus traffic from a real Hyundai YF Sonata.
+Size/Type: CSV logs containing CAN-ID, DLC, payload bytes, and injection flags.
+Threat Classes: Normal run, DoS, Fuzzy, RPM, and Gear attacks.
+VeReMi Dataset: ( 3 years ago)
+Scope: Kinematic beacon data from V2V communication in VANET simulations.
+Size/Type: 18 kinematic features (positions, speeds, accelerations, headings, noise levels).
+Threat Classes: Benign (BENIGN) and Attack (ATTACK) (falsified kinematic attributes).
+
+3.CICIDS 2017 Dataset: (updated 3 years ago)
+Scope: Network flow-level traffic logs spanning multi-layer V2I and V2N network protocols.
+Size/Type: 78 numeric flow features down-selected to a stable 46-feature network baseline.
+Threat Classes: Benign vs. Attack (DDoS, PortScan, FTP-Patator, SSH-Patator, Web Attacks, etc.)
+4.IEEE VTC-CAN Dataset: (last updated 2025)
+Scope: Labeled high-fidelity in-vehicle CAN bus log stream under attack injections.
+Size/Type: CAN frames windowed to 46-dimensional temporal descriptors.
+Threat Classes: Attack-free, DoS attack, Fuzzy attack, and Impersonation attack.
+
+
+--- Slide 12 ---
+ 
+Justification
+Coverage:
+Low-Level IVN Protection: Car-Hacking and IEEE VTC-CAN evaluate anomaly detection on the internal physical ECU bus (message intervals, ID distributions, payload integrity).
+High-Level V2V Protection: VeReMi evaluates system resilience to geographic and kinematic coordinate spoofing or communication misbehavior.
+High-Level V2I/V2N Protection: CICIDS 2017 evaluates broad network-layer threats (DDoS, brute-force exploits, scans) targeting external connectivity.
+Realism & Data Heterogeneity: Incorporating these four distinct datasets tests the dataset-agnostic feature engineering layer and the robustness of KANConvNet across high-frequency binary sequences, continuous float vectors, and IP traffic metrics.
+
+
+--- Slide 13 ---
+Data Engineering
+Challenge: Heterogeneous DatasetsVarying Protocols: CAN bus messages (HEX payloads) vs. V2X beacons (coordinate floats) vs. IP flows (network counts).
+
+Goal: Standardize diverse inputs into a single format so the same neural network (KANConvNet) can be reused.
+
+Solution: Unified Feature Extraction
+Sliding Window: Group incoming message streams into a sliding window of size W=64 messages and stride S=16.
+
+Feature Unification: Summarize each window into exactly 46 universal features (numbers).
+
+Unified Pipeline: Creates a dataset-agnostic feature vector x∈R^46 for the classifier model.
+
+--- Slide 14 ---
+Data Engineering (46-D Feature Mapping)
+In-Vehicle Networks (Car-Hacking & IEEE VTC-CAN):
+
+	What it measures: High-frequency messages exchanged between internal ECUs.
+46-D Feature Breakdown:Payload Stats (16): 
+Average value & deviation of raw data bytes (b0..b7).
+Message Length (2): Average & deviation of Data Length Code (DLC).
+Component Identity (26): Active CAN-ID distribution histogram hashed over 24 buckets + dominant ID stats.
+Data Entropy (2): Information randomness and non-zero payload ratio.
+
+2. V2X Telemetry Networks (VeReMi):
+
+	What it measures: GPS and motion telemetry shared between vehicles.
+46-D Feature Breakdown:
+Average Motion (18): Position, speed, heading, and sensor noise averages.Fluctuations (18): Standard deviations of kinematic readings over the window.
+Derived Forces (5): Total speed magnitude, acceleration force, and heading intensity.
+Behavior Stats (5): Spatial coordinates spread, time intervals, and broadcast rates.
+
+
+--- Slide 15 ---
+Data Engineering (46-D Feature Mapping)
+3. IP Networks (CICIDS 2017):
+
+	What it measures: External Internet network traffic flows.
+46-D Feature Breakdown:
+Transfer Rates (6): Flow duration, bytes/second, packets/second, and average size.
+Flow Sizes (12): Total forward/backward data size and packet lengths.
+Time Gaps (15): Inter-Arrival Times (IAT) of packet streams.
+Control & Headers (13): TCP flags (SYN, ACK, RST) and packet header sizes.
+
+--- Slide 16 ---
+Data Engineering (Preprocessing)
+Data Cleaning Pipeline
+Percentile Clipping: Continuous features are clipped at the 0.5th and 99.5th percentiles (using training set bounds) to remove noisy sensor spikes and outliers.
+Z-score Standardization: Every feature is scaled to standard bounds.
+Safeguarding Against Data Leakage (Anti-Cheating)
+Centralized Stratified Split: 70% Train, 15% Validation, 15% Test.
+Strict Training Isolation: Mean (μ) and standard deviation (σ) parameters are computed only on the 70% training split.
+Evaluation Integrity: The calculated training statistics are locked and then used to scale validation and testing sets
+
+
+--- Slide 17 ---
+Non-IID Simulation
+1. Fleet Setup & Connectivity Constraints
+Simulated Fleet Size (N): N∈{50,100,200} client vehicles, each running KANConvNet in containerized/isolated environments.
+Client Sampling Fraction (q): Server selects a random subset of active vehicles at each round (q=0.60 for N=50, q=0.70 for N=100, and q=0.75 for N=200).
+Vehicular Churn(P drop): Simulated random client dropout of 5%−20% per round due to tunnel shadowing, signal fading, or moving out of range. Dropped clients can rejoin later.
+
+
+--- Slide 18 ---
+Non-IID Simulation
+2.Dirichlet Non-IID Partitioning 
+
+To model realistic geographic variations where different vehicles encounter different traffic patterns and attack ratios:
+
+Mathematical Split: 
+Training data is split across clients using a Dirichlet distribution with concentration parameter α=0.3.pc ∼ Dir(α⋅1N) where pc represents the proportion of samples from class c allocated to each of the N clients
+
+Class Skew Effect: 
+
+A smaller α leads to higher skew (non-IID conditions). 
+
+With α=0.3, some vehicles observe only benign traffic, while others are dominated by a single attack class (e.g., DoS only), forcing the global model to learn from highly heterogeneous client updates.
+
+Centralized Evaluation: 
+
+Validation and test splits are kept centralized at the server, ensuring unbiased and global performance metrics.
+
+--- Slide 19 ---
+
+Baseline Architecture:
+PHASE 1: INITIALIZATION:
+1. Role : Central Server 
+2. Action : Init & Broadcast global model 
+3. Target : N Vehicles 
+4. Security : SecureChannel (ECDH + AES-256 + Mutual Auth)
+PHASE 2: CLIENT SIDE
+1. Inputs : CAN (1D-Conv) | V2X (MLP) | GPS/IMU (1D-Conv) 
+2. Fusion : 10Hz Sync → FiLM Gating → 46-dim Vector 
+3. Model : KANConvNet 
+4. Train : SGD + L2 Regularization 
+5. Adapt : Personalization Blend (Global + Local) 
+6.Privacy : L2 Clip (C=1.0) + Gaussian Noise (σ=1.2)
+
+
+--- Slide 20 ---
+
+Baseline Architecture:
+PHASE 3: SERVER AGGREGATION
+1. Stage 1 : TOPSIS 
+    Action : Dimensionality Reduction → Rank → Filter Outliers 
+3. Stage 2 : Multi-Krum 
+    Action : Robust Clustering → Pairwise Distance → Average Top-m
+
+PHASE 4: GA TUNING
+1. Goal : Hyperparameter Optimization 
+2. Genes : {LR, Batch, Epochs, Momentum, Dropout, Optimizer, L2, α} 
+3. Flow : Init → Eval (F1) → Crossover → Mutate → Deploy
+
+--- Slide 21 ---
+
+KanConvNet Architecture:
+  STAGE 1: INPUT
+1. Source : Fused Telemetry 
+2. Shape : 46-dim Vector 
+3. Preprocess : Normalization / Fourier Transform
+   STAGE 2: MAPPING
+1. Logic : Linear Transform + Fourier Encoding 
+2. Sequence : Precedes Linear Summation
+STAGE 3: ACTIVATION
+1. Type : Kolmogorov-Inspired Nonlinearity 
+2. Placement : Network Edges 
+3. Benefit : High Interpretability / Safety Audits
+
+--- Slide 22 ---
+
+KanConvNet Architecture:
+ STAGE 4: HIDDEN LAYERS
+1. Type : Intermediate Layers 
+2. Activation : ReLU 
+3. Goal : Spatial-Temporal Pattern Extraction
+STAGE 5: OUTPUT
+1. Map : Final Kolmogorov Activation 
+2. Classifier : SGD Prediction
+
+--- Slide 23 ---
+
+
+Why FHE in FL:
+
+--- Slide 24 ---
+
+
+Security and Performance Report:
+
+--- Slide 25 ---
+
+HE Scheme:
+
+--- Slide 26 ---
+
+FINDINGS:
+Fully HE Is Impractical in Our Scenario
+ Latency: Real-time IDS requires 10–100 ms response times, but FHE delays processing to seconds or minutes. 
+Hardware Constraints: Resource-heavy FHE drains batteries and starves safety applications on low-power On-Board Units.
+Ciphertext Size: FHE expands model weights into gigabytes of data, saturating limited V2X wireless networks. 
+Mobility: Slow FHE aggregation means fast-moving vehicles will likely drive out of network range before updates complete.
+ Algorithmic Limits: Approximating essential non-linear IDS functions (like ReLU) with FHE triggers unsustainable computational overhead.
+
+--- Slide 27 ---
+Layered FHE
+1. Full FHE encrypts all model parameters, making it too slow (seconds to minutes) and impractical for real-time IoV detection.
+2. Layer-Wise FHE encrypts only the most sensitive layer of the KANConvNet model that captures vehicle-specific driving patterns.
+3. All other layers (input, Fourier, activation, output) remain in plaintext to maintain speed and efficiency.
+4. This approach maintains <60ms detection latency, keeps updates to kilobyte size, and runs on standard ECU-class hardware.
+5. Key takeaway: Strong cryptographic privacy for critical vehicle data without sacrificing real-time performance.
+
+
+--- Slide 28 ---
+
+Work Completed:
+1. KANConvNet Classifier
+Architecture: Implemented with the Kolmogorov-Arnold trick (learnable edge activations via Fourier basis).
+Custom Layers: Built FourierKANLinear, KolmogorovActivation, and KANConv1d modules.
+Backbone: Configured a CNN backbone to process windowed vehicular sequences.
+2. Data Pipeline & Preprocessing
+Datasets: Integrated loaders for CAN-VTC, Car-Hacking, CICIDS 2017, and VeReMi.
+Feature Engineering: Unified 46-feature extraction (timing, DLC, payload stats, CAN-ID histograms).
+Normalization: Applied automated Z-score scaling and signal clipping.
+
+
+--- Slide 29 ---
+
+Work Completed:
+3. Phase 1: Federated Setup
+Distribution: Simulated realistic non-IID data via Dirichlet allocation (α=0.3) for 50-200 clients.
+Security: Secured client-server channels with ECDH handshakes, AES-256-GCM, and mutual authentication.
+Simulation: Built FederatedServer/Client classes and defined a Genetic Algorithm hyperparameter search space.
+4. Infrastructure & Verification
+Workflow: Built centralized train.py supporting full runs and rapid --smoke tests.
+Orchestration: Automated the init sequence (partitioning → secure setup → broadcast) via phase1.py.
+Validation: Integrated JSON training logs and best-weight checkpointing.
+
+--- Slide 30 ---
+
+Next Step
+The project is now ready to move into Phase 2 (Federated Training), which involves implementing the TOPSIS + Multi-Krum aggregation logic and the Genetic Algorithm evolution loop.
+We will look into the aggregate function and its mathematical formulation in detail to ensure proper implementation of the TOPSIS + Multi-Krum pipeline.
+
+
+

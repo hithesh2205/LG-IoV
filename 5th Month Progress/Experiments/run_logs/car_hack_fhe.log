@@ -1,0 +1,107 @@
+C:\Users\Thrish_Sudha\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+[helpers] Random seed fixed at: 2025
+[init] Federated simulation device: cpu | Dataset: car_hack | Mode: fhe
+[preprocess] Loading raw data for 'car_hack' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[car_hack] normal_run: 61801 windows
+[car_hack] DoS: 229107 windows
+[car_hack] Fuzzy: 239925 windows
+[car_hack] RPM: 288853 windows
+[car_hack] gear: 277693 windows
+[preprocess] car_hack split sizes: train=768165, val=164607, test=164607
+[preprocess] Classes: ('normal_run', 'DoS', 'Fuzzy', 'RPM', 'gear')
+[preprocess] Class counts (train): [43261.0, 160375.0, 167947.0, 202197.0, 194385.0]
+[preprocess] Class weights: [3.551304817199707, 0.9579610228538513, 0.9147707223892212, 0.7598183751106262, 0.7903541922569275]
+[server] Initialized global server with 44,549 parameters. FHE=True
+[init] Registering 10 clients...
+[init] Registered all 10 clients successfully.
+
+--- Federated FHE Round 01/05 ---
+[server] Selected 7/10 active clients (IDs: [6, 1, 5, 9, 0, 4, 7])
+  [client 06] Completed local training on 4719 samples.
+  [client 01] Completed local training on 166585 samples.
+  [client 05] Completed local training on 213029 samples.
+  [client 09] Completed local training on 90779 samples.
+  [client 00] Completed local training on 105222 samples.
+  [client 04] Completed local training on 44219 samples.
+  [client 07] Completed local training on 48656 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 01 Complete | Global Test Loss: 1.0881 | Global Test Acc: 0.7193 | Time: 44.0s
+
+--- Federated FHE Round 02/05 ---
+[server] Selected 7/10 active clients (IDs: [3, 2, 9, 6, 0, 4, 7])
+  [client 03] Completed local training on 49341 samples.
+  [client 02] Completed local training on 22153 samples.
+  [client 09] Completed local training on 90779 samples.
+  [client 06] Completed local training on 4719 samples.
+  [client 00] Completed local training on 105222 samples.
+  [client 04] Completed local training on 44219 samples.
+  [client 07] Completed local training on 48656 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 02 Complete | Global Test Loss: 0.4546 | Global Test Acc: 0.7763 | Time: 24.3s
+
+--- Federated FHE Round 03/05 ---
+[server] Selected 7/10 active clients (IDs: [6, 2, 8, 9, 7, 5, 3])
+  [client 06] Completed local training on 4719 samples.
+  [client 02] Completed local training on 22153 samples.
+  [client 08] Completed local training on 23462 samples.
+  [client 09] Completed local training on 90779 samples.
+  [client 07] Completed local training on 48656 samples.
+  [client 05] Completed local training on 213029 samples.
+  [client 03] Completed local training on 49341 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 03 Complete | Global Test Loss: 0.4865 | Global Test Acc: 0.7724 | Time: 29.8s
+
+--- Federated FHE Round 04/05 ---
+[server] Selected 7/10 active clients (IDs: [8, 1, 9, 0, 6, 5, 7])
+  [client 08] Completed local training on 23462 samples.
+  [client 01] Completed local training on 166585 samples.
+  [client 09] Completed local training on 90779 samples.
+  [client 00] Completed local training on 105222 samples.
+  [client 06] Completed local training on 4719 samples.
+  [client 05] Completed local training on 213029 samples.
+  [client 07] Completed local training on 48656 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 04 Complete | Global Test Loss: 0.4619 | Global Test Acc: 0.7766 | Time: 43.3s
+
+--- Federated FHE Round 05/05 ---
+[server] Selected 7/10 active clients (IDs: [2, 0, 7, 3, 1, 6, 4])
+  [client 02] Completed local training on 22153 samples.
+  [client 00] Completed local training on 105222 samples.
+  [client 07] Completed local training on 48656 samples.
+  [client 03] Completed local training on 49341 samples.
+  [client 01] Completed local training on 166585 samples.
+  [client 06] Completed local training on 4719 samples.
+  [client 04] Completed local training on 44219 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 05 Complete | Global Test Loss: 0.5528 | Global Test Acc: 0.7383 | Time: 29.7s
+
+[federated] Simulation (fhe) completed in 171.1 seconds.
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.7383
+Macro F1:  0.7733
+Precision: 0.8527
+Recall:    0.7713
+ROC-AUC:   0.9539
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+normal_run                | 0.9987     | 0.9912     | 0.9949     | 9270    
+DoS                       | 0.8059     | 0.3954     | 0.5305     | 34366   
+Fuzzy                     | 0.4692     | 0.9688     | 0.6322     | 35989   
+RPM                       | 0.9922     | 0.8066     | 0.8899     | 43328   
+gear                      | 0.9974     | 0.6947     | 0.8190     | 41654   
+
+Confusion Matrix:
+[[ 9188     0    82     0     0]
+ [    2 13588 20703    41    32]
+ [    8  1066 34865    33    17]
+ [    1  1013  7338 34950    26]
+ [    1  1193 11321   200 28939]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_model_car_hack_fhe.pt
+[federated] Simulation summary saved to: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_summary_car_hack_fhe.json

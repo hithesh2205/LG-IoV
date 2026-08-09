@@ -1,0 +1,202 @@
+{
+  "phase": 1,
+  "paper": "Heidari et al., FedIoV (FGCS 2026)",
+  "dataset": "can_vtc",
+  "smoke": true,
+  "seed": 2025,
+  "wall_clock_seconds": 4.51,
+  "split": {
+    "ratio_train_val_test": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "stratified": true,
+    "n_train": 8744,
+    "n_val": 1872,
+    "n_test": 1872,
+    "classes": [
+      "Attack_free",
+      "DoS_attack",
+      "Fuzzy_attack",
+      "Impersonation_attack"
+    ]
+  },
+  "non_iid_partition": {
+    "method": "Dirichlet",
+    "alpha": 0.3,
+    "n_clients": 50,
+    "n_classes": 4,
+    "seed": 2025,
+    "samples_per_client": {
+      "min": 1,
+      "max": 575,
+      "mean": 174.88,
+      "median": 131.0,
+      "std": 145.2816079206174
+    },
+    "class_entropy_bits_per_client": {
+      "min": -0.0,
+      "max": 1.9436202276121226,
+      "mean": 1.097766994024656
+    },
+    "max_possible_entropy_bits": 2.0,
+    "sample_class_counts_first_5_clients": [
+      [
+        7,
+        9,
+        1,
+        27
+      ],
+      [
+        7,
+        3,
+        2,
+        0
+      ],
+      [
+        151,
+        2,
+        1,
+        0
+      ],
+      [
+        21,
+        0,
+        2,
+        16
+      ],
+      [
+        11,
+        42,
+        12,
+        0
+      ]
+    ],
+    "elapsed_seconds": 0.008
+  },
+  "global_model": {
+    "architecture": "KANConvNet",
+    "in_features": 46,
+    "n_classes": 4,
+    "layer_size": 128,
+    "dropout": 0.2,
+    "fourier_modes": 8,
+    "use_conv_backbone": false,
+    "param_count": 145668,
+    "pretrained_path": null,
+    "pretrained_loaded": false,
+    "init_elapsed_seconds": 0.072
+  },
+  "secure_channels": {
+    "kex": "ECDH-P256",
+    "auth": "Ed25519 mutual auth on ephemeral pubkeys",
+    "aead": "AES-256-GCM",
+    "kdf": "HKDF-SHA256 (info='FedIoV/v1/aes-256-gcm')",
+    "n_clients": 50,
+    "handshake_elapsed_seconds": 0.051,
+    "handshake_per_client_ms": 1.027,
+    "probe_round_trip_ok": true,
+    "server_identity_fp": "1d357775a186e264",
+    "client0_identity_fp": "54881bf0dc4bae9c",
+    "client0_aes_key_fp": "cf5d58ef5ce1e457"
+  },
+  "ga": {
+    "population_size": 50,
+    "generations": 20,
+    "crossover_prob": 0.85,
+    "mutation_prob": 0.06,
+    "elitism": 2,
+    "seed": 2025,
+    "search_space_size": {
+      "batch_size": 5,
+      "epochs": 5,
+      "momentum": 5,
+      "l2": 4,
+      "personalization": 5,
+      "optimizer": 5,
+      "dropout": 6
+    },
+    "total_search_space_combinations": 75000,
+    "sample_individuals_first_5": [
+      {
+        "batch_size": 48,
+        "epochs": 60,
+        "momentum": 0.998,
+        "l2": 0.0005,
+        "personalization": 0.95,
+        "optimizer": "adadelta",
+        "dropout": 0.3
+      },
+      {
+        "batch_size": 192,
+        "epochs": 30,
+        "momentum": 0.998,
+        "l2": 0.0005,
+        "personalization": 0.15,
+        "optimizer": "sgd",
+        "dropout": 0.2
+      },
+      {
+        "batch_size": 48,
+        "epochs": 60,
+        "momentum": 0.998,
+        "l2": 0.005,
+        "personalization": 0.75,
+        "optimizer": "adamw",
+        "dropout": 0.1
+      },
+      {
+        "batch_size": 24,
+        "epochs": 15,
+        "momentum": 0.6,
+        "l2": 0.05,
+        "personalization": 0.15,
+        "optimizer": "sgd",
+        "dropout": 0.1
+      },
+      {
+        "batch_size": 24,
+        "epochs": 60,
+        "momentum": 0.95,
+        "l2": 0.0005,
+        "personalization": 0.35,
+        "optimizer": "rmsprop",
+        "dropout": 0.45
+      }
+    ]
+  },
+  "downstream_constants": {
+    "local_epochs_per_round_E": 2,
+    "sampling_fraction_q": 0.6,
+    "rounds_R": 200,
+    "multi_krum_m": 5,
+    "client_dp_clip_C": 1.0,
+    "client_dp_sigma_grid": [
+      1.2,
+      1.6,
+      2.0
+    ],
+    "evaluation": {
+      "folds_k": 5,
+      "seeds_r": 3,
+      "runs": 15,
+      "stats": [
+        "Wilcoxon paired",
+        "Holm-Bonferroni",
+        "Cliff's delta",
+        "McNemar"
+      ]
+    }
+  },
+  "broadcast": {
+    "n_clients": 50,
+    "n_ok": 50,
+    "n_mismatched": 0,
+    "mismatched_client_ids": [],
+    "global_state_dict_sha256": "0d197628dd304b9f1e2940f16aa144c6d7a72c544d628d7530c878e390e8c4e7",
+    "bytes_per_client": 589537,
+    "param_count": 145668,
+    "elapsed_seconds": 0.46
+  }
+}

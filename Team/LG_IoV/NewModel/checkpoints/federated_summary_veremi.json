@@ -1,0 +1,12 @@
+{
+  "dataset": "veremi",
+  "n_clients": 10,
+  "rounds": 3,
+  "local_epochs": 1,
+  "alpha": 0.3,
+  "parameters": 43394,
+  "training_time_sec": 12.084108352661133,
+  "test_accuracy": 0.7381333333333333,
+  "test_macro_f1": 0.4246701442160172,
+  "test_roc_auc": 0.5305267061441202
+}

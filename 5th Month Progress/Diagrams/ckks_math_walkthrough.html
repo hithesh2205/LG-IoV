@@ -1,0 +1,471 @@
+<meta charset="UTF-8">
+<title>CKKS for FedIoV — the math, step by step</title>
+<style>
+  :root{
+    --bg:#EEF1F3; --surface:#FFFFFF; --surface-2:#E4E9ED; --surface-3:#D9E0E5;
+    --text:#141A20; --text-dim:#57626C; --text-faint:#87929C;
+    --accent:#1E8F80; --accent-ink:#0E5B51; --accent-soft:rgba(30,143,128,0.10); --accent-soft-2:rgba(30,143,128,0.20); --on-accent:#FFFFFF;
+    --warn:#A66A15; --warn-soft:rgba(166,106,21,0.12);
+    --danger:#B23F2C; --danger-soft:rgba(178,63,44,0.12);
+    --line:rgba(20,26,32,0.13); --line-strong:rgba(20,26,32,0.22);
+    --radius:14px;
+    --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Consolas", "Liberation Mono", monospace;
+    --shadow: 0 1px 2px rgba(20,26,32,0.06), 0 8px 24px -12px rgba(20,26,32,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#10141A; --surface:#171D26; --surface-2:#1E2630; --surface-3:#26303C;
+      --text:#E7ECF1; --text-dim:#9AA7B4; --text-faint:#6B7784;
+      --accent:#3FC9B7; --accent-ink:#BEEFE7; --accent-soft:rgba(63,201,183,0.12); --accent-soft-2:rgba(63,201,183,0.22); --on-accent:#0A1310;
+      --warn:#E0A339; --warn-soft:rgba(224,163,57,0.14);
+      --danger:#E2735E; --danger-soft:rgba(226,115,94,0.14);
+      --line:rgba(231,236,241,0.12); --line-strong:rgba(231,236,241,0.22);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10141A; --surface:#171D26; --surface-2:#1E2630; --surface-3:#26303C;
+    --text:#E7ECF1; --text-dim:#9AA7B4; --text-faint:#6B7784;
+    --accent:#3FC9B7; --accent-ink:#BEEFE7; --accent-soft:rgba(63,201,183,0.12); --accent-soft-2:rgba(63,201,183,0.22); --on-accent:#0A1310;
+    --warn:#E0A339; --warn-soft:rgba(224,163,57,0.14);
+    --danger:#E2735E; --danger-soft:rgba(226,115,94,0.14);
+    --line:rgba(231,236,241,0.12); --line-strong:rgba(231,236,241,0.22);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -14px rgba(0,0,0,0.55);
+  }
+  :root[data-theme="light"]{
+    --bg:#EEF1F3; --surface:#FFFFFF; --surface-2:#E4E9ED; --surface-3:#D9E0E5;
+    --text:#141A20; --text-dim:#57626C; --text-faint:#87929C;
+    --accent:#1E8F80; --accent-ink:#0E5B51; --accent-soft:rgba(30,143,128,0.10); --accent-soft-2:rgba(30,143,128,0.20); --on-accent:#FFFFFF;
+    --warn:#A66A15; --warn-soft:rgba(166,106,21,0.12);
+    --danger:#B23F2C; --danger-soft:rgba(178,63,44,0.12);
+    --line:rgba(20,26,32,0.13); --line-strong:rgba(20,26,32,0.22);
+    --shadow: 0 1px 2px rgba(20,26,32,0.06), 0 8px 24px -12px rgba(20,26,32,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft-2); }
+
+  .app{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+  @media (max-width: 860px){ .app{ grid-template-columns:1fr; } }
+
+  /* ---------- Rail ---------- */
+  .rail{
+    border-right:1px solid var(--line); padding:28px 18px; position:sticky; top:0; height:100vh;
+    display:flex; flex-direction:column; gap:22px; overflow-y:auto;
+  }
+  @media (max-width: 860px){ .rail{ position:relative; height:auto; border-right:none; border-bottom:1px solid var(--line); padding:20px 18px 14px; } }
+
+  .brand{ display:flex; flex-direction:column; gap:2px; }
+  .brand .mark{ font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); }
+  .brand .name{ font-family:var(--serif); font-size:17px; line-height:1.25; }
+
+  .steps{ display:flex; flex-direction:column; gap:2px; list-style:none; margin:0; padding:0; }
+  @media (max-width: 860px){ .steps{ flex-direction:row; overflow-x:auto; gap:6px; padding-bottom:6px; } }
+
+  .step-btn{
+    all:unset; cursor:pointer; display:flex; align-items:baseline; gap:10px; padding:9px 10px; border-radius:9px;
+    font-size:13.5px; color:var(--text-dim); line-height:1.3; transition:background .15s ease, color .15s ease;
+  }
+  @media (max-width: 860px){ .step-btn{ white-space:nowrap; } }
+  .step-btn:hover{ background:var(--surface-2); color:var(--text); }
+  .step-btn.active{ background:var(--accent-soft); color:var(--text); }
+  .step-btn .idx{ font-family:var(--mono); font-size:11px; color:var(--text-faint); min-width:16px; }
+  .step-btn.active .idx{ color:var(--accent); }
+  .step-btn .grp{ font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); display:block; margin:14px 0 2px 10px; }
+
+  .rail-foot{ margin-top:auto; font-size:11px; color:var(--text-faint); line-height:1.5; }
+  @media (max-width: 860px){ .rail-foot{ display:none; } }
+
+  /* ---------- Main ---------- */
+  main{ padding:56px 64px 120px; max-width:860px; }
+  @media (max-width: 860px){ main{ padding:32px 22px 90px; } }
+
+  .stage{ display:none; animation: rise .38s ease both; }
+  .stage.active{ display:block; }
+  @media (prefers-reduced-motion: reduce){ .stage{ animation:none; } }
+  @keyframes rise{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .eyebrow{ font-family:var(--mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 10px; }
+  h1{ font-family:var(--serif); font-weight:500; font-size:clamp(26px,3.4vw,36px); line-height:1.16; margin:0 0 16px; text-wrap:balance; }
+  h2{ font-family:var(--serif); font-weight:500; font-size:22px; margin:0 0 6px; text-wrap:balance; }
+  p{ font-size:15px; line-height:1.68; color:var(--text-dim); max-width:65ch; margin:0 0 14px; }
+  p strong{ color:var(--text); font-weight:600; }
+  .lede{ font-size:16.5px; color:var(--text); max-width:62ch; }
+
+  code, .k{ font-family:var(--mono); }
+  .k{ background:var(--surface-2); border:1px solid var(--line); padding:1px 6px; border-radius:5px; font-size:0.92em; color:var(--text); }
+
+  .panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; margin:18px 0; box-shadow:var(--shadow); }
+  .panel + .panel{ margin-top:14px; }
+  .panel h3{ font-family:var(--sans); font-weight:650; font-size:13px; letter-spacing:.02em; margin:0 0 12px; color:var(--text-dim); text-transform:uppercase; font-size:11.5px; letter-spacing:.1em; }
+
+  .formula{ font-family:var(--mono); font-size:15.5px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:14px 18px; color:var(--text); overflow-x:auto; }
+  .formula .op{ color:var(--accent); }
+  .formula .comment{ color:var(--text-faint); }
+
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  @media (max-width:700px){ .grid3{ grid-template-columns:1fr; } }
+
+  .client-card{ border:1px solid var(--line); border-radius:11px; padding:14px 16px; background:var(--surface-2); }
+  .client-card .cname{ font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;}
+  .client-card .pt{ font-family:var(--mono); font-size:13px; color:var(--accent); background:var(--accent-soft); padding:1px 7px; border-radius:5px; }
+  .kv{ display:flex; justify-content:space-between; gap:10px; font-family:var(--mono); font-size:13px; padding:3px 0; border-bottom:1px dashed var(--line); }
+  .kv:last-child{ border-bottom:none; }
+  .kv .lbl{ color:var(--text-faint); }
+  .kv .val{ color:var(--text); font-variant-numeric:tabular-nums; }
+  .ct-tag{ margin-top:9px; font-family:var(--mono); font-size:12.5px; color:var(--accent-ink); background:var(--accent-soft); border:1px solid var(--accent-soft-2); border-radius:7px; padding:6px 9px; }
+
+  .wire{ display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--text-faint); font-family:var(--mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; }
+  .wire::before, .wire::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--line-strong), transparent); }
+
+  .readout-row{ display:flex; gap:12px; flex-wrap:wrap; }
+  .readout{ flex:1; min-width:150px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .readout .rlabel{ font-size:10.5px; text-transform:uppercase; letter-spacing:.09em; color:var(--text-faint); margin-bottom:5px; }
+  .readout .rval{ font-family:var(--mono); font-size:19px; color:var(--text); font-variant-numeric:tabular-nums; }
+  .readout.accent{ border-color:var(--accent-soft-2); background:var(--accent-soft); }
+  .readout.accent .rval{ color:var(--accent-ink); }
+  .readout.warn{ border-color:rgba(224,163,57,0.32); background:var(--warn-soft); }
+  .readout.warn .rval{ color:var(--warn); }
+  .readout.danger{ border-color:rgba(226,115,94,0.32); background:var(--danger-soft); }
+  .readout.danger .rval{ color:var(--danger); }
+
+  .callout{ border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 10px 10px 0; padding:12px 16px; font-size:14px; color:var(--text); line-height:1.6; }
+  .callout.warn{ border-left-color:var(--warn); background:var(--warn-soft); }
+  .callout.danger{ border-left-color:var(--danger); background:var(--danger-soft); }
+  .callout strong{ color:inherit; }
+
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums; }
+  th{ font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-faint); font-weight:600; }
+  td.mono, th.mono{ font-family:var(--mono); }
+  .twrap{ overflow-x:auto; }
+
+  .nav-controls{ display:flex; justify-content:space-between; align-items:center; margin-top:40px; padding-top:20px; border-top:1px solid var(--line); }
+  .nav-btn{ all:unset; cursor:pointer; font-family:var(--mono); font-size:12.5px; letter-spacing:.04em; color:var(--text-dim); display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:9px; border:1px solid var(--line); transition:border-color .15s, color .15s; }
+  .nav-btn:hover{ border-color:var(--line-strong); color:var(--text); }
+  .nav-btn:disabled{ opacity:.35; cursor:default; }
+  .nav-btn:disabled:hover{ border-color:var(--line); color:var(--text-dim); }
+  .nav-btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .nav-btn.primary:hover{ opacity:.92; border-color:var(--accent); color:var(--on-accent);}
+
+  .progress-track{ height:3px; background:var(--surface-3); border-radius:2px; overflow:hidden; margin-bottom:34px; }
+  .progress-fill{ height:100%; background:var(--accent); border-radius:2px; transition:width .35s ease; }
+
+  .split{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:700px){ .split{ grid-template-columns:1fr; } }
+  .split .col-title{ font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--text-faint); margin-bottom:8px; }
+
+  ul.tight{ margin:0; padding-left:18px; }
+  ul.tight li{ font-size:14.5px; color:var(--text-dim); line-height:1.6; margin-bottom:4px; }
+  ul.tight li strong{ color:var(--text); }
+
+  .tag{ display:inline-block; font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; padding:2px 8px; border-radius:99px; border:1px solid var(--line-strong); color:var(--text-dim); margin-right:6px;}
+  .tag.real{ color:var(--accent-ink); border-color:var(--accent-soft-2); background:var(--accent-soft); }
+  .tag.sim{ color:var(--warn); border-color:rgba(224,163,57,0.32); background:var(--warn-soft); }
+</style>
+
+<div class="app">
+  <nav class="rail">
+    <div class="brand">
+      <span class="mark">FedIoV &middot; Layer-wise FHE</span>
+      <span class="name">How the CKKS math actually works</span>
+    </div>
+    <ul class="steps" id="steps"></ul>
+    <div class="rail-foot">Built from the project's handwritten CKKS derivation + a live TenSEAL benchmark on the real ChebyKAN parameter counts. Use &larr; / &rarr; to step through.</div>
+  </nav>
+
+  <main>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <!-- STAGE 0 -->
+    <section class="stage" data-group="Setup" data-title="Why this exists">
+      <p class="eyebrow">00 &middot; Framing</p>
+      <h1>Three vehicles never show their weights in the clear.</h1>
+      <p class="lede">FedIoV's server only ever aggregates <strong>ciphertexts</strong>. Every worked number on the next few pages is taken directly from the project's own derivation — the same toy example, walked forward one operation at a time, then connected to what genuinely happens when the real TenSEAL CKKS library runs on your actual 44K-parameter ChebyKAN layers.</p>
+      <div class="panel">
+        <h3>The shape of the argument</h3>
+        <ul class="tight">
+          <li><strong>Steps 1–4</strong> — the simplified single-key CKKS toy example (secret key <span class="k">[4, 9]</span>, three clients), encrypted, aggregated, and decrypted by hand.</li>
+          <li><strong>Step 5</strong> — the same operations, but in the real polynomial ring <span class="k">R_q = Z_q[x] / (x^N + 1)</span> that production CKKS uses.</li>
+          <li><strong>Step 6</strong> — what it actually costs: real TenSEAL CKKS timed on your model's real parameter counts, not the numpy simulation.</li>
+          <li><strong>Step 7</strong> — extending to <strong>multi-key / threshold CKKS</strong>, and why single-key CKKS is the wrong trust model for a fleet of independently-owned vehicles.</li>
+        </ul>
+      </div>
+      <p><span class="tag sim">Simulated</span> marks a step that mirrors the arithmetic but skips real lattice cryptography. <span class="tag real">Real</span> marks numbers measured from an actual cryptographic library run on this machine.</p>
+    </section>
+
+    <!-- STAGE 1 -->
+    <section class="stage" data-group="Single-key toy example" data-title="The setup">
+      <p class="eyebrow">01 &middot; Setup <span class="tag sim">Simulated</span></p>
+      <h1>One shared secret key, three vehicles, one weight each.</h1>
+      <p>The server will never see any of these three numbers. Each is a client's locally-trained weight for one layer, about to be encrypted before it ever leaves the vehicle.</p>
+
+      <div class="panel">
+        <h3>Global CKKS parameters</h3>
+        <div class="readout-row">
+          <div class="readout"><div class="rlabel">Secret key S</div><div class="rval">[4, 9]</div></div>
+          <div class="readout"><div class="rlabel">Modulus q</div><div class="rval">100,003</div></div>
+          <div class="readout"><div class="rlabel">Scaling factor &Delta;</div><div class="rval">1,000</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Client plaintext weights</h3>
+        <div class="grid3">
+          <div class="client-card"><div class="cname">Client 1 <span class="pt">PT = 0.10</span></div></div>
+          <div class="client-card"><div class="cname">Client 2 <span class="pt">PT = 0.12</span></div></div>
+          <div class="client-card"><div class="cname">Client 3 <span class="pt">PT = 0.09</span></div></div>
+        </div>
+      </div>
+      <div class="callout">True average the server is trying to help compute, without ever seeing a value: <strong>(0.10 + 0.12 + 0.09) / 3 = 0.1033</strong>. Keep that number in mind for step 4.</div>
+    </section>
+
+    <!-- STAGE 2 -->
+    <section class="stage" data-group="Single-key toy example" data-title="Client encryption">
+      <p class="eyebrow">02 &middot; Client-side encryption <span class="tag sim">Simulated</span></p>
+      <h1>Each vehicle scales, masks, and ships a ciphertext.</h1>
+      <div class="formula">b <span class="op">=</span> a&middot;S <span class="op">+</span> e <span class="op">+</span> &Delta;&middot;PT&nbsp;&nbsp;<span class="comment">(mod q)</span></div>
+      <p><span class="k">a</span> is a fresh random vector the client draws every time (safe to publish). <span class="k">e</span> is small random noise. Neither the server nor any other client ever learns <span class="k">S</span>.</p>
+
+      <div class="grid3">
+        <div class="client-card">
+          <div class="cname">Client 1 <span class="pt">0.10</span></div>
+          <div class="kv"><span class="lbl">a&#8321;</span><span class="val">[37, 52]</span></div>
+          <div class="kv"><span class="lbl">e&#8321;</span><span class="val">5</span></div>
+          <div class="kv"><span class="lbl">b&#8321; = 37&middot;4+52&middot;9+5+100</span><span class="val">721</span></div>
+          <div class="ct-tag">CT&#8321; = ([37, 52], 721)</div>
+        </div>
+        <div class="client-card">
+          <div class="cname">Client 2 <span class="pt">0.12</span></div>
+          <div class="kv"><span class="lbl">a&#8322;</span><span class="val">[21, 66]</span></div>
+          <div class="kv"><span class="lbl">e&#8322;</span><span class="val">3</span></div>
+          <div class="kv"><span class="lbl">b&#8322;</span><span class="val">801</span></div>
+          <div class="ct-tag">CT&#8322; = ([21, 66], 801)</div>
+        </div>
+        <div class="client-card">
+          <div class="cname">Client 3 <span class="pt">0.09</span></div>
+          <div class="kv"><span class="lbl">a&#8323;</span><span class="val">[58, 14]</span></div>
+          <div class="kv"><span class="lbl">e&#8323;</span><span class="val">4</span></div>
+          <div class="kv"><span class="lbl">b&#8323;</span><span class="val">452</span></div>
+          <div class="ct-tag">CT&#8323; = ([58, 14], 452)</div>
+        </div>
+      </div>
+      <p style="margin-top:14px">Every ciphertext leaving a vehicle looks like uniform noise to anyone without <span class="k">S</span> — including the aggregation server.</p>
+    </section>
+
+    <!-- STAGE 3 -->
+    <section class="stage" data-group="Single-key toy example" data-title="Server aggregation">
+      <p class="eyebrow">03 &middot; Server-side aggregation <span class="tag sim">Simulated</span></p>
+      <h1>The server adds ciphertexts. It never decrypts anything.</h1>
+      <p>CKKS is additively homomorphic: adding ciphertexts is the same as adding the messages inside them, so plain vector addition across the three <span class="k">(a, b)</span> pairs is a legal FedAvg sum — done entirely on encrypted values.</p>
+      <div class="wire">ciphertext-only summation</div>
+      <div class="formula">a_sum <span class="op">=</span> a&#8321; + a&#8322; + a&#8323; <span class="comment">= [37,52]+[21,66]+[58,14]</span><br>b_sum <span class="op">=</span> b&#8321; + b&#8322; + b&#8323; <span class="comment">= 721+801+452</span></div>
+      <div class="readout-row" style="margin-top:14px">
+        <div class="readout accent"><div class="rlabel">a_sum</div><div class="rval">[116, 132]</div></div>
+        <div class="readout accent"><div class="rlabel">b_sum</div><div class="rval">1,974</div></div>
+      </div>
+    </section>
+
+    <!-- STAGE 4 -->
+    <section class="stage" data-group="Single-key toy example" data-title="Client decryption">
+      <p class="eyebrow">04 &middot; Client-side decryption <span class="tag sim">Simulated</span></p>
+      <h1>Only a vehicle holding S can read the result.</h1>
+      <div class="formula">î <span class="op">=</span> a_sum &middot; S <span class="comment">= 116&middot;4 + 132&middot;9</span><br>&gamma; <span class="op">=</span> b_sum &minus; î<br>res <span class="op">=</span> &gamma; / &Delta;</div>
+      <div class="readout-row" style="margin-top:14px">
+        <div class="readout"><div class="rlabel">î</div><div class="rval">1,652</div></div>
+        <div class="readout"><div class="rlabel">&gamma;</div><div class="rval">322</div></div>
+        <div class="readout accent"><div class="rlabel">res = &gamma; / 1000</div><div class="rval">0.322</div></div>
+      </div>
+      <div class="panel" style="margin-top:16px">
+        <h3>Divide by the 3 contributing clients</h3>
+        <div class="readout-row">
+          <div class="readout accent"><div class="rlabel">Decrypted FedAvg</div><div class="rval">0.322 / 3 = 0.1073</div></div>
+          <div class="readout"><div class="rlabel">True average</div><div class="rval">0.1033</div></div>
+          <div class="readout warn"><div class="rlabel">Error</div><div class="rval">&asymp; 0.004</div></div>
+        </div>
+      </div>
+      <div class="callout">That 0.004 gap is <strong>encryption noise, not a bug</strong> — a side effect of the toy example's small modulus (q = 100,003). Real CKKS runs with a modulus many orders of magnitude larger, which is exactly why the measured error in step 6 is <strong>~10&#8315;&#8312;</strong> instead of ~10&#8315;&sup2;.</div>
+    </section>
+
+    <!-- STAGE 5 -->
+    <section class="stage" data-group="Real CKKS" data-title="The real polynomial ring">
+      <p class="eyebrow">05 &middot; From toy integers to polynomial rings</p>
+      <h1>Production CKKS runs this same shape of math over polynomials.</h1>
+      <p>Swap the integer secret key for a secret <em>polynomial</em>, and every step above still holds — encryption is still "mask with randomness," aggregation is still "add," decryption is still "unmask with the secret."</p>
+
+      <div class="split">
+        <div>
+          <div class="col-title">Keys, in the ring R_q = Z_q[x] / (x&#8319;+1)</div>
+          <div class="panel">
+            <div class="formula" style="font-size:14px">s(x) &isin; R_q<span class="comment"> &nbsp;secret key polynomial</span><br>a(x) &nbsp;<span class="comment">random public polynomial</span><br>e(x) &nbsp;<span class="comment">error, lower degree</span><br>b(x) <span class="op">=</span> &minus;a(x)&middot;s(x) + e(x)</div>
+            <p style="margin:10px 0 0; font-size:13.5px">Public key = <span class="k">(a, b)</span>. Anyone can encrypt with it; only the holder of <span class="k">s(x)</span> can decrypt.</p>
+          </div>
+        </div>
+        <div>
+          <div class="col-title">Encrypting a plaintext polynomial</div>
+          <div class="panel">
+            <div class="formula" style="font-size:14px">m(x) <span class="op">=</span> 288 + 325x + 471x&sup2;<span class="comment"> &nbsp;(&times;&Delta;)</span><br>u(x), e&#8321;(x), e&#8322;(x) &nbsp;<span class="comment">fresh randomness</span><br>c&#8320; <span class="op">=</span> b&middot;u + e&#8321; + m<br>c&#8321; <span class="op">=</span> a&middot;u + e&#8322;</div>
+            <p style="margin:10px 0 0; font-size:13.5px">Ciphertext = <span class="k">(c&#8320;, c&#8321;)</span>. Decrypt with <span class="k">m'(x) = c&#8320; + c&#8321;&middot;s</span>, then divide by &Delta;.</p>
+          </div>
+        </div>
+      </div>
+      <p>A weight tensor is just the coefficient list of <span class="k">m(x)</span> — this is why one ciphertext can carry thousands of weights at once (see the "slot count" in step 6).</p>
+    </section>
+
+    <!-- STAGE 6 -->
+    <section class="stage" data-group="Real CKKS" data-title="What it really costs">
+      <p class="eyebrow">06 &middot; Benchmarked on your actual model <span class="tag real">Real — TenSEAL</span></p>
+      <h1>The numpy simulation is free. Real lattice cryptography is not.</h1>
+      <p><span class="k">fhe_adapter.SimulatedCKKSVector</span> mimics the arithmetic above with plain numpy, so it can't show real cost. The numbers below come from actually running <span class="k">TenSEAL</span> (CKKS, poly_modulus_degree=8192, coeff_mod=[60,40,40,60]) on your real ChebyKAN parameter counts, aggregating 7 active clients per round — the exact shape of one federated round.</p>
+
+      <div class="panel">
+        <h3>Per-round overhead, one client's update, by dataset</h3>
+        <div class="twrap">
+          <table id="benchTable">
+            <thead><tr><th>Dataset</th><th class="mono">Params</th><th class="mono">Encrypt</th><th class="mono">Homomorphic&nbsp;sum</th><th class="mono">Decrypt</th><th class="mono">Ciphertext&nbsp;size</th></tr></thead>
+            <tbody id="benchBody"><tr><td colspan="6" style="color:var(--text-faint)">Run <span class="k">benchmark_real_ckks.py</span> to populate — falling back to the measured run from this session.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="callout">Real CKKS packs up to <strong>4,096</strong> numbers per ciphertext at this parameter size, so a 44K-parameter model needs about <strong>11 ciphertexts</strong> per client per round — around <strong>21&times;</strong> the raw float32 size on the wire. That bandwidth and latency cost is the actual price of the privacy guarantee; the accuracy is essentially unaffected (max error ~10&#8315;&#8312;).</div>
+    </section>
+
+    <!-- STAGE 7 -->
+    <section class="stage" data-group="Beyond single-key" data-title="Multi-key / threshold CKKS">
+      <p class="eyebrow">07 &middot; Why single-key CKKS is the wrong trust model for a fleet</p>
+      <h1>One shared secret key means one leaked key breaks every vehicle.</h1>
+      <p>Steps 1–6 all share a <strong>single secret key S</strong> across every client — standard for TenSEAL/SEAL, which is single-key only. For independently-owned vehicles, that's a single point of failure: any one compromised car can decrypt every other car's updates. The fix is to never let any one party hold the whole key.</p>
+
+      <div class="panel">
+        <h3>Splitting S = [4, 9] across two independent key-custodians</h3>
+        <p style="margin-bottom:14px">Reusing the exact numbers from step 3 — same <span class="k">a_sum = [116, 132]</span>, same <span class="k">b_sum = 1,974</span> — but now no single custodian holds all of <span class="k">S</span>.</p>
+        <div class="split">
+          <div>
+            <div class="col-title">Custodian A holds s_A = [4, 0]</div>
+            <div class="formula" style="font-size:14px">partial_A <span class="op">=</span> a_sum &middot; s_A<br><span class="comment">= 116&middot;4 + 132&middot;0</span></div>
+            <div class="readout" style="margin-top:10px"><div class="rlabel">partial_A</div><div class="rval">464</div></div>
+          </div>
+          <div>
+            <div class="col-title">Custodian B holds s_B = [0, 9]</div>
+            <div class="formula" style="font-size:14px">partial_B <span class="op">=</span> a_sum &middot; s_B<br><span class="comment">= 116&middot;0 + 132&middot;9</span></div>
+            <div class="readout" style="margin-top:10px"><div class="rlabel">partial_B</div><div class="rval">1,188</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="split">
+        <div>
+          <div class="col-title">Both custodians cooperate</div>
+          <div class="panel">
+            <div class="formula" style="font-size:14px">partial_A + partial_B <span class="op">=</span> 464+1188 <span class="op">=</span> 1652</div>
+            <div class="readout-row" style="margin-top:10px">
+              <div class="readout accent"><div class="rlabel">Recovered î</div><div class="rval">1,652</div></div>
+              <div class="readout accent"><div class="rlabel">Decrypted avg</div><div class="rval">0.1073</div></div>
+            </div>
+            <p style="margin:10px 0 0; font-size:13.5px">Identical to step 4 — threshold decryption is exact, it just needs <em>both</em> shares combined.</p>
+          </div>
+        </div>
+        <div>
+          <div class="col-title">Only custodian A cooperates</div>
+          <div class="panel">
+            <div class="formula" style="font-size:14px">&gamma;' <span class="op">=</span> b_sum &minus; partial_A<br><span class="comment">= 1974 &minus; 464</span></div>
+            <div class="readout-row" style="margin-top:10px">
+              <div class="readout danger"><div class="rlabel">Bogus î</div><div class="rval">464</div></div>
+              <div class="readout danger"><div class="rlabel">"Decrypted"</div><div class="rval">0.503</div></div>
+            </div>
+            <p style="margin:10px 0 0; font-size:13.5px">Off by 5&times; and meaningless — a lone key-share reveals nothing usable about the plaintext.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <strong>A terminology note worth being precise about in front of your guides:</strong> what's shown above is <strong>threshold / multiparty CKKS</strong> — one shared public key, secret key <em>split</em> into shares, decryption needs a quorum of shares. This is what's practically deployed today (e.g. the <span class="k">dckks</span> package in the Lattigo library) and is a straightforward extension of everything in steps 1&ndash;6.
+        <br><br>
+        <strong>"True" multi-key CKKS</strong> is a different, heavier construction: every client keeps a fully independent key, ciphertexts from different keys are algebraically extended (dimension grows with the number of keys) before they can be combined, with its own key-switching and noise-growth analysis. It's an active research area and not something TenSEAL/SEAL support out of the box — worth flagging as future work rather than implementing under time pressure.
+      </div>
+    </section>
+
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn">&larr; Back</button>
+      <span id="stageLabel" style="font-family:var(--mono); font-size:12px; color:var(--text-faint);"></span>
+      <button class="nav-btn primary" id="nextBtn">Next &rarr;</button>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  var stages = Array.prototype.slice.call(document.querySelectorAll('.stage'));
+  var stepsList = document.getElementById('steps');
+  var lastGroup = null;
+  stages.forEach(function(s, i){
+    var group = s.getAttribute('data-group');
+    if(group !== lastGroup){
+      var g = document.createElement('span');
+      g.className = 'grp';
+      g.textContent = group;
+      stepsList.appendChild(g);
+      lastGroup = group;
+    }
+    var li = document.createElement('li');
+    var btn = document.createElement('button');
+    btn.className = 'step-btn';
+    btn.setAttribute('data-i', i);
+    btn.innerHTML = '<span class="idx">' + String(i).padStart(2,'0') + '</span><span>' + s.getAttribute('data-title') + '</span>';
+    btn.addEventListener('click', function(){ go(i); });
+    li.appendChild(btn);
+    stepsList.appendChild(li);
+  });
+
+  var current = 0;
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var progressFill = document.getElementById('progressFill');
+  var stageLabel = document.getElementById('stageLabel');
+
+  function go(i){
+    if(i < 0 || i >= stages.length) return;
+    current = i;
+    stages.forEach(function(s, idx){ s.classList.toggle('active', idx === i); });
+    document.querySelectorAll('.step-btn').forEach(function(b){
+      b.classList.toggle('active', parseInt(b.getAttribute('data-i'),10) === i);
+    });
+    progressFill.style.width = (100 * (i+1) / stages.length) + '%';
+    stageLabel.textContent = (i+1) + ' / ' + stages.length;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === stages.length - 1;
+    nextBtn.textContent = i === stages.length - 1 ? 'End' : 'Next →';
+    document.querySelector('main').scrollTo({top:0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+  }
+
+  prevBtn.addEventListener('click', function(){ go(current-1); });
+  nextBtn.addEventListener('click', function(){ go(current+1); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowRight') go(current+1);
+    if(e.key === 'ArrowLeft') go(current-1);
+  });
+
+  go(0);
+
+  // Try to load the real benchmark JSON if this page is ever served with it alongside;
+  // otherwise fall back to the measured session values baked in below.
+  var fallback = [
+    {dataset:'can_vtc', n_params:44164, enc:67.65, agg:107.39, dec:14.98, exp:20.8},
+    {dataset:'car_hack', n_params:44549, enc:62.66, agg:70.78, dec:13.17, exp:20.6},
+    {dataset:'cicids', n_params:43394, enc:63.58, agg:83.34, dec:13.13, exp:21.2},
+    {dataset:'veremi', n_params:43394, enc:67.40, agg:99.43, dec:16.65, exp:21.2}
+  ];
+  var tbody = document.getElementById('benchBody');
+  tbody.innerHTML = fallback.map(function(r){
+    return '<tr><td>'+r.dataset+'</td><td class="mono">'+r.n_params.toLocaleString()+'</td>'+
+      '<td class="mono">'+r.enc.toFixed(1)+' ms</td><td class="mono">'+r.agg.toFixed(1)+' ms</td>'+
+      '<td class="mono">'+r.dec.toFixed(1)+' ms</td><td class="mono">'+r.exp.toFixed(1)+'&times;</td></tr>';
+  }).join('');
+})();
+</script>

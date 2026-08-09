@@ -1,0 +1,7 @@
+torch>=2.3.0
+tenseal
+pandas
+numpy
+scikit-learn
+rich
+pytest

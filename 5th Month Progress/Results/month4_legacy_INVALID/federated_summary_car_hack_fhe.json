@@ -1,0 +1,13 @@
+{
+  "dataset": "car_hack",
+  "use_fhe": true,
+  "n_clients": 10,
+  "rounds": 5,
+  "local_epochs": 2,
+  "alpha": 0.3,
+  "parameters": 44549,
+  "training_time_sec": 171.05221009254456,
+  "test_accuracy": 0.7383039603419053,
+  "test_macro_f1": 0.77329763568376,
+  "test_roc_auc": 0.9538737433162485
+}

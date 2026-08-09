@@ -1,0 +1,102 @@
+{
+  "tag": "dev-laptop-x86",
+  "platform": {
+    "timestamp": "2026-08-09T01:51:50",
+    "machine": "AMD64",
+    "architecture": "64bit",
+    "processor": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+    "system": "Windows 11",
+    "python": "3.12.0",
+    "python_compiler": "MSC v.1935 64 bit (AMD64)",
+    "numpy": "2.4.1",
+    "cpu_count_logical": 12,
+    "torch": "2.13.0+cpu",
+    "torch_threads": 6,
+    "tenseal": "0.3.16"
+  },
+  "raw_compute": {
+    "elements": 4194304,
+    "int64_mulmod_sec": 0.01775630000338424,
+    "int64_mulmod_Mops": 236.21497717433203,
+    "float64_mul_sec": 0.007726099996943958,
+    "float64_mul_Mops": 542.8746717825355,
+    "float64_add_Mops": 559.3673231617486,
+    "memcpy_GBps": 6.551552640751235
+  },
+  "ntt": {
+    "sizes": [
+      {
+        "n": 1024,
+        "q": 1073707009,
+        "forward_sec": 0.0001083999959519133,
+        "multiply_sec": 0.00032279999868478626
+      },
+      {
+        "n": 4096,
+        "q": 1073692673,
+        "forward_sec": 0.00028929999825777486,
+        "multiply_sec": 0.0009699000002001412
+      },
+      {
+        "n": 8192,
+        "q": 1073692673,
+        "forward_sec": 0.000626500004727859,
+        "multiply_sec": 0.0018759000013233162
+      }
+    ]
+  },
+  "ckks": {
+    "available": true,
+    "poly_modulus_degree": 8192,
+    "coeff_mod_bit_sizes": [
+      60,
+      40,
+      40,
+      60
+    ],
+    "slots": 4096,
+    "encrypt_sec": 0.0034373000016785227,
+    "add_sec": 3.3399999665562063e-05,
+    "plain_multiply_sec": 0.0005665999997290783,
+    "cipher_multiply_dot_sec": 0.017127999999502208,
+    "decrypt_sec": 0.0008955000012065284,
+    "ciphertext_bytes": 334491
+  },
+  "fhefl_round": {
+    "available": true,
+    "n_parameters": 44164,
+    "ciphertexts": 11,
+    "levels_dropped": 1,
+    "encrypt_update_sec": 0.04768119999789633,
+    "encrypted_distance_sec": 0.1291207000031136,
+    "weighted_aggregate_sec": 0.004897999999229796,
+    "decrypt_update_sec": 0.007628100000147242,
+    "wire_bytes_per_client": 2588961,
+    "wire_megabytes_per_client": 2.4690256118774414
+  },
+  "ids_inference": {
+    "batch_1": {
+      "seconds": 0.00025209999876096845,
+      "windows_per_sec": 3966.6799084285663,
+      "latency_ms_per_window": 0.25209999876096845
+    },
+    "batch_32": {
+      "seconds": 0.00039429999742424116,
+      "windows_per_sec": 81156.48036784053,
+      "latency_ms_per_window": 0.012321874919507536
+    },
+    "batch_256": {
+      "seconds": 0.0006817000030423515,
+      "windows_per_sec": 375531.7571622421,
+      "latency_ms_per_window": 0.0026628906368841854
+    },
+    "available": true,
+    "parameters": 44549
+  },
+  "memory": {
+    "python_peak_mb": 0.686275,
+    "python_current_mb": 0.361123,
+    "note": "Python-visible allocations only; TenSEAL's C++ heap is not counted, so treat this as a lower bound."
+  },
+  "is_target_hardware": false
+}

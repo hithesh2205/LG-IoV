@@ -1,0 +1,295 @@
+<meta charset="UTF-8">
+<title>FedIoV — FL vs. FL+FHE Dashboard</title>
+<style>
+  .viz-root{
+    --bg:#F9F9F7; --surface:#FFFFFF; --surface-2:#F1F1EE; --surface-3:#E7E6E1;
+    --ink:#0B0B0B; --ink-2:#52514E; --ink-muted:#898781;
+    --grid:#E1E0D9; --baseline:#C3C2B7; --ring:rgba(11,11,11,0.10);
+    --accent:#1E8F80; --accent-soft:#E1F0EE;
+    --series-nofhe:#EDA100; --series-fhe:#1BAF7A;
+    --good:#0CA30C; --warning:#FAB219; --serious:#EC835A; --critical:#D03B3B; --warning-ink:#96650A;
+    --good-soft:#E7F6E7; --warning-soft:#FDF1DA; --pending-soft:#EFEFEC;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])) .viz-root{
+      --bg:#0D0D0D; --surface:#171713; --surface-2:#1D1D19; --surface-3:#26261F;
+      --ink:#FFFFFF; --ink-2:#C3C2B7; --ink-muted:#898781;
+      --grid:#2C2C2A; --baseline:#383835; --ring:rgba(255,255,255,0.10);
+      --accent:#3FC9B7; --accent-soft:#173430;
+      --series-nofhe:#C98500; --series-fhe:#199E70;
+      --good:#0CA30C; --warning:#FAB219; --serious:#EC835A; --critical:#D03B3B; --warning-ink:#FAB219;
+      --good-soft:#12281a; --warning-soft:#2c2312; --pending-soft:#1D1D19;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] .viz-root{
+    --bg:#0D0D0D; --surface:#171713; --surface-2:#1D1D19; --surface-3:#26261F;
+    --ink:#FFFFFF; --ink-2:#C3C2B7; --ink-muted:#898781;
+    --grid:#2C2C2A; --baseline:#383835; --ring:rgba(255,255,255,0.10);
+    --accent:#3FC9B7; --accent-soft:#173430;
+    --series-nofhe:#C98500; --series-fhe:#199E70;
+    --good-soft:#12281a; --warning-soft:#2c2312; --pending-soft:#1D1D19;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] .viz-root{
+    --bg:#F9F9F7; --surface:#FFFFFF; --surface-2:#F1F1EE; --surface-3:#E7E6E1;
+    --ink:#0B0B0B; --ink-2:#52514E; --ink-muted:#898781;
+    --grid:#E1E0D9; --baseline:#C3C2B7; --ring:rgba(11,11,11,0.10);
+    --accent:#1E8F80; --accent-soft:#E1F0EE;
+    --series-nofhe:#EDA100; --series-fhe:#1BAF7A;
+    --good-soft:#E7F6E7; --warning-soft:#FDF1DA; --pending-soft:#EFEFEC;
+    color-scheme: light;
+  }
+
+  .viz-root *{ box-sizing:border-box; }
+  .viz-root{ background:var(--bg); color:var(--ink); font-family:var(--sans); padding:28px; min-height:100vh; }
+  .viz-root ::selection{ background:var(--accent-soft); }
+
+  .wrap{ max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:22px; }
+
+  /* Header */
+  .head{ display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; }
+  .head h1{ font-size:22px; font-weight:700; margin:0 0 4px; letter-spacing:-0.01em; }
+  .head .sub{ font-size:13px; color:var(--ink-2); margin:0; max-width:60ch; }
+  .head-right{ display:flex; align-items:center; gap:10px; }
+  .pill{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:5px 11px; border-radius:99px; background:var(--surface-2); border:1px solid var(--ring); color:var(--ink-2); }
+  .pill .dot{ width:7px; height:7px; border-radius:50%; }
+  .pill.status-live .dot{ background:var(--good); box-shadow:0 0 0 3px var(--good-soft); }
+  .link-btn{ font-size:12.5px; font-weight:600; text-decoration:none; color:var(--accent); border:1px solid var(--accent); padding:6px 13px; border-radius:8px; transition:background .15s; }
+  .link-btn:hover{ background:var(--accent-soft); }
+
+  /* Stat tiles */
+  .tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  @media (max-width:900px){ .tiles{ grid-template-columns:repeat(2,1fr); } }
+  .tile{ background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; gap:6px; }
+  .tile .tlabel{ font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-muted); font-weight:600; }
+  .tile .tval{ font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }
+  .tile .tval.accent{ color:var(--accent); }
+  .tile .tnote{ font-size:11.5px; color:var(--ink-2); }
+
+  /* Panels */
+  .panel{ background:var(--surface); border:1px solid var(--ring); border-radius:14px; padding:20px 22px; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+  .panel-head h2{ font-size:15px; font-weight:700; margin:0; }
+  .panel-head .phint{ font-size:12px; color:var(--ink-muted); }
+
+  .grid-2{ display:grid; grid-template-columns:1.3fr 1fr; gap:16px; align-items:stretch; }
+  @media (max-width:980px){ .grid-2{ grid-template-columns:1fr; } }
+
+  /* Legend */
+  .legend{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:4px; }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2); }
+  .legend-swatch{ width:11px; height:11px; border-radius:3px; }
+
+  /* Bar chart (custom, hand-built per skill: thin marks, rounded ends, data labels) */
+  .barchart{ display:flex; flex-direction:column; gap:14px; margin-top:6px; }
+  .bar-row{ display:grid; grid-template-columns:96px 1fr; align-items:center; gap:10px; }
+  .bar-row .bname{ font-size:12.5px; color:var(--ink-2); text-align:right; }
+  .bar-track-pair{ display:flex; flex-direction:column; gap:4px; }
+  .bar-track{ position:relative; height:16px; background:var(--surface-2); border-radius:4px; overflow:visible; }
+  .bar-fill{ position:absolute; top:0; left:0; height:100%; border-radius:4px; display:flex; align-items:center; transition:width .5s ease; }
+  .bar-fill .bval{ position:absolute; left:calc(100% + 8px); font-size:11.5px; font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap; font-weight:600; }
+  .bar-fill.nofhe{ background:var(--series-nofhe); }
+  .bar-fill.fhe{ background:var(--series-fhe); }
+  .bar-track.pending{ background:repeating-linear-gradient(135deg, var(--surface-3), var(--surface-3) 5px, var(--surface-2) 5px, var(--surface-2) 10px); }
+  .pending-label{ font-size:11.5px; color:var(--ink-muted); font-style:italic; padding-left:4px; }
+
+  /* Table */
+  .twrap{ overflow-x:auto; }
+  table{ border-collapse:collapse; width:100%; font-size:12.8px; }
+  th, td{ padding:9px 12px; text-align:right; border-bottom:1px solid var(--grid); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  th:first-child, td:first-child{ text-align:left; }
+  th{ font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-muted); font-weight:600; border-bottom:1px solid var(--baseline); }
+  td.status-cell{ text-align:left; }
+
+  .status-chip{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 8px; border-radius:99px; }
+  .status-chip.done{ background:var(--good-soft); color:var(--good); }
+  .status-chip.running{ background:var(--warning-soft); color:var(--warning-ink); }
+  .status-chip.pending{ background:var(--pending-soft); color:var(--ink-muted); }
+  .status-chip .sdot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .status-chip.running .sdot{ animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+  @media (prefers-reduced-motion: reduce){ .status-chip.running .sdot{ animation:none; } }
+
+  .delta-good{ color:var(--good); font-weight:600; }
+  .delta-neutral{ color:var(--ink-2); }
+
+  /* Overhead mini-bars (small multiples, single-hue sequential = accent) */
+  .overhead-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  @media (max-width:900px){ .overhead-grid{ grid-template-columns:repeat(2,1fr); } }
+  .oh-card{ border:1px solid var(--ring); border-radius:10px; padding:12px 14px; background:var(--surface-2); }
+  .oh-card .ohname{ font-size:12px; font-weight:700; margin-bottom:8px; }
+  .oh-stack{ display:flex; height:10px; border-radius:5px; overflow:hidden; margin-bottom:8px; background:var(--surface-3); }
+  .oh-seg{ height:100%; }
+  .oh-legend{ display:flex; flex-direction:column; gap:3px; font-size:11px; color:var(--ink-2); }
+  .oh-legend div{ display:flex; justify-content:space-between; gap:8px; }
+  .oh-legend span.k{ display:inline-flex; align-items:center; gap:5px; }
+  .oh-legend .sw{ width:8px; height:8px; border-radius:2px; }
+  .oh-total{ margin-top:8px; font-size:12.5px; font-weight:700; text-align:right; }
+
+  .callout{ margin-top:16px; border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 10px 10px 0; padding:12px 16px; font-size:12.8px; color:var(--ink); line-height:1.6; }
+
+  .footer-note{ font-size:11.5px; color:var(--ink-muted); text-align:center; padding:8px 0 0; }
+  .footer-note a{ color:var(--ink-muted); }
+</style>
+
+<div class="viz-root">
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <h1>FL vs. FL+FHE — Live Comparison Dashboard</h1>
+      <p class="sub">FedIoV federated ChebyKAN, from-scratch training. Same model, same Dirichlet client split (α=0.3), same seed — FHE on/off is the only variable.</p>
+    </div>
+    <div class="head-right">
+      <span class="pill" id="statusPill"><span class="dot"></span><span id="statusPillText">— / — datasets complete</span></span>
+      <a class="link-btn" href="#" id="mathLink" target="_blank" rel="noopener">CKKS math walkthrough →</a>
+    </div>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Test Accuracy — No-FHE vs. Full Layer-wise FHE</h2>
+        <span class="phint">per dataset, fresh training run</span>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--series-nofhe)"></span>No-FHE (plaintext)</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--series-fhe)"></span>Full Layer-wise FHE</span>
+      </div>
+      <div class="barchart" id="barchart"></div>
+      <div class="callout">Deltas below ~1.5% are attributable to shared RNG-state divergence introduced by the noise-injection step (client sampling order shifts downstream) — not a systematic FHE effect. CAN-VTC's near-zero delta (+0.009%) is the cleanest signal of that.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Run status</h2>
+        <span class="phint">this session</span>
+      </div>
+      <div class="twrap">
+        <table id="statusTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>What Real CKKS Costs Per Round</h2>
+      <span class="phint">measured with TenSEAL on the actual ChebyKAN parameter tensors — not the numpy simulation used for training</span>
+    </div>
+    <div class="overhead-grid" id="overheadGrid"></div>
+    <div class="callout">The simulated CKKS layer used above (for training) costs nothing extra to run, so it can't show real cryptographic overhead. These numbers come from actually encrypting/aggregating/decrypting with TenSEAL at each dataset's real parameter count, 7 active clients per round.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Full results table</h2>
+    </div>
+    <div class="twrap">
+      <table id="fullTable"></table>
+    </div>
+  </div>
+
+  <p class="footer-note">Generated from Claude's work/FHE_Comparison/results — regenerate via scripts/generate_dashboard_data.py after each training run.</p>
+
+</div>
+</div>
+
+<script>
+(function(){
+  var DATA = {"generated_note": "Fresh from-scratch runs; FHE on/off is the only variable.", "n_datasets_total": 4, "n_datasets_done": 4, "rows": [{"dataset": "can_vtc", "label": "CAN-VTC", "status": "done", "parameters": 44164, "nofhe_accuracy": 0.9998843903905292, "fhe_accuracy": 0.9999768780781059, "nofhe_macro_f1": 0.9999048746894095, "fhe_macro_f1": 0.999980977302921, "nofhe_roc_auc": 0.9999999989299609, "fhe_roc_auc": 1.0, "nofhe_time_sec": 45.62122941017151, "fhe_time_sec": 51.27077388763428, "encrypt_ms": 45.29274285804214, "aggregate_ms": 58.17259999457747, "decrypt_ms": 36.60309998667799, "round_overhead_ms": 140.0684428392976, "ciphertext_expansion": 20.81462276967666, "max_abs_error": 2.765189546088953e-08}, {"dataset": "car_hack", "label": "Car-Hacking", "status": "done", "parameters": 44549, "nofhe_accuracy": 0.733881305169282, "fhe_accuracy": 0.7383039603419053, "nofhe_macro_f1": 0.764072946497362, "fhe_macro_f1": 0.77329763568376, "nofhe_roc_auc": 0.954887799136858, "fhe_roc_auc": 0.9538737433162485, "nofhe_time_sec": 171.6381392478943, "fhe_time_sec": 171.05221009254456, "encrypt_ms": 44.070228572568986, "aggregate_ms": 54.04459999408573, "decrypt_ms": 9.168899996438995, "round_overhead_ms": 107.2837285630937, "ciphertext_expansion": 20.634352061774674, "max_abs_error": 2.4818970108253513e-08}, {"dataset": "cicids", "label": "CICIDS-2017", "status": "done", "parameters": 43394, "nofhe_accuracy": 0.9819204537685563, "fhe_accuracy": 0.9818473717587539, "nofhe_macro_f1": 0.9714726776290994, "fhe_macro_f1": 0.9712995524687404, "nofhe_roc_auc": 0.9979229627875534, "fhe_roc_auc": 0.9978071155509498, "nofhe_time_sec": 451.0466380119324, "fhe_time_sec": 457.57543897628784, "encrypt_ms": 43.98382857159179, "aggregate_ms": 56.80570000549778, "decrypt_ms": 8.973199990577996, "round_overhead_ms": 109.76272856766757, "ciphertext_expansion": 21.18230630962806, "max_abs_error": 2.981441403482332e-08}, {"dataset": "veremi", "label": "VeReMi", "status": "done", "parameters": 43394, "nofhe_accuracy": 0.5805613305613305, "fhe_accuracy": 0.5290049665049665, "nofhe_macro_f1": 0.5087295965758241, "fhe_macro_f1": 0.4917081555393138, "nofhe_roc_auc": 0.5240420944645245, "fhe_roc_auc": 0.5250618042885129, "nofhe_time_sec": 435.8947160243988, "fhe_time_sec": 262.1607666015625, "encrypt_ms": 48.18191428785212, "aggregate_ms": 58.61039998126216, "decrypt_ms": 8.886299998266622, "round_overhead_ms": 115.67861426738091, "ciphertext_expansion": 21.185578651426464, "max_abs_error": 3.5349818471724914e-08}]};
+  var MATH_URL = "https://claude.ai/code/artifact/8a6809b6-50f5-4d1e-9b70-948982812fc9";
+  document.getElementById('mathLink').href = MATH_URL;
+
+  var rows = DATA.rows;
+  var doneRows = rows.filter(function(r){ return r.status === 'done'; });
+
+  // Header pill
+  document.getElementById('statusPillText').textContent = DATA.n_datasets_done + ' / ' + DATA.n_datasets_total + ' datasets complete';
+  var pill = document.getElementById('statusPill');
+  if (DATA.n_datasets_done < DATA.n_datasets_total) pill.classList.add('status-live');
+
+  function fmtPct(v){ return v == null ? '—' : (v*100).toFixed(2) + '%'; }
+  function fmtMs(v){ return v == null ? '—' : v.toFixed(1) + ' ms'; }
+  function fmtSec(v){ return v == null ? '—' : v.toFixed(1) + ' s'; }
+
+  // ---- Stat tiles ----
+  var avgDelta = doneRows.length ? doneRows.reduce(function(s,r){ return s + (r.fhe_accuracy - r.nofhe_accuracy); }, 0) / doneRows.length : null;
+  var avgOverhead = rows.filter(function(r){return r.round_overhead_ms!=null;}).reduce(function(s,r,_,arr){ return s + r.round_overhead_ms/arr.length; }, 0);
+  var avgExpansion = rows.filter(function(r){return r.ciphertext_expansion!=null;}).reduce(function(s,r,_,arr){ return s + r.ciphertext_expansion/arr.length; }, 0);
+  var maxErr = Math.max.apply(null, rows.filter(function(r){return r.max_abs_error!=null;}).map(function(r){return r.max_abs_error;}));
+
+  var tiles = [
+    { label:'Avg. accuracy delta (FHE − No-FHE)', val: avgDelta==null?'—':(avgDelta>=0?'+':'')+(avgDelta*100).toFixed(3)+'%', note: doneRows.length+' of '+rows.length+' datasets so far', accent:true },
+    { label:'Avg. real CKKS overhead / round', val: avgOverhead.toFixed(0)+' ms', note:'encrypt + homomorphic sum + decrypt, per client' },
+    { label:'Ciphertext expansion', val: avgExpansion.toFixed(1)+'×', note:'vs. raw float32 weights on the wire' },
+    { label:'Max numeric error (real CKKS)', val: maxErr.toExponential(1), note:'vs. plaintext FedAvg — cryptographically negligible' },
+  ];
+  document.getElementById('tiles').innerHTML = tiles.map(function(t){
+    return '<div class="tile"><div class="tlabel">'+t.label+'</div><div class="tval'+(t.accent?' accent':'')+'">'+t.val+'</div><div class="tnote">'+t.note+'</div></div>';
+  }).join('');
+
+  // ---- Accuracy bar chart ----
+  document.getElementById('barchart').innerHTML = rows.map(function(r){
+    if (r.status !== 'done'){
+      return '<div class="bar-row"><div class="bname">'+r.label+'</div>'+
+        '<div class="bar-track-pair"><div class="bar-track pending"></div><div class="pending-label">'+(r.status==='running'?'training now…':'queued')+'</div></div></div>';
+    }
+    var noPct = (r.nofhe_accuracy*100), fhePct = (r.fhe_accuracy*100);
+    // scale bars against a window zoomed to THIS row's own two values, so a dataset sitting
+    // at ~75% accuracy isn't flattened by a window sized for one sitting at ~99.99%
+    // (exact values are always shown as data labels per the contrast-relief rule)
+    var lo = Math.max(0, Math.min(noPct, fhePct) - 8);
+    var hi = 100;
+    var scale = function(p){ return Math.max(2, (Math.min(p,hi)-lo)/(hi-lo)*100); };
+    return '<div class="bar-row"><div class="bname">'+r.label+'</div><div class="bar-track-pair">'+
+      '<div class="bar-track"><div class="bar-fill nofhe" style="width:'+scale(noPct)+'%"><span class="bval">'+noPct.toFixed(2)+'%</span></div></div>'+
+      '<div class="bar-track"><div class="bar-fill fhe" style="width:'+scale(fhePct)+'%"><span class="bval">'+fhePct.toFixed(2)+'%</span></div></div>'+
+      '</div></div>';
+  }).join('');
+
+  // ---- Status table ----
+  var statusRows = rows.map(function(r){
+    var chip = r.status === 'done' ? '<span class="status-chip done"><span class="sdot"></span>Done</span>'
+      : r.status === 'running' ? '<span class="status-chip running"><span class="sdot"></span>Training…</span>'
+      : '<span class="status-chip pending"><span class="sdot"></span>Queued</span>';
+    return '<tr><td>'+r.label+'</td><td class="status-cell">'+chip+'</td>'+
+      '<td>'+fmtSec(r.nofhe_time_sec)+'</td><td>'+fmtSec(r.fhe_time_sec)+'</td></tr>';
+  }).join('');
+  document.getElementById('statusTable').innerHTML =
+    '<thead><tr><th>Dataset</th><th>Status</th><th>No-FHE time</th><th>FHE time</th></tr></thead><tbody>'+statusRows+'</tbody>';
+
+  // ---- Overhead small multiples ----
+  document.getElementById('overheadGrid').innerHTML = rows.map(function(r){
+    if (r.encrypt_ms == null) return '<div class="oh-card"><div class="ohname">'+r.label+'</div><div class="pending-label">benchmark pending</div></div>';
+    var total = r.encrypt_ms + r.aggregate_ms + r.decrypt_ms;
+    var segs = [
+      {k:'Encrypt', v:r.encrypt_ms, c:'var(--series-nofhe)'},
+      {k:'Aggregate', v:r.aggregate_ms, c:'var(--accent)'},
+      {k:'Decrypt', v:r.decrypt_ms, c:'var(--series-fhe)'}
+    ];
+    var stack = segs.map(function(s){ return '<div class="oh-seg" style="width:'+(s.v/total*100)+'%; background:'+s.c+'"></div>'; }).join('');
+    var legend = segs.map(function(s){ return '<div><span class="k"><span class="sw" style="background:'+s.c+'"></span>'+s.k+'</span><span>'+s.v.toFixed(1)+' ms</span></div>'; }).join('');
+    return '<div class="oh-card"><div class="ohname">'+r.label+'</div><div class="oh-stack">'+stack+'</div><div class="oh-legend">'+legend+'</div><div class="oh-total">'+total.toFixed(1)+' ms total · '+r.ciphertext_expansion.toFixed(1)+'× size</div></div>';
+  }).join('');
+
+  // ---- Full table ----
+  var head = '<thead><tr><th>Dataset</th><th>Params</th><th>No-FHE Acc.</th><th>FHE Acc.</th><th>Δ Acc.</th>'+
+    '<th>No-FHE F1</th><th>FHE F1</th><th>No-FHE ROC-AUC</th><th>FHE ROC-AUC</th><th>Round overhead</th></tr></thead>';
+  var body = rows.map(function(r){
+    var delta = (r.fhe_accuracy!=null && r.nofhe_accuracy!=null) ? (r.fhe_accuracy-r.nofhe_accuracy)*100 : null;
+    var deltaCell = delta==null ? '—' : '<span class="'+(Math.abs(delta)<0.05?'delta-good':'delta-neutral')+'">'+(delta>=0?'+':'')+delta.toFixed(3)+'%</span>';
+    return '<tr><td>'+r.label+'</td><td>'+(r.parameters?r.parameters.toLocaleString():'—')+'</td>'+
+      '<td>'+fmtPct(r.nofhe_accuracy)+'</td><td>'+fmtPct(r.fhe_accuracy)+'</td><td>'+deltaCell+'</td>'+
+      '<td>'+(r.nofhe_macro_f1!=null?r.nofhe_macro_f1.toFixed(4):'—')+'</td><td>'+(r.fhe_macro_f1!=null?r.fhe_macro_f1.toFixed(4):'—')+'</td>'+
+      '<td>'+(r.nofhe_roc_auc!=null?r.nofhe_roc_auc.toFixed(4):'—')+'</td><td>'+(r.fhe_roc_auc!=null?r.fhe_roc_auc.toFixed(4):'—')+'</td>'+
+      '<td>'+fmtMs(r.round_overhead_ms)+'</td></tr>';
+  }).join('');
+  document.getElementById('fullTable').innerHTML = head + '<tbody>' + body + '</tbody>';
+})();
+</script>

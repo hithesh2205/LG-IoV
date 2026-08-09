@@ -1,0 +1,124 @@
+{
+  "n_parameters": 44164,
+  "plaintext_bytes": 176656,
+  "slot_count": 4096,
+  "active_clients": 7,
+  "max_safe_level_drop": 1,
+  "lever1_level_drop": [
+    {
+      "levels_dropped": 0,
+      "bytes_per_client": 3678034,
+      "megabytes": 3.5076465606689453,
+      "saving_pct": 0.0,
+      "distance_max_err": 8.939846566136112e-06,
+      "aggregation_max_err": 2.918939547708055e-08,
+      "status": "ok",
+      "within_safe_bound": true,
+      "round_seconds": 2.020451900003536
+    },
+    {
+      "levels_dropped": 1,
+      "bytes_per_client": 2588963,
+      "megabytes": 2.469027519226074,
+      "saving_pct": 29.610139547377756,
+      "distance_max_err": 9.933500189163169e-05,
+      "aggregation_max_err": 9.565800114519352e-08,
+      "status": "ok",
+      "within_safe_bound": true,
+      "round_seconds": 1.3001128000032622
+    },
+    {
+      "levels_dropped": 2,
+      "bytes_per_client": 1443387,
+      "megabytes": 1.376521110534668,
+      "saving_pct": 60.756561793610395,
+      "distance_max_err": NaN,
+      "aggregation_max_err": NaN,
+      "status": "distance failed: ValueError",
+      "within_safe_bound": false,
+      "round_seconds": 0.3768555000060587
+    }
+  ],
+  "lever2_padding": {
+    "padded_slots": 45056,
+    "wasted_slots": 892,
+    "padding_pct": 1.9797585227272727
+  },
+  "lever3_sparsification": [
+    {
+      "keep_fraction": 1.0,
+      "n_chunks": 11,
+      "bytes": 2588586,
+      "index_overhead_bytes": 0,
+      "relative_reconstruction_error": 0.0
+    },
+    {
+      "keep_fraction": 0.5,
+      "n_chunks": 6,
+      "bytes": 1500284,
+      "index_overhead_bytes": 88328,
+      "relative_reconstruction_error": 0.2640516741379037
+    },
+    {
+      "keep_fraction": 0.25,
+      "n_chunks": 3,
+      "bytes": 750142,
+      "index_overhead_bytes": 44164,
+      "relative_reconstruction_error": 0.5241468394468695
+    },
+    {
+      "keep_fraction": 0.1,
+      "n_chunks": 2,
+      "bytes": 488316,
+      "index_overhead_bytes": 17664,
+      "relative_reconstruction_error": 0.7486541927874653
+    }
+  ],
+  "combined": [
+    {
+      "name": "baseline (Month 4: no drop, dense)",
+      "n_chunks": 11,
+      "bytes": 3678444,
+      "megabytes": 3.508037567138672,
+      "expansion": 20.822638347975726,
+      "padding_pct": 1.9797585227272727,
+      "saving_pct": 0.0,
+      "lossy": false
+    },
+    {
+      "name": "level-dropped (Month 5 default)",
+      "n_chunks": 11,
+      "bytes": 2588586,
+      "megabytes": 2.468667984008789,
+      "expansion": 14.653258309935694,
+      "padding_pct": 1.9797585227272727,
+      "saving_pct": 29.628234112032146,
+      "lossy": false
+    },
+    {
+      "name": "level-dropped + top-50% (lossy)",
+      "n_chunks": 6,
+      "bytes": 1500284,
+      "megabytes": 1.4307823181152344,
+      "expansion": 8.492686350874015,
+      "padding_pct": 10.148111979166668,
+      "saving_pct": 59.21416772961611,
+      "lossy": true
+    },
+    {
+      "name": "level-dropped + top-25% (lossy)",
+      "n_chunks": 3,
+      "bytes": 750142,
+      "megabytes": 0.7153911590576172,
+      "expansion": 4.246343175437008,
+      "padding_pct": 10.148111979166668,
+      "saving_pct": 79.60708386480806,
+      "lossy": true
+    }
+  ],
+  "lever4_seed_compression": {
+    "available": false,
+    "reason": "TenSEAL exposes no Serializable<Ciphertext>; SEAL and OpenFHE do. Would send c0 plus a 32-byte seed instead of (c0, c1).",
+    "theoretical_saving_pct": 50.0
+  }
+}

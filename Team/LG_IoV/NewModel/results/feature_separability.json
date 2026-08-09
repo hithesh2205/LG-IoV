@@ -1,0 +1,54 @@
+[
+  {
+    "dataset": "can_vtc",
+    "n_samples": 24808,
+    "n_classes": 2,
+    "attack_share": 0.5,
+    "majority_baseline": 0.5,
+    "max_separation_sigma": 13.167449951171875,
+    "mean_separation_sigma": 3.149005174636841,
+    "best_single_feature_accuracy": 1.0,
+    "best_single_feature_index": 19,
+    "lift_over_baseline": 0.5,
+    "verdict": "SUSPICIOUS - one feature nearly solves it; check for leakage"
+  },
+  {
+    "dataset": "car_hack",
+    "n_samples": 61078,
+    "n_classes": 5,
+    "attack_share": 0.40548151543927435,
+    "majority_baseline": 0.5945184845607256,
+    "max_separation_sigma": 3.664705514907837,
+    "mean_separation_sigma": 0.8560951948165894,
+    "best_single_feature_accuracy": 0.9347391859589378,
+    "best_single_feature_index": 36,
+    "lift_over_baseline": 0.34022070139821214,
+    "verdict": "OK - real but non-trivial signal"
+  },
+  {
+    "dataset": "cicids",
+    "n_samples": 799427,
+    "n_classes": 2,
+    "attack_share": 0.14988235323550492,
+    "majority_baseline": 0.8501176467644951,
+    "max_separation_sigma": 1.136075735092163,
+    "mean_separation_sigma": 0.3572176992893219,
+    "best_single_feature_accuracy": 0.9056536744443208,
+    "best_single_feature_index": 9,
+    "lift_over_baseline": 0.055536027679825684,
+    "verdict": "OK - real but non-trivial signal"
+  },
+  {
+    "dataset": "veremi",
+    "n_samples": 200000,
+    "n_classes": 2,
+    "attack_share": 0.453395,
+    "majority_baseline": 0.546605,
+    "max_separation_sigma": 0.04623567685484886,
+    "mean_separation_sigma": 0.011034798808395863,
+    "best_single_feature_accuracy": 0.545315,
+    "best_single_feature_index": 20,
+    "lift_over_baseline": -0.0012900000000000134,
+    "verdict": "WEAK - features barely separate the classes; check the formulation"
+  }
+]

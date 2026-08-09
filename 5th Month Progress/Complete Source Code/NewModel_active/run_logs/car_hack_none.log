@@ -1,0 +1,290 @@
+[helpers] Random seed fixed at: 2025
+
+[init] device=cpu dataset=car_hack backend=none seed=2025
+[preprocess] Loading raw data for 'car_hack' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[car_hack] cleaned_normal_run_data.csv: msgs=600,000 injected=0 (0.0%) malformed_dropped=0 â†’ windows=37,218 (attack=0, normal=37,218)
+[car_hack] cleaned_DoS_dataset.csv: msgs=595,375 injected=128,469 (21.6%) malformed_dropped=4,625 â†’ windows=36,928 (attack=14,810, normal=22,118)
+[car_hack] cleaned_Fuzzy_dataset.csv: msgs=569,748 injected=103,326 (18.1%) malformed_dropped=30,252 â†’ windows=35,339 (attack=16,771, normal=18,568)
+[car_hack] cleaned_RPM_dataset.csv: msgs=594,980 injected=104,503 (17.6%) malformed_dropped=5,020 â†’ windows=36,907 (attack=20,413, normal=16,494)
+[car_hack] cleaned_gear_dataset.csv: msgs=594,817 injected=105,402 (17.7%) malformed_dropped=5,183 â†’ windows=36,897 (attack=20,681, normal=16,216)
+[preprocess] blocks: total=464 train=326 val=69 test=69
+[preprocess] car_hack split sizes: train=128541, val=27379, test=27369
+[preprocess] Classes: ('normal', 'DoS', 'Fuzzy', 'RPM', 'gear')
+[preprocess] Class counts (train): [78395.0, 10069.0, 11326.0, 14230.0, 14521.0]
+[preprocess] Class weights: [0.32793164253234863, 2.5532028675079346, 2.269839286804199, 1.8066197633743286, 1.7704153060913086]
+[server] global model: 44,549 parameters, backend=none, disclosure=practical
+[init] 10 vehicles registered over ECDH+AES-256-GCM channels (mutual Ed25519 auth)
+
+--- round 01/05 | active 7/10 [1, 2, 4, 5, 6, 7, 8] ---
+  vehicle-0002: trained on 48,028 samples
+  vehicle-0005: trained on 6,532 samples
+  vehicle-0001: trained on 9,225 samples
+  vehicle-0004: trained on 1,956 samples
+  vehicle-0006: trained on 12,051 samples
+  vehicle-0007: trained on 16,447 samples
+  vehicle-0008: trained on 15,751 samples
+round 01 | loss 0.0403 | acc 0.9975 | 14.8s | p^u [0.108, 0.151, 0.152, 0.158, 0.145, 0.142, 0.143]
+
+--- round 02/05 | active 7/10 [1, 2, 5, 6, 7, 8, 9] ---
+  vehicle-0002: trained on 48,028 samples
+  vehicle-0006: trained on 12,051 samples
+  vehicle-0007: trained on 16,447 samples
+  vehicle-0009: trained on 12,798 samples
+  vehicle-0008: trained on 15,751 samples
+  vehicle-0005: trained on 6,532 samples
+  vehicle-0001: trained on 9,225 samples
+round 02 | loss 0.0250 | acc 0.9978 | 13.0s | p^u [0.106, 0.146, 0.14, 0.153, 0.142, 0.155, 0.159]
+
+--- round 03/05 | active 7/10 [0, 1, 2, 3, 5, 6, 9] ---
+  vehicle-0000: trained on 1,020 samples
+  vehicle-0006: trained on 12,051 samples
+  vehicle-0009: trained on 12,798 samples
+  vehicle-0005: trained on 6,532 samples
+  vehicle-0002: trained on 48,028 samples
+  vehicle-0003: trained on 4,733 samples
+  vehicle-0001: trained on 9,225 samples
+round 03 | loss 0.0208 | acc 0.9974 | 11.9s | p^u [0.162, 0.148, 0.147, 0.153, 0.079, 0.156, 0.154]
+
+--- round 04/05 | active 7/10 [0, 1, 4, 5, 6, 7, 8] ---
+  vehicle-0004: trained on 1,956 samples
+  vehicle-0007: trained on 16,447 samples
+  vehicle-0005: trained on 6,532 samples
+  vehicle-0000: trained on 1,020 samples
+  vehicle-0001: trained on 9,225 samples
+  vehicle-0008: trained on 15,751 samples
+  vehicle-0006: trained on 12,051 samples
+round 04 | loss 0.0154 | acc 0.9977 | 5.9s | p^u [0.157, 0.122, 0.149, 0.161, 0.154, 0.127, 0.13]
+
+--- round 05/05 | active 7/10 [1, 3, 4, 5, 7, 8, 9] ---
+  vehicle-0004: trained on 1,956 samples
+  vehicle-0001: trained on 9,225 samples
+  vehicle-0005: trained on 6,532 samples
+  vehicle-0007: trained on 16,447 samples
+  vehicle-0003: trained on 4,733 samples
+  vehicle-0008: trained on 15,751 samples
+  vehicle-0009: trained on 12,798 samples
+round 05 | loss 0.0148 | acc 0.9973 | 7.1s | p^u [0.159, 0.153, 0.146, 0.122, 0.155, 0.132, 0.132]
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.9973
+Macro F1:  0.9970
+Precision: 0.9965
+Recall:    0.9976
+ROC-AUC:   0.9999
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+normal                    | 0.9984     | 0.9970     | 0.9977     | 16114   
+DoS                       | 0.9980     | 0.9966     | 0.9973     | 2036    
+Fuzzy                     | 0.9996     | 0.9978     | 0.9987     | 2703    
+RPM                       | 0.9957     | 0.9974     | 0.9966     | 3520    
+gear                      | 0.9907     | 0.9990     | 0.9948     | 2996    
+
+Confusion Matrix:
+[[16066     4     1    15    28]
+ [    7  2029     0     0     0]
+ [    6     0  2697     0     0]
+ [    9     0     0  3511     0]
+ [    3     0     0     0  2993]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_car_hack_none_s2025.pt
+[helpers] Random seed fixed at: 2026
+
+[init] device=cpu dataset=car_hack backend=none seed=2026
+[preprocess] Loading raw data for 'car_hack' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[car_hack] cleaned_normal_run_data.csv: msgs=600,000 injected=0 (0.0%) malformed_dropped=0 â†’ windows=37,218 (attack=0, normal=37,218)
+[car_hack] cleaned_DoS_dataset.csv: msgs=595,375 injected=128,469 (21.6%) malformed_dropped=4,625 â†’ windows=36,928 (attack=14,810, normal=22,118)
+[car_hack] cleaned_Fuzzy_dataset.csv: msgs=569,748 injected=103,326 (18.1%) malformed_dropped=30,252 â†’ windows=35,339 (attack=16,771, normal=18,568)
+[car_hack] cleaned_RPM_dataset.csv: msgs=594,980 injected=104,503 (17.6%) malformed_dropped=5,020 â†’ windows=36,907 (attack=20,413, normal=16,494)
+[car_hack] cleaned_gear_dataset.csv: msgs=594,817 injected=105,402 (17.7%) malformed_dropped=5,183 â†’ windows=36,897 (attack=20,681, normal=16,216)
+[preprocess] blocks: total=464 train=326 val=69 test=69
+[preprocess] car_hack split sizes: train=129007, val=27379, test=26903
+[preprocess] Classes: ('normal', 'DoS', 'Fuzzy', 'RPM', 'gear')
+[preprocess] Class counts (train): [76913.0, 10106.0, 12391.0, 14896.0, 14701.0]
+[preprocess] Class weights: [0.33546215295791626, 2.553077459335327, 2.0822694301605225, 1.732102632522583, 1.755077838897705]
+[server] global model: 44,549 parameters, backend=none, disclosure=practical
+[init] 10 vehicles registered over ECDH+AES-256-GCM channels (mutual Ed25519 auth)
+
+--- round 01/05 | active 7/10 [0, 2, 3, 4, 5, 8, 9] ---
+  vehicle-0003: trained on 697 samples
+  vehicle-0002: trained on 465 samples
+  vehicle-0009: trained on 6,003 samples
+  vehicle-0008: trained on 5,823 samples
+  vehicle-0000: trained on 22,007 samples
+  vehicle-0004: trained on 17,371 samples
+  vehicle-0005: trained on 12,008 samples
+round 01 | loss 0.0757 | acc 0.9982 | 9.3s | p^u [0.161, 0.163, 0.148, 0.145, 0.128, 0.126, 0.129]
+
+--- round 02/05 | active 7/10 [0, 1, 2, 3, 4, 5, 6] ---
+  vehicle-0001: trained on 49,581 samples
+  vehicle-0002: trained on 465 samples
+  vehicle-0003: trained on 697 samples
+  vehicle-0005: trained on 12,008 samples
+  vehicle-0006: trained on 8,752 samples
+  vehicle-0000: trained on 22,007 samples
+  vehicle-0004: trained on 17,371 samples
+round 02 | loss 0.0174 | acc 0.9985 | 13.1s | p^u [0.099, 0.165, 0.164, 0.142, 0.153, 0.139, 0.137]
+
+--- round 03/05 | active 7/10 [0, 2, 3, 5, 6, 7, 9] ---
+  vehicle-0005: trained on 12,008 samples
+  vehicle-0007: trained on 6,300 samples
+  vehicle-0009: trained on 6,003 samples
+  vehicle-0002: trained on 465 samples
+  vehicle-0003: trained on 697 samples
+  vehicle-0000: trained on 22,007 samples
+  vehicle-0006: trained on 8,752 samples
+round 03 | loss 0.0077 | acc 0.9991 | 5.5s | p^u [0.131, 0.146, 0.151, 0.164, 0.163, 0.099, 0.145]
+
+--- round 04/05 | active 7/10 [0, 2, 3, 4, 6, 7, 9] ---
+  vehicle-0006: trained on 8,752 samples
+  vehicle-0009: trained on 6,003 samples
+  vehicle-0007: trained on 6,300 samples
+  vehicle-0004: trained on 17,371 samples
+  vehicle-0003: trained on 697 samples
+  vehicle-0000: trained on 22,007 samples
+  vehicle-0002: trained on 465 samples
+round 04 | loss 0.0092 | acc 0.9992 | 5.5s | p^u [0.144, 0.147, 0.151, 0.117, 0.163, 0.114, 0.164]
+
+--- round 05/05 | active 7/10 [0, 2, 3, 4, 6, 7, 9] ---
+  vehicle-0000: trained on 22,007 samples
+  vehicle-0007: trained on 6,300 samples
+  vehicle-0009: trained on 6,003 samples
+  vehicle-0006: trained on 8,752 samples
+  vehicle-0004: trained on 17,371 samples
+  vehicle-0003: trained on 697 samples
+  vehicle-0002: trained on 465 samples
+round 05 | loss 0.0070 | acc 0.9988 | 5.6s | p^u [0.086, 0.156, 0.156, 0.144, 0.13, 0.163, 0.165]
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.9988
+Macro F1:  0.9983
+Precision: 0.9980
+Recall:    0.9985
+ROC-AUC:   0.9999
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+normal                    | 0.9991     | 0.9990     | 0.9991     | 17256   
+DoS                       | 0.9929     | 0.9978     | 0.9953     | 1810    
+Fuzzy                     | 0.9995     | 0.9995     | 0.9995     | 1976    
+RPM                       | 1.0000     | 0.9976     | 0.9988     | 2881    
+gear                      | 0.9987     | 0.9987     | 0.9987     | 2980    
+
+Confusion Matrix:
+[[17239    13     1     0     3]
+ [    4  1806     0     0     0]
+ [    1     0  1975     0     0]
+ [    6     0     0  2874     1]
+ [    4     0     0     0  2976]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_car_hack_none_s2026.pt
+[helpers] Random seed fixed at: 2027
+
+[init] device=cpu dataset=car_hack backend=none seed=2027
+[preprocess] Loading raw data for 'car_hack' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[car_hack] cleaned_normal_run_data.csv: msgs=600,000 injected=0 (0.0%) malformed_dropped=0 â†’ windows=37,218 (attack=0, normal=37,218)
+[car_hack] cleaned_DoS_dataset.csv: msgs=595,375 injected=128,469 (21.6%) malformed_dropped=4,625 â†’ windows=36,928 (attack=14,810, normal=22,118)
+[car_hack] cleaned_Fuzzy_dataset.csv: msgs=569,748 injected=103,326 (18.1%) malformed_dropped=30,252 â†’ windows=35,339 (attack=16,771, normal=18,568)
+[car_hack] cleaned_RPM_dataset.csv: msgs=594,980 injected=104,503 (17.6%) malformed_dropped=5,020 â†’ windows=36,907 (attack=20,413, normal=16,494)
+[car_hack] cleaned_gear_dataset.csv: msgs=594,817 injected=105,402 (17.7%) malformed_dropped=5,183 â†’ windows=36,897 (attack=20,681, normal=16,216)
+[preprocess] blocks: total=464 train=326 val=69 test=69
+[preprocess] car_hack split sizes: train=128617, val=27279, test=27393
+[preprocess] Classes: ('normal', 'DoS', 'Fuzzy', 'RPM', 'gear')
+[preprocess] Class counts (train): [77020.0, 10719.0, 11535.0, 14521.0, 14822.0]
+[preprocess] Class weights: [0.3339833915233612, 2.399794816970825, 2.2300302982330322, 1.7714619636535645, 1.7354878187179565]
+[server] global model: 44,549 parameters, backend=none, disclosure=practical
+[init] 10 vehicles registered over ECDH+AES-256-GCM channels (mutual Ed25519 auth)
+
+--- round 01/05 | active 7/10 [0, 2, 4, 5, 6, 7, 8] ---
+  vehicle-0002: trained on 3,970 samples
+  vehicle-0000: trained on 925 samples
+  vehicle-0004: trained on 22,928 samples
+  vehicle-0007: trained on 3,804 samples
+  vehicle-0005: trained on 6,641 samples
+  vehicle-0008: trained on 21,898 samples
+  vehicle-0006: trained on 8,819 samples
+round 01 | loss 0.0911 | acc 0.9970 | 6.3s | p^u [0.148, 0.159, 0.123, 0.15, 0.152, 0.123, 0.144]
+
+--- round 02/05 | active 7/10 [0, 1, 3, 4, 6, 8, 9] ---
+  vehicle-0009: trained on 22,136 samples
+  vehicle-0006: trained on 8,819 samples
+  vehicle-0004: trained on 22,928 samples
+  vehicle-0000: trained on 925 samples
+  vehicle-0003: trained on 22,015 samples
+  vehicle-0001: trained on 15,481 samples
+  vehicle-0008: trained on 21,898 samples
+round 02 | loss 0.0202 | acc 0.9979 | 10.4s | p^u [0.136, 0.15, 0.129, 0.164, 0.147, 0.14, 0.135]
+
+--- round 03/05 | active 7/10 [0, 2, 3, 5, 6, 7, 8] ---
+  vehicle-0003: trained on 22,015 samples
+  vehicle-0005: trained on 6,641 samples
+  vehicle-0000: trained on 925 samples
+  vehicle-0007: trained on 3,804 samples
+  vehicle-0002: trained on 3,970 samples
+  vehicle-0006: trained on 8,819 samples
+  vehicle-0008: trained on 21,898 samples
+round 03 | loss 0.0159 | acc 0.9980 | 6.3s | p^u [0.091, 0.156, 0.163, 0.157, 0.156, 0.149, 0.128]
+
+--- round 04/05 | active 7/10 [0, 1, 2, 4, 5, 6, 7] ---
+  vehicle-0000: trained on 925 samples
+  vehicle-0001: trained on 15,481 samples
+  vehicle-0005: trained on 6,641 samples
+  vehicle-0006: trained on 8,819 samples
+  vehicle-0004: trained on 22,928 samples
+  vehicle-0007: trained on 3,804 samples
+  vehicle-0002: trained on 3,970 samples
+round 04 | loss 0.0104 | acc 0.9974 | 6.0s | p^u [0.163, 0.135, 0.143, 0.149, 0.099, 0.157, 0.155]
+
+--- round 05/05 | active 7/10 [0, 2, 4, 6, 7, 8, 9] ---
+  vehicle-0009: trained on 22,136 samples
+  vehicle-0004: trained on 22,928 samples
+  vehicle-0008: trained on 21,898 samples
+  vehicle-0002: trained on 3,970 samples
+  vehicle-0006: trained on 8,819 samples
+  vehicle-0007: trained on 3,804 samples
+  vehicle-0000: trained on 925 samples
+round 05 | loss 0.0150 | acc 0.9982 | 7.8s | p^u [0.122, 0.124, 0.121, 0.157, 0.154, 0.158, 0.164]
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.9982
+Macro F1:  0.9979
+Precision: 0.9983
+Recall:    0.9975
+ROC-AUC:   1.0000
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+normal                    | 0.9980     | 0.9989     | 0.9985     | 16367   
+DoS                       | 0.9976     | 0.9980     | 0.9978     | 2453    
+Fuzzy                     | 1.0000     | 0.9966     | 0.9983     | 2367    
+RPM                       | 0.9987     | 0.9965     | 0.9976     | 3152    
+gear                      | 0.9974     | 0.9974     | 0.9974     | 3054    
+
+Confusion Matrix:
+[[16349     6     0     4     8]
+ [    5  2448     0     0     0]
+ [    8     0  2359     0     0]
+ [   11     0     0  3141     0]
+ [    8     0     0     0  3046]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_car_hack_none_s2027.pt
+
+==================================================================
+car_hack / none over 3 seed(s)
+  accuracy  0.9981 +/- 0.0006
+  macro F1  0.9977 +/- 0.0005
+  ROC-AUC   0.9999 +/- 0.0000
+  audit     {'rounds': 5, 'individual_update_decryptions': 0, 'aggregate_decryptions': 5, 'distance_scalars_revealed': 35}
+  saved     C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\results\federated_car_hack_none.json
+==================================================================
+
+---STDERR---

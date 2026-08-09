@@ -1,0 +1,55 @@
+# ChebyshevKAN — model, data and training configuration
+#
+# NOTE: this file previously carried the header "MamKANformer Hyperparameter
+# Configuration". The MamKANformer trunk was superseded by ChebyshevKAN in
+# Month 4 and is retained only as an archived branch under models/. Nothing in
+# the federated path reads MamKANformer settings.
+
+model:
+  hidden_dim: 64         # hidden dimension of KAN layers
+  num_layers: 2          # number of Chebyshev KAN layers stacked
+  degree: 4              # degree of Chebyshev polynomials
+  dropout: 0.2           # dropout rate
+
+data:
+  window: 64             # sliding window size (CAN adapters)
+  stride: 16             # stride of sliding window -> 75% overlap
+  n_features: 46         # preprocessed input features (all adapters)
+  clip_low: 0.005        # lower percentile clip, fitted on train only
+  clip_high: 0.995       # upper percentile clip, fitted on train only
+  # Windows never cross a block boundary, and whole blocks are assigned to one
+  # split. See data/can_features.py and data/preprocess.py (defect D2).
+  block_size_messages: 6400   # CAN adapters
+  block_rows_veremi: 50000
+  block_rows_cicids: 20000
+
+train:
+  seed: 2025             # random seed for reproducibility
+  batch_size: 96         # training batch size
+  epochs: 30             # maximum epochs
+  lr: 0.0005             # learning rate
+  weight_decay: 0.0005   # weight decay
+  optimizer: "adamw"     # optimizer (adamw, sgd, rmsprop, nadam)
+  val_split: 0.15        # validation split ratio
+  test_split: 0.15       # testing split ratio
+  early_stopping_patience: 5 # early stopping patience
+  num_workers: 0         # dataloader workers
+  device: "cuda"         # preferred training device (cuda, cpu)
+
+federated:
+  clients: 10            # N — vehicles in the simulated fleet
+  rounds: 5              # R — federated rounds
+  local_epochs: 2        # E — local epochs per round
+  alpha: 0.3             # Dirichlet concentration for non-IID sharding
+  sampling_rate: 0.7     # q — fraction of vehicles active per round
+  backend: "ckks"        # ckks | exact | none
+  disclosure: "practical" # practical | strict  (see Documentation/09)
+  noise_flooding_bits: 0  # IND-CPA^D smudging; MUST be > 0 for deployment
+
+crypto:
+  # Profile A (practical, default): 128-bit security, 2 multiplicative levels.
+  poly_modulus_degree: 8192
+  coeff_mod_bit_sizes: "[60, 40, 40, 60]"
+  global_scale_bits: 40
+  # Profile B (strict) needs a 2nd ct-ct multiply -> N=16384, [60,40,40,40,60].
+  # Measured cost: 2.56x ciphertext size, 3.76x distance time.

@@ -1,0 +1,190 @@
+{
+  "phase": 1,
+  "paper": "Heidari et al., FedIoV (FGCS 2026)",
+  "dataset": "veremi",
+  "smoke": true,
+  "seed": 2025,
+  "wall_clock_seconds": 10.7,
+  "split": {
+    "ratio_train_val_test": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "stratified": true,
+    "n_train": 43747,
+    "n_val": 9375,
+    "n_test": 9375,
+    "classes": [
+      "BENIGN",
+      "ATTACK"
+    ]
+  },
+  "non_iid_partition": {
+    "method": "Dirichlet",
+    "alpha": 0.3,
+    "n_clients": 50,
+    "n_classes": 2,
+    "seed": 2025,
+    "samples_per_client": {
+      "min": 2,
+      "max": 5232,
+      "mean": 874.94,
+      "median": 434.0,
+      "std": 1108.1557545760434
+    },
+    "class_entropy_bits_per_client": {
+      "min": -0.0,
+      "max": 0.9996437496778561,
+      "mean": 0.39177049211602943
+    },
+    "max_possible_entropy_bits": 1.0,
+    "sample_class_counts_first_5_clients": [
+      [
+        67,
+        87
+      ],
+      [
+        532,
+        885
+      ],
+      [
+        464,
+        0
+      ],
+      [
+        70,
+        273
+      ],
+      [
+        268,
+        117
+      ]
+    ],
+    "elapsed_seconds": 0.003
+  },
+  "global_model": {
+    "architecture": "KANConvNet",
+    "in_features": 46,
+    "n_classes": 2,
+    "layer_size": 128,
+    "dropout": 0.45,
+    "fourier_modes": 8,
+    "use_conv_backbone": false,
+    "param_count": 145410,
+    "pretrained_path": null,
+    "pretrained_loaded": false,
+    "init_elapsed_seconds": 0.049
+  },
+  "secure_channels": {
+    "kex": "ECDH-P256",
+    "auth": "Ed25519 mutual auth on ephemeral pubkeys",
+    "aead": "AES-256-GCM",
+    "kdf": "HKDF-SHA256 (info='FedIoV/v1/aes-256-gcm')",
+    "n_clients": 50,
+    "handshake_elapsed_seconds": 0.039,
+    "handshake_per_client_ms": 0.773,
+    "probe_round_trip_ok": true,
+    "server_identity_fp": "d4d24dbbe4468843",
+    "client0_identity_fp": "260fcb604e2c00c3",
+    "client0_aes_key_fp": "ad161ba6ed7e609f"
+  },
+  "ga": {
+    "population_size": 50,
+    "generations": 20,
+    "crossover_prob": 0.85,
+    "mutation_prob": 0.06,
+    "elitism": 2,
+    "seed": 2025,
+    "search_space_size": {
+      "batch_size": 5,
+      "epochs": 5,
+      "momentum": 5,
+      "l2": 4,
+      "personalization": 5,
+      "optimizer": 5,
+      "dropout": 6
+    },
+    "total_search_space_combinations": 75000,
+    "sample_individuals_first_5": [
+      {
+        "batch_size": 48,
+        "epochs": 60,
+        "momentum": 0.998,
+        "l2": 0.0005,
+        "personalization": 0.95,
+        "optimizer": "adadelta",
+        "dropout": 0.3
+      },
+      {
+        "batch_size": 192,
+        "epochs": 30,
+        "momentum": 0.998,
+        "l2": 0.0005,
+        "personalization": 0.15,
+        "optimizer": "sgd",
+        "dropout": 0.2
+      },
+      {
+        "batch_size": 48,
+        "epochs": 60,
+        "momentum": 0.998,
+        "l2": 0.005,
+        "personalization": 0.75,
+        "optimizer": "adamw",
+        "dropout": 0.1
+      },
+      {
+        "batch_size": 24,
+        "epochs": 15,
+        "momentum": 0.6,
+        "l2": 0.05,
+        "personalization": 0.15,
+        "optimizer": "sgd",
+        "dropout": 0.1
+      },
+      {
+        "batch_size": 24,
+        "epochs": 60,
+        "momentum": 0.95,
+        "l2": 0.0005,
+        "personalization": 0.35,
+        "optimizer": "rmsprop",
+        "dropout": 0.45
+      }
+    ]
+  },
+  "downstream_constants": {
+    "local_epochs_per_round_E": 2,
+    "sampling_fraction_q": 0.6,
+    "rounds_R": 200,
+    "multi_krum_m": 5,
+    "client_dp_clip_C": 1.0,
+    "client_dp_sigma_grid": [
+      1.2,
+      1.6,
+      2.0
+    ],
+    "evaluation": {
+      "folds_k": 5,
+      "seeds_r": 3,
+      "runs": 15,
+      "stats": [
+        "Wilcoxon paired",
+        "Holm-Bonferroni",
+        "Cliff's delta",
+        "McNemar"
+      ]
+    }
+  },
+  "broadcast": {
+    "n_clients": 50,
+    "n_ok": 50,
+    "n_mismatched": 0,
+    "mismatched_client_ids": [],
+    "global_state_dict_sha256": "1ca7d79d40457dfc0602a3fb45b91af33d7094a34dca280e2ec9e3bad37ac967",
+    "bytes_per_client": 588513,
+    "param_count": 145410,
+    "elapsed_seconds": 0.332
+  }
+}

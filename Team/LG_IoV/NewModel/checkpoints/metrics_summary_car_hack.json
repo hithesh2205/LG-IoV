@@ -1,0 +1,8 @@
+{
+  "dataset": "car_hack",
+  "parameters": 609605,
+  "training_time_sec": 1.7126705646514893,
+  "accuracy": 0.8657142857142858,
+  "macro_f1": 0.8645090897051549,
+  "roc_auc": 0.9835765306122448
+}

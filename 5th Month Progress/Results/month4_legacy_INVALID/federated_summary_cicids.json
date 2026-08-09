@@ -1,0 +1,12 @@
+{
+  "dataset": "cicids",
+  "n_clients": 10,
+  "rounds": 3,
+  "local_epochs": 1,
+  "alpha": 0.3,
+  "parameters": 43394,
+  "training_time_sec": 18.836057424545288,
+  "test_accuracy": 0.9957735513291068,
+  "test_macro_f1": 0.4989411502452073,
+  "test_roc_auc": 0.8235805257867107
+}

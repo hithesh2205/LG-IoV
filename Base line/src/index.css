@@ -1,0 +1,204 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
+
+  --color-purple-400: #c084fc;
+  --color-purple-500: #a855f7;
+  --color-purple-600: #9333ea;
+
+  --color-dark-bg: #0f172a;
+  --color-dark-surface: #1e293b;
+  --color-dark-card: #334155;
+}
+
+/* ============ BASE ============ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+/* ============ REACT FLOW OVERRIDES ============ */
+.react-flow__node {
+  cursor: pointer !important;
+}
+
+.react-flow__minimap {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.react-flow__controls {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.react-flow__controls button {
+  border: none !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15) !important;
+}
+
+.react-flow__controls button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__background {
+  opacity: 0.4;
+}
+
+/* ============ GLASSMORPHISM ============ */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-dark {
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+/* ============ GLOW EFFECTS ============ */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3), 0 0 60px rgba(6, 182, 212, 0.1);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1);
+}
+
+/* ============ GRADIENT TEXT ============ */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============ ANIMATED ARROW EDGE ============ */
+.animated-edge-path {
+  stroke-dasharray: 8 4;
+  animation: flowDash 1.5s linear infinite;
+}
+
+@keyframes flowDash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+/* ============ PARTICLE ANIMATION ============ */
+@keyframes floatParticle {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-8px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0.8; }
+}
+
+.particle {
+  animation: floatParticle 2s ease-in-out infinite;
+}
+
+/* ============ DATA FLOW ANIMATION ============ */
+@keyframes dataFlow {
+  0% { transform: translateY(-10px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(10px); opacity: 0; }
+}
+
+.data-flow {
+  animation: dataFlow 2s ease-in-out infinite;
+}
+
+/* ============ PULSE ============ */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.2); }
+  50% { box-shadow: 0 0 24px rgba(59, 130, 246, 0.5), 0 0 48px rgba(6, 182, 212, 0.2); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ============ SCROLL IN MODULE POPUP ============ */
+.module-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.module-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.module-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.module-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+/* ============ DARK MODE ============ */
+.dark .glass {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.dark .react-flow__minimap {
+  background: rgba(15, 23, 42, 0.9) !important;
+}
+
+.dark .react-flow__controls button {
+  background: rgba(30, 41, 59, 0.9) !important;
+  color: #e2e8f0 !important;
+  fill: #e2e8f0 !important;
+}
+
+.dark .react-flow__controls button:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+}
+
+/* ============ SEARCH ============ */
+.search-highlight .react-flow__node {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.search-highlight .react-flow__node.matched {
+  opacity: 1;
+}

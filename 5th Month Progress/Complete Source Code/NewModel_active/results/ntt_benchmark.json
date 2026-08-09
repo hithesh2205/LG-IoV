@@ -1,0 +1,80 @@
+{
+  "host": {
+    "processor": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+    "machine": "AMD64",
+    "python": "3.12.0",
+    "numpy": "2.4.1"
+  },
+  "note": "Python/numpy reference. A C+NEON kernel removes interpreter overhead, so these speedups are a lower bound.",
+  "results": [
+    {
+      "n": 256,
+      "q": 1073738753,
+      "forward_sec": 5.650000093737617e-05,
+      "multiply_sec": 0.00016709999908925965,
+      "schoolbook_sec": 2.5500004994682968e-05,
+      "speedup_vs_schoolbook": 0.1526032623199576,
+      "theoretical_ratio_n2_over_nlogn": 32.0,
+      "butterflies": 1024
+    },
+    {
+      "n": 512,
+      "q": 1073738753,
+      "forward_sec": 7.510000432375818e-05,
+      "multiply_sec": 0.00022399999579647556,
+      "schoolbook_sec": 9.029999637277797e-05,
+      "speedup_vs_schoolbook": 0.4031249913719809,
+      "theoretical_ratio_n2_over_nlogn": 56.888888888888886,
+      "butterflies": 2304
+    },
+    {
+      "n": 1024,
+      "q": 1073707009,
+      "forward_sec": 0.00012159999459981918,
+      "multiply_sec": 0.00032810000266181305,
+      "schoolbook_sec": 0.0003469000002951361,
+      "speedup_vs_schoolbook": 1.0572995961011955,
+      "theoretical_ratio_n2_over_nlogn": 102.4,
+      "butterflies": 5120
+    },
+    {
+      "n": 2048,
+      "q": 1073692673,
+      "forward_sec": 0.00017970000044442713,
+      "multiply_sec": 0.0005726000017602928,
+      "schoolbook_sec": 0.0013602999970316887,
+      "speedup_vs_schoolbook": 2.375654894952568,
+      "theoretical_ratio_n2_over_nlogn": 186.1818181818182,
+      "butterflies": 11264
+    },
+    {
+      "n": 4096,
+      "q": 1073692673,
+      "forward_sec": 0.00032780000037746504,
+      "multiply_sec": 0.001076100001228042,
+      "schoolbook_sec": 0.005712600002880208,
+      "speedup_vs_schoolbook": 5.308614437655429,
+      "theoretical_ratio_n2_over_nlogn": 341.3333333333333,
+      "butterflies": 24576
+    },
+    {
+      "n": 8192,
+      "q": 1073692673,
+      "forward_sec": 0.0006869999997434206,
+      "multiply_sec": 0.0020652999955927953,
+      "schoolbook_sec": 0.022887200000695884,
+      "speedup_vs_schoolbook": 11.081779910683947,
+      "theoretical_ratio_n2_over_nlogn": 630.1538461538462,
+      "butterflies": 53248
+    }
+  ],
+  "test_vectors": {
+    "path": "C:\\Users\\Thrish_Sudha\\Desktop\\Amrita Files\\LGSI IOV\\Team\\LG_IoV\\NewModel\\results\\ntt_test_vectors.json",
+    "sizes": [
+      256,
+      512,
+      1024
+    ],
+    "bytes": 79275
+  }
+}

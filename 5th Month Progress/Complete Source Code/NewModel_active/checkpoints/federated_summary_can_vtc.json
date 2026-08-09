@@ -1,0 +1,12 @@
+{
+  "dataset": "can_vtc",
+  "n_clients": 10,
+  "rounds": 3,
+  "local_epochs": 1,
+  "alpha": 0.3,
+  "parameters": 44164,
+  "training_time_sec": 3.954545259475708,
+  "test_accuracy": 0.9857142857142858,
+  "test_macro_f1": 0.9857492417976289,
+  "test_roc_auc": 0.9998341836734694
+}

@@ -1,0 +1,547 @@
+                                         Future Generation Computer Systems 181 (2026) 108448
+                                                 Contents lists available at ScienceDirect
+
+                                Future Generation Computer Systems
+
+                                        journal homepage: www.elsevier.com/locate/fgcs
+
+FedIoV: A secure and adaptive federated framework for real-time intrusion
+detection in vehicular networks
+
+Arash Heidari a,b,* , Seyed Hamed Rastegar c, Ahmad Khonsari a,b,*
+
+a School of Electrical and Computer Engineering, College of Engineering, University of Tehran, Tehran, Iran
+b School of Computer Science at the Institute for Research in Fundamental Sciences (IPM), Tehran, Iran
+c Department of Communications and Electronics, School of Electrical and Computer Engineering, Shiraz University, Shiraz, Iran
+
+ARTICLE INFO                    ABSTRACT
+
+Keywords:                       The Internet of Vehicles (IoV) ecosystem is rapidly expanding with connected vehicles, which has made the need
+Federated learning              for secure, scalable, and real-time Intrusion Detection Systems (IDS) even greater. Conventional methods
+Internet of vehicles            encounter significant obstacles in managing diverse vehicular data, fluctuating mobility patterns, and limited on-
+Intrusion detection             board resources, thereby undermining both privacy and dependability. To fill these deficiencies, we suggest
+KANConvNet                      FedIoV, a secure and adaptive Federated Learning (FL)-based IDS made for real-time vehicular contexts. The
+Robust aggregation              main idea is that FL, when combined with strong aggregation and lightweight modeling, may enable strong
+                                intrusion detection even when resources are constrained and the environment is hostile, all without giving up
+Index terms:                    data privacy. FedIoV includes: (i) secure initialization and encrypted communication between clients and
+Federated learning              servers; (ii) a two-stage aggregation pipeline that uses TOPSIS-based dimensionality reduction and Multi-Krum
+Internet of vehicles            clustering to remove noisy or malicious updates; (iii) KANConvNet, a lightweight and easy-to-understand clas
+Intrusion detection system      sifier based on the Kolmogorov­Arnold theorem that captures complex vehicular dynamics; and (iv) hyper
+Adversarial robustness          parameter optimization driven by a genetic algorithm for adaptive performance tuning across different clients.
+KANConvNet                      FedIoV is better than the best IDS algorithms on five benchmark IoV datasets: Car-Hacking, VeReMi, CICIDS
+Secure aggregation              2017, IEEE VTC­CAN, and CarNet. It raises the F1-score by 2 to 4 percentage points, lowers the cost of
+Real-time detection             communication per round by 50 to 70%, lowers the energy use per vehicle by up to 62%, and keeps the detection
+Genetic algorithm optimization  latency below 60 ms. FedIoV maintains 99% accuracy even with <50% Byzantine involvement. This is almost
+                                twice as strong as the existing FL or blockchain-assisted IDS frameworks. These results show that FedIoV is an
+                                effective approach to identify intrusions in IoV networks in real time, that is self-adaptive, protects privacy, and
+                                uses less energy.
+
+1. Introduction                                                           Denial-of-Service (DoS) attacks [3­6]. Such attacks compromise user
+                                                                          privacy and may result in severe failures in safety-critical operations [7].
+    The swift expansion of the Internet of Vehicles (IoV) is reshaping    Conventional Intrusion Detection Systems (IDS), primarily developed
+contemporary intelligent transportation systems through the facilitation  for centralized frameworks, face challenges in addressing the rigorous
+of real-time communication and collaboration among vehicles, infra        latency, privacy, and scalability demands of decentralized vehicular
+structure, and edge computing nodes [1]. Vehicle-to-Everything (V2X)      settings [8,9].
+technologies, including Dedicated Short-Range Communications
+(DSRC), Cellular Vehicle to Everything (C-V2X), and 5G-assisted V2N           Federated Learning (FL) represents an effective approach for
+communications, enable vehicles to exchange telemetry, contextual         decentralized model training, facilitating collaborative learning among
+awareness, and sensor data, thereby improving road safety, traffic flow,  distributed clients while eliminating the need for raw data exchange
+and autonomous decision-making [2]. This widespread connectivity          [10]. In vehicular contexts, FL enables in-vehicle units to locally train
+notably heightens the system's susceptibility to various cyber threats,   IDSs utilizing private data, transmitting only model updates to a central
+such as message falsification, replay attacks, data poisoning, and        server for aggregation [11­15]. This method inherently facilitates pri
+                                                                          vacy preservation and minimizes communication overhead [7].
+
+  * Corresponding authors.
+     E-mail addresses: arash_heidari@ieee.org, arash.heidari@ut.ac.ir (A. Heidari), h.rastegar@shirazu.ac.ir (S.H. Rastegar), a_khonsari@ut.ac.ir (A. Khonsari).
+
+https://doi.org/10.1016/j.future.2026.108448
+Received 19 July 2025; Received in revised form 14 February 2026; Accepted 21 February 2026
+Available online 23 February 2026
+0167-739X/© 2026 Elsevier B.V. All rights are reserved, including those for text and data mining, AI training, and similar technologies.
+A. Heidari et al.                                                                                                           Future Generation Computer Systems 181 (2026) 108448
+
+Practical deployment of FL in the IoV faces challenges due to non-IID          sequence: Section II presents a summary of the latest findings that are
+data distributions among clients, dynamic network topologies result            related to the study topic. The FedIoV model is elaborated in Section III.
+ing from vehicular mobility, constrained edge computing resources, and         Also, the FedIoV method will be provided in Section IV. The paper
+vulnerability to adversarial updates [16]. These factors impede model          presents the results of the FedIoV method and provides a comprehensive
+convergence, diminish detection performance, and undermine trust               comparison with existing approaches in Section V. Section VI provides
+worthiness [17]. Furthermore, current FL-based IDS solutions frequently        an overview and conclusion.
+depend on traditional aggregation methods such as FedAvg, which
+exhibit significant sensitivity to poisoned or noisy gradients and are not     2. Related work
+well-suited for heterogeneous vehicular environments [18].
+                                                                                   Focusing on security, scalability, and adaptability under resource-
+    Despite recent advancements, a significant gap persists in the             constrained and adversarial circumstances, this part surveys recent de
+development of FL-based IDS frameworks that are robust against                 velopments in intrusion detection for the IoV. Many smart models
+adversarial interference, adaptable to dynamic vehicular conditions,           spread across different architectural levels have been suggested to
+and sufficiently lightweight for real-time execution on resource-              identify sophisticated vehicle threats. In this regard, a fine tree-based
+constrained devices. Objectives. This work aims at:                            IDS trained on benchmark datasets was suggested by Tiwari, et al.
+                                                                               [19] to handle real-time anomaly detection. Across measures including
+ · Creating an FL-IDS framework for IoV that runs on in-vehicle units          precision, recall, and F1-score, their model produced almost perfect
+    with limited resources and keeps people's privacy safe;                    detection performance. Its reliance on centralized training, though,
+                                                                               might restrict scalability in dynamic IoV environments. Also, Sun, et al.
+ · Making it more stable when client data is not IID and when vehicles         [20] presented KG-ID, a knowledge graph-based method for identifying
+    are moving, changing, or using different types of sensors;                 several CAN-level attacks by modeling signal relationships, with an
+                                                                               emphasis on in-vehicle networks. Though cross-domain attack adapta
+ · Filtering out poisoned or noisy client updates during federated ag          tion is still a question, their lightweight design permitted high-speed
+    gregation can help reduce adversarial and Byzantine behaviors;             detection (0.031 ms latency) in actual cars. Moreover, Zhang, et al.
+                                                                               [21] suggested an IDS approach using GRIPCA for dimensionality
+ · Lowering the amount of communication and energy used per round              reduction and OWELM for classification to handle the data volume issue.
+    while keeping the end-to-end detection latency to less than a second;      Although the model's centralized optimization might be lacking under
+                                                                               real-time constraints in mobile vehicular environments, it showed good
+ · Allowing lightweight and understandable decisions about intrusion           accuracy across datasets. In addition, Mahendran, et al. [22] proposed a
+    detection to help with operational auditing and compliance with            dynamic anomaly prediction system using U-CRF-DDBN that efficiently
+    safety and security rules.                                                 forecasts attack effects and finds susceptible nodes. Though it beat
+                                                                               conventional models, it showed a clear decline in detection performance
+    In this regard, we propose FedIoV, a secure and adaptive FL frame          versus unknown attacks. Also, Sani, et al. [7] built BIDS, a
+work tailored for IDS in vehicular networks. FedIoV includes several           blockchain-enabled IDS, to stop harmful data injection in traffic control.
+significant innovations: (i) secure model initialization and encrypted         BIDS validated actions at every stage and monitored vehicle movement
+client-server communication to ensure data integrity; (ii) a hybrid ag         using unchangeable ledgers. Although it improved responsibility, its
+gregation mechanism that integrates TOPSIS-based dimensionality                performance declined with a rising proportion of hostile nodes. On the
+reduction with Multi-Krum robust clustering to mitigate poisoned up            other hand, Mei, et al. [9] suggested a BiTCN-based IDS that used ad
+dates; (iii) the development of KANConvNet, a computationally efficient        ditive feature fusion to improve detection by treating CAN data as
+and interpretable classifier based on the Kolmogorov­Arnold represen           sequential inputs. Although efficient, their model's dependence on
+tation theorem, aimed at identifying nonlinear patterns in vehicular           high-dimensional feature extraction could create difficulties for light
+telemetry; and (iv) a genetic algorithm-driven hyperparameter optimi           weight deployment. As well as Abbas, et al. [23] proposed an ML-based
+zation framework that facilitates adaptive configuration among het             method for distributed identity verification across edge servers in terms
+erogeneous clients. The components collectively enable FedIoV to               of privacy-preserving authentication. Though successful in lowering
+provide resilient, scalable, and privacy-preserving intrusion detection in     overhead, their approach called for trusted pre-distribution of creden
+real-world IoV environments. The main contributions of this work are           tials, which could restrict flexibility. Besides, Qin, et al. [24] developed
+summarized as follows:                                                         GPIDS using a GAN-based contextual model to identify both conven
+                                                                               tional and hidden attacks. Notably, it was the first to identify SOME
+ · Proposing a novel FL framework, FedIoV, tailored for real-time and          attacks, proving strong performance across actual cars. Moreover, Xie,
+    privacy-preserving intrusion detection in vehicular networks under         et al. [25] proposed IoV-BCFL, a FL and blockchain hybrid system for
+    non-IID and adversarial settings;                                          distributed IDS, by means of more integration of decentralized design.
+                                                                               Using RSA and IPFS, their model guarantees privacy, maximizes
+ · Designing a robust and secure aggregation pipeline that integrates          communication overhead, and safely records intrusion attempts. Finally,
+    TOPSIS-based dimensionality reduction and Multi-Krum clustering,           aiming at future 6G-IoV integration, [26] proposed an AI-enhanced
+    effectively filtering poisoned or inconsistent model updates from          digital twin system that distributes computational loads via stacked
+    compromised clients;                                                       sparse autoencoders and online learning. Though it has good detection
+                                                                               statistics and resource optimization, the complexity of the system may
+ · Introducing KANConvNet, a lightweight and interpretable deep                restrict real-time response in rapidly changing network conditions.
+    learning architecture based on the Kolmogorov­Arnold theorem,
+    suitable for deployment on resource-constrained in-vehicle units;              Even though there has been a lot of progress, recent FL-based IDS for
+                                                                               IoV and vehicular networks still have some problems. A lot of methods
+ · Implementing an end-to-end secure communication protocol be                 use traditional aggregation methods like FedAvg, which do not work
+    tween vehicles and the central server, ensuring encrypted, authen          well with non-IID data distributions and are open to poisoned or
+    ticated, and tamper-resistant model synchronization during                 Byzantine client updates. Some papers talk about using blockchain to
+    federated training rounds;                                                 help with coordination or deep generative models, which make trust or
+                                                                               detection more accurate but come with a lot of extra communication,
+ · Optimizing local training performance and global convergence using          energy use, and latency costs that make them too expensive to use in real
+    a genetic algorithm-based hyperparameter tuning strategy, enabling
+    adaptive learning across heterogeneous vehicular nodes;
+
+ · Evaluating the proposed framework on multiple real-world IoV
+    datasets, demonstrating superior detection accuracy, robustness to
+    adversarial updates, and computational efficiency compared to state-
+    of-the-art FL-based IDS methods;
+
+    The subsequent sections of this paper are organized in the following
+
+                                                                            2
+A. Heidari et al.                                                                                                               Future Generation Computer Systems 181 (2026) 108448
+
+time on in-vehicle units. Most current FL-based IDS frameworks also use            3. FedIoV model
+black-box deep models, which are hard to understand and make them
+less useful for operational auditing and safety/security compliance.                   This section talks about the proposed system. Also, Table 2 shows
+Finally, adaptive optimization across different types of vehicles is often         symbols and their definitions.
+not used, which makes convergence unstable and performance worse
+when mobility and client churn are real.                                           3.1. System architecture and initialization
+
+    FedIoV is made to fix these problems directly. FedIoV is different                  Involving model initialization, communication setup, and security
+from other FL-based IDS frameworks because it uses a two-stage robust
+aggregation pipeline (TOPSIS-based filtering followed by Multi-Krum                protocols to guarantee data privacy and integrity, the FL process begins
+clustering) to deal with adversarial and noisy updates in non-IID con
+ditions while cutting down on unnecessary communication. FedIoV, on                with configuring the central server and IoV-enabled vehicles as clients.
+the other hand, focuses on lightweight modeling and energy-efficient
+operation through the proposed KANConvNet architecture, which is                   Pre-trained  weights     start  the  global   model   M  (0)  on  the  central  server,
+different from blockchain- or GAN-based solutions. Also, using Kolmo                                                                        G
+gorov­Arnold-inspired activations makes it possible to make intrusion
+detection decisions that can be understood, which is mostly missing in             this model is then sent to every connected car Di for {1, 2, ..., N}.
+current FL-based IDS methods. Finally, the use of genetic algorithm-
+driven hyperparameter optimization lets FedIoV automatically adjust                M G(0)Di, i  {1, 2, ..., N},                                                    (1)
+local training for different types of vehicles, which speeds up conver
+gence and makes the system more stable in dynamic IoV environments.                    This setup guarantees that every car begins with a consistent baseline
+This positioning sets FedIoV apart as a complete, deployable solution              model, therefore enabling cooperative learning over the distributed
+instead of just an optimization for one part. Table 1 shows related works          vehicular network while preserving local data privacy.
+in the mentioned area.
+                                                                                       A protected communication protocol is set up between the central
+                                                                                   server and every IoV-enabled vehicle Di, to guarantee safe and quick
+                                                                                   information exchange. Denoted as SecureChannel (Server, Di), this safe
+                                                                                   channel protects the transfer of sensitive model updates, gradients, and
+                                                                                   auxiliary information across the federated learning rounds:
+
+                                                                                   SecureChannel ( Server, Di), i  {1, 2, ..., N},                                 (2)
+
+Table 1                                                                                The communication protocol has to support characteristics like
+Summary of related works.                                                          encryption, authentication, and resilience against adversarial intercep
+                                                                                   tion or tampering, given the highly dynamic and decentralized character
+Researchers      Core Idea             Advantage            Challenges             of vehicular networks. Real-time secure data transfer can be maintained
+                                                                                   using standard vehicular communication technologies such as DSRC, C-
+Tiwari, et al.   Decision-tree model   Achieves near-       Centralized            V2X, or 5G-assisted V2X networks. Maintaining the privacy of local
+  [19]           trained on real       perfect accuracy     learning limits        vehicular data and avoiding any illegal access that could endanger the
+                 datasets for anomaly  across detection     scalability            federated learning process depends on strong end-to-end encryption and
+Sun, et al.      detection             metrics                                     lightweight authentication systems. Fig. 1 represents the system
+  [20]           Knowledge graph to    Ultra-low detection  Limited cross-
+                 detect CAN-based      latency; ontology    protocol               Table 2
+Zhang, et al.    attacks               modeling             generalization         Definitions of the symbols.
+  [21]           Dimensionality        Improves efficiency  Performance
+                 reduction +           with high detection  degradation under      Symbol Definition                             Symbol          Definition
+Mahendran,       optimized classifier  rates                real-time                                                            Di
+  et al. [22]    for large datasets                         conditions             M    (0)     Initial global model on the                      The local dataset of the
+                 Predictive anomaly    Strong for known     Reduced                     G       central server                                   IoV-enabled vehicle.
+Sani, et al.     model using CRF       attacks; impact      effectiveness on                    Index for each participating                     Aggregated global model
+  [7]            and Bayesian          forecasting          unknown attack         i            vehicle among N total vehicles   M  (t)          at communication round
+                 networks                                   classes                                                                 G            t
+Mei, et al. [9]  Blockchain-enabled    Enhances             Detection                                                                            Learning rate for local
+                 detection based on    traceability and     performance drops      m(ijt)       The normalized value of the jth                  model optimization.
+Abbas, et al.    vehicle trajectory    system resilience    with higher                         parameter in the model update
+  [23]           verification                               malicious ratios                                                                     The weighted normalized
+                 Sequential CAN data   Effective anomaly    High                                from vehicle D i at round t                      value of the jth parameter
+Qin, et al.      modeling using        detection with       computational                                                                        Ideal (best) solution
+  [24]           temporal              sequence awareness   cost for real-time     d            Total number of model            wi(jt)          vector after
+                 convolutions                               analysis                                                                             normalization and
+Xie, et al.      Distributed ML-       Low overhead, high   Requires pre-          A-           parameters                       Aþ              weighting
+  [25]           based                 accuracy             installed                                                                            Euclidean distance from
+                 authentication with   authentication       credentials; less                   Anti-ideal (worst) solution                      model update D i to ideal
+Yigit, et al.    privacy preservation                       adaptive                                                                             solution A+
+  [26]           GAN-based IDS         Detects rare and     Complexity in                       vector after normalization and                   Relative closeness
+                 targeting stealthy    disguised attacks    model training and                                                                   coefficient of model
+Our Work         IVN attacks,          effectively          deployment                          weighting.                                       Model prediction for
+                 including SOME                                                                                                                  input x under parameters
+                 FL with blockchain    Privacy-preserving   Resource               si-          Euclidean distance from model    si+             M
+                 for decentralized     with reduced         constraints at                      update D i to ideal solution A-  Ci              Learning-rate used for
+                 IDS and secure        communication        RSUs and vehicles                                                    f(x; M)         local gradient descent.
+                 logging               overhead                                    N            Total number of participating                    Regularisation term
+                 AI-enhanced DT        Reduces latency      Complexity in          x, y         vehicles/clients.                (M)
+                 with online learning  and resource usage;  deployment and                      Sample feature vector and        H               Full hyper-parameter
+                 and autoencoders      high detection       real-time response     wj           ground-truth label in a local                    search space in GA
+                 for 6 G IoV           success                                     m            dataset                                          optimisation
+                 Federated IDS with    Combines privacy,    -                                   An importance weight assigned                    A concrete
+                 secure aggregation,   robustness, and                             , , e, ,     to parameter j in TOPSIS.                        hyperparameter
+                 Multi-Krum, and       real-time inference                            ,         Number of top-ranked models                      configuration (genome).
+                 KANConvNet                                                                     selected within each cluster by
+                                                                                   i, i         Multi-Krum.
+                                                                                                Learning-rate, batch-size,
+                                                                                                epochs, momentum, dropout,
+                                                                                                optimizer.
+                                                                                                Extra regularization
+                                                                                                hyperparameters for dataset-
+                                                                                                specific tuning.
+
+                                                                                3
+A. Heidari et al.                                                                                                                Future Generation Computer Systems 181 (2026) 108448
+
+                                                                               steps above. Only model parameter updates (never raw signals) are
+
+                                                                               encrypted over SecureChannel to the server, which does not care about
+
+                                                                               which modalities a client had available. TOPSIS filtering and Multi-
+
+                                                                               Krum aggregation work on parameter deltas, no matter what modal
+
+                                                                               ities a client had available. This approach lets different types of fleets
+
+                                                                               (such as CAN+GPS vs. CAN+GPS+V2X) take part in FL in the same way
+
+                                                                               while keeping privacy, making sure that the time is always right,
+
+                                                                               handling missing data in a principled way, and creating fusion signals
+
+                                                                               that can be understood for audits later on.
+
+                                                                                  This aggregation method guarantees resilience against poisoning
+
+                                                                               attacks or data anomalies and is meant to consider possible adversarial
+
+                                                                               changes from compromised vehicles. Adopting strong aggregation
+
+                                                                               strategies helps the server to reduce the effects of erratic or hostile local
+
+                                                                               updates, therefore strengthening the security and stability of the
+
+                                                                               worldwide model. The updated global model is redistributed to all
+
+                                                                               participating IoV-enabled vehicles once aggregation is complete,
+
+                                                                               therefore preserving synchronous communication and guaranteeing
+
+                                                                               coordinated learning across the dynamic vehicular network. Even as
+
+                                                                               cars regularly join or leave the network owing to their natural mobility,
+
+                                                                               this synchronized model updating approach allows ongoing model
+
+                                                                               refinement and adaptation. Every IoV-enabled car D i, locally optimizes
+
+                                                                               the received global model using its own locally gathered vehicular data.
+                                                                                                                                                                 (        i(t) ),
+                                                                               The     goal     is  to    reduce      the     local  loss        function,  L         M            defined  as:
+                                                                                                                                                                 i
+
+                            Fig. 1. System architecture.                       L  (      (t) )  =         1               ((            i(t) ),   )                                              (4)
+                                                                                  iM                                  l    f x; M                y
+                                                                                         i          |D i| (x,y)D i
+
+architecture.                                                                                                                           (                             )
+                                                                                            (, ) represents the loss function, f x; M                                  ,
+                                                                               where l                                                                           (t)      denotes the model's
+                                                                                                                                                                 i
+
+3.2. Local model training and personalization                                  prediction for the input x, and |D i|, is the size of the local dataset
+
+                                                                               available at the vehicle D i. In the local optimization phase, each vehicle
+
+   The central server aggregates the updated local models after local          fine-tunes the global model to its unique driving and sensor data envi
+
+training at each vehicle. The local updates are clustered into multi-          ronment using gradient descent. The model parameters are updated as
+
+center clusters and combined with a resilient mechanism to create the          follows:
+
+new global model, so as to handle the high mobility and heterogeneous          M  (t)  M    (t-    1)  -     L     (  M   (t-  1) )                                                              (5)
+                                                                                  i         i                             i
+data distributions characteristic of vehicular networks.                                                           i
+
+M  (t)  =               ({  (t) }N  )                     (3)                  where     the     learning       rate      is     and    L        (   (t-  1) ),  signifies         the  gradient  of
+   G       Aggregate M               ,                                                                                                           iM  i
+                            i i=1
+                                                                               the local loss function concerning the model parameters. By allowing
+
+    Before any FL step, each client (vehicle) does a full local multimodal     each vehicle to better capture its operational context, such as traffic
+alignment and fusion. First, heterogeneous streams CAN frames (IDs,
+signals), V2X beacons (CAM/DENM-like fields), GPS/IMU telemetry                patterns, driving behavior, and sensor dynamics, this localized gradient
+(lat/long, speed, yaw rate, acceleration), and, when available, compact
+perception cues (e.g., object counts/lane markers pre-extracted on-            descent adjustment improves the general personalization and robustness
+board)--are timestamp-synchronized to the ECU's monotonic clock.
+Then, they are resampled to a common 10 Hz grid using zero-order hold          of the global federated model when aggregated.
+for discrete channels (CAN/V2X) and linear interpolation for continuous
+channels (GPS/IMU). Messages are aligned within a ± 50 ms tolerance;              Every vehicle uses L2 regularization during local training to handle
+pairs that are not in this range are thrown away. A binary mask vector
+shows which packets are missing. For each timestep, short gaps (0.5 s)         the natural data variability across several IoV-enabled vehicles resulting
+are filled in, but longer gaps stay hidden so they do not add to the loss.
+Next up are lightweight encoders that work with each modality: (i) CAN         from different traffic conditions, driving habits, and sensor configura
+signal-level normalization, optional one-hot/embedding of message IDs,
+then a 1-D conv + GELU block to capture short-range temporal patterns;         tions. This allows the model to keep beneficial generalization knowledge
+(ii) V2X feature selection (position, heading, speed, cooperative flags),
+normalization, then a small MLP; (iii) GPS/IMU 1-D conv + max-pool for         from the global model and helps to prevent overfitting to local vehicular
+micro-dynamics; (iv) optional vision/LiDAR cues--already condensed
+scalars/vectors normalized and passed through a tiny MLP (raw images/          data. The regularized local objective function is given as:
+point clouds are never federated). Encoded sequences are divided into
+windows (with a length of 64 and a stride of 16) and then combined into        L  reg (  M  (t) )   =     L  (  M  (t) )  +      (   M  (t)  )                                                   (6)
+a fused embedding. This embedding is then processed via attention-style                                                                 i     ,
+gating (FiLM-like affine modulation) based on reliability scores from mt.         i         i                i     i
+This down-weights modalities that are poor or missing and gives KAN
+ConvNet a fixed-size vector (46 dims in our case) as input. We use mo          where  is the regularization parameter and () represents the regu
+dality dropout (0.1) during training to make the model more resistant to       larization term. Every IoV-enabled vehicle Di sends its updated model (t)
+sensors that do not always work. We also use class-balanced loss weights       to the multi-center servers for aggregation after local optimization. The
+to fix class imbalance without oversampling. The vehicle does all of the       personalized update algorithm adds two important phases: dimension
+                                                                               ality reduction using the TOPSIS approach and robust aggregation using
+                                                                               the Krum algorithm to improve the dependability and security of the
+                                                                               federated learning process.
+
+                                                                               3.3. Robust aggregation pipeline
+
+                                                                                   At the central server, we use the Technique for Order of Preference
+                                                                               by Similarity to the Ideal Solution (TOPSIS) method to properly manage
+                                                                               the great dimensionality and varied distribution of model updates across
+                                                                               vehicles. Filtering and ranking the incoming model updates depending
+                                                                               on their quality and consistency requires this dimensionality reduction
+
+                                                                            4
+A. Heidari et al.                                                                                                                          Future Generation Computer Systems 181 (2026) 108448
+
+stage. The process starts with Normalization: the server first normalizes                       calculated similarity coefficients Ci, at last. Clustering helps to find
+                                                                                                consistent groups of model updates that can be combined more effi
+each   model        update  M   (t)  ,   received  from  vehicle,  D i,  guaranteeing  that     ciently, therefore lowering the chance of including outlier updates and
+                                i                                                               supporting stability in the global model update process. Fig. 2 shows the
+                                                                                                federated communication and secure update flow among IoV vehicles
+updates are comparable across several feature scales. From a mathe                              and the central server.
+
+matical standpoint, the normalized value m(ijt) for the jth parameter of the                        The similarity calculation to the ideal solution A+ and anti-ideal
+                                                                                                solution A- allows the system to directly identify which model updates
+model update from the vehicle D i, at the communication round t is                              M(it), are consistent with the majority. Outliers are those model updates
+                                                                                                that show much higher distances from the ideal solution Si+, or much
+calculated as:                                                                                  lower distances to the anti-ideal solution S-i -will naturally produce
+                                                                                                lower similarity scores Ci. The system can therefore efficiently isolate
+m(ijt) = Ni=m1(i(jt)mi(jt))2,                                                          (7)      and reject these outlier models, thereby enhancing the dependability
+                                                                                                and integrity of the aggregation process in a very dynamic vehicle
+    In this formula, m(ijt) represents the jth parameter of the model update                    network.
+
+received from the vehicle D i, during communication round t, and N                                  The central server uses the Multi-Krum algorithm for strong aggre
+denotes the total number of participating vehicles in the federated                             gation after dimensionality reduction and similarity-based clustering.
+learning process. Laying the groundwork for the next actions in the                             Preserving model convergence and dependability, this stage is crucial to
+TOPSIS-based ranking and aggregation process, this normalization                                reducing the impact of hostile or anomalous updates from possibly
+guarantees that all parameter updates are assessed on a comparable                              compromised vehicles. The server assesses the robustness of model up
+scale. After normalization, the server uses a weighted normalization to                         dates within each similarity cluster, Ck employing pairwise squared
+highlight the relative relevance of several model parameters depending                          Euclidean distance computation across all participating clients' models.
+on their contribution to general model performance. The weighted                                The distance for updates of any two cars is calculated as the total
+normalized value wi(jt), is determined as follows:                                              squared variance across relevant parameters in the model state dictio
+                                                                                                naries. Where n is the total number of models in the cluster and f the
+wi(jt) = wjmi(jt)                                                                      (8)      presumed number of hostile clients, Multi-Krum then gives each model a
+                                                                                                robustness score by adding its distances to the n - 2f - 2 nearest
+where wj, represents the weight assigned to the jth parameter. These                            neighbors. Multi-Krum chooses the top m models with the lowest scores,
+                                                                                                i.e., most consistent with others, to represent the cluster instead of
+weights are determined by analyzing the sensitivity of the global model's                       depending on a single "best" model. This guarantees that the last ag
+                                                                                                gregation step is influenced by several reliable updates. The global
+performance to variations in specific parameters, ensuring that more                            model MG(t), is then updated by averaging the selected models from all
+                                                                                                clusters:
+influential parameters have a greater impact on the ranking process.
+    The server then finds the perfect answer A+ and the anti-ideal so
+
+lution A- . While the anti-ideal solution reflects the worst-case perfor
+
+mance across all participating vehicles, the ideal solution is the set of
+
+parameter values relating to the maximum performance. These are
+
+worked out as:
+
+A+  =  {              j  =  1,  2,  ...,   }                                           (9)         (t)      1      |C |  1         (t)
+         mai xw(ijt)                      d                                                        G       |C                   M  i
+                                                                                                M       =                                                                          (14)
+                                                                                                               |  k=1 m iSk
+
+A-  =  {             j  =  1,  2,  ...,   }                                            (10)        Where   [0, 1] is the personalization coefficient that governs the
+         miinwi(jt)                      d
+
+                                                                                                trade-off between global alignment and local specificity. This step al
+
+    Here, d denotes the total number of model parameters. Then, by                              lows each vehicle to benefit from the collective knowledge of the
+
+measuring their distances, the server calculates the similarity of every                        network while retaining the adaptability needed for localized decision-
+
+model update to both the ideal and anti-ideal solutions. The distance of                        making in real-world vehicular scenarios. The revised global model after
+the model update from the vehicle D i, to the ideal solution A+ and the
+anti-ideal solution A- is given by:                                                             strong     aggregation,      M     (t)  ,  is  sent  back  to  all  participating  IoV-enabled
+                                                                                                                                   G
+
+                                                                                                cars. Every car uses a tailored update technique to consider the local
+
+Si+ =     d(w(ijt)-Aj+)2,                                                                       variability in driving patterns, sensor settings, and environmental
+
+                 j=1                                                                   (11)
+
+Si- =     d(w(ijt)-A-j)2.                                                              (12)
+
+                 j=1
+
+    The relative closeness coefficient Ci, of each model update to the
+ideal solution is then calculated as:
+
+Ci  =     si-  s-i                                                                     (13)
+       s+i +
+
+    A higher value of Ci (closer to 1) suggests that the model update is
+more desirable and closer to the optimal solution. Even with heteroge
+neous driving patterns and varied vehicle sensor data, this whole
+ranking and evaluation process guarantees that model updates coming
+from vehicles with better local model performance are given higher
+priority during aggregation, so improving the robustness and efficacy of
+the federated learning system. The server groups the model updates into
+clusters of similar performance and behavior, depending on the
+
+                                                                                                           Fig. 2. Federated communication and secure update flow.
+
+                                                                                             5
+A. Heidari et al.                                                                                       Future Generation Computer Systems 181 (2026) 108448
+
+contexts. Combining the worldwide model with its prior local model                world federated learning scenarios where model transparency and reli
+accomplishes this.                                                                ability directly impact safety and trust in autonomous and connected
+                                                                                  vehicle systems. Fig. 3 illustrates the architecture and computational
+M  (t+1)  =  M     (t)  +  (1 -  )M  (t)  (15)                                    flow of the KANConvNet model (Algorithm 1).
+   i               G                 i
+
+    Here, the personalization coefficient,   [0, 1], defines the impact of        4. FedIoV method
+the global model relative to the vehicle's current model. In very syn
+chronized traffic systems or urban vehicle fleets, a higher  encourages               Hyperparameter tuning is essential in our FL-based IDS for IoV to
+stronger conformity with the global model, which might be advanta                 improve model performance across heterogeneous and dynamic vehic
+geous. On the other hand, a lower  supports localized learning, which is          ular environments. Choosing the best hyperparameter combinations is
+beneficial for cars running in specialized settings like rural routes,            especially important for guaranteeing consistent training efficiency,
+autonomous delivery systems, or mission-specific fleets. By adapting to           stability, and generalization, since every car runs with different data
+its operational context, this tailored model integration guarantees that          distributions and computational limits. We create a design space for
+every vehicle keeps maximum performance and still gains from the                  hyperparameter optimization using a GA to solve this. Let  represent
+combined knowledge of the federated network.                                      the set of hyperparameters to be optimized. Parameters like the learning
+                                                                                  rate , which governs the step size during training, have a major impact
+3.4. The KANConvNet classifier                                                    on the overall performance of the federated model. While larger values
+                                                                                  might speed up training, they run the danger of overshooting or insta
+    The KANConvNet model is created to meet the demand for a                      bility; smaller values of  usually result in stable but slower conver
+computationally efficient and interpretable deep learning architecture            gence. The batch size  also matters greatly: while bigger batch sizes
+capable of managing complex feature interactions in the IoV setting. The          provide computational efficiency but could cause overfitting, smaller
+model has to generalize well across varied traffic data, keep resilience to       batch sizes produce noisier gradients that enhance generalization. The
+hostile inputs, and run effectively on resource-limited vehicle hardware          type of optimizer, , controls how gradients are applied and therefore
+in federated learning settings where cars run as distributed clients.             influences stability and convergence speed directly. Other significant
+KANConvNet addresses these difficulties by including the Kolmogor                 hyperparameters are the number of training epochs e, the momentum ,
+ov­Arnold representation theorem, which allows the modeling of non-               and the dropout rate , all of which influence model regularization and
+linear interactions using bespoke-designed activation functions. These            learning dynamics. Officially, the hyperparameter design area is
+functions improve interpretability and help the model to more accu                described as:
+rately capture the dynamics of vehicle data. Unlike conventional neural
+networks, where non-linearity is applied after linear summation, KAN              H = {, , e, , , }               (20)
+ConvNet redefines learning dynamics by moving activation functions to
+the network's edges, applying non-linearity before the summation step.                As indicated in Table 3, these parameters are investigated over
+This new design increases the interpretability of intermediate outputs            specified value sets differing across five benchmark IoV datasets. We use
+and enables a more exact representation of complicated spatial and                a GA to effectively search this design space; it evolves a population of
+temporal patterns. The model's convolutional backbone also lets it scale          candidate solutions across generations using a fitness function f() that
+across large and varied vehicular datasets, making it appropriate for             assesses model performance. Starting with the initialization of a popu
+both individual vehicle-level decision-making and collective learning             lation P 0 of size N, the GA treats each individual i  P 0 a unique mix
+via federated frameworks.                                                         of hyperparameters.
+
+    Representing different vehicle signals, including CAN bus readings,           P 0 = {1, 2, ..., N}            (21)
+speed, acceleration, engine status, and GPS-based telemetry, the input to
+KANConvNet is a feature vector x=[x1, x2, ..., x46]. Standard normali             Each genome i, is encoded as:
+zation or frequency-domain methods, such as the Fourier Transform, are
+used to preprocess this input, therefore generating a transformed signal          i = {i, i, ei, i, i, i, i, i }  (22)
+z0=Preprocess(x). A linear transformation coupled with a Fourier-based
+encoding then applies the Kolmogorov­Arnold mapping:                              where  and  could stand for extra bespoke parameters employed in
+                                                                                  regularizing or normalizing techniques, particular to vehicle datasets.
+z1 = W1.F (z0) + b1                       (16)                                    The GA moves through conventional evolutionary stages: selection,
+                                                                                  crossover, mutation, and fitness evaluation. High-performing people are
+    This output is passed through a custom Kolmogorov-inspired non-               chosen as parents in every generation. Crossover recombines their ge
+linear activation function:                                                       netic material and hyperparameter values, producing new offspring.
+                                                                                  Mutation helps the algorithm avoid local optima and investigate a larger
+z2 = Kolmogorov (z1)                      (17)                                    search area by adding random changes to certain genes. Usually based
+                                                                                  on model accuracy or validation performance on local or worldwide
+    The network continues through a series of hidden layers, each                 datasets, the fitness function () evaluates each new generation.
+refining the representation through ReLU activations and distinct layer           Convergence criteria, such as a maximum number of generations or
+weights, producing intermediate outputs. z3, z4, and z5. In the final             stabilization of performance improvements, guide this process to iterate.
+stage, another Kolmogorov activation is applied before generating the             Our system efficiently finds strong configurations suited to IoV condi
+final feature vector:                                                             tions, utilizing GA-driven hyperparameter tuning, so balancing local
+                                                                                  learning efficiency with global model accuracy across resource-
+z6 = W5Kolmogorov (z5) + b5               (18)                                    constrained and varied vehicular clients.
+
+    The prediction is computed using a standard stochastic gradient                   Two fundamental processes, crossover and mutation, guide the cre
+descent-based update:                                                             ation of new candidate solutions during the evolutionary stage of our
+                                                                                  GA-based hyperparameter optimization. Two-parent hyperparameter
+y = SGD(z6)                               (19)                                    sets, p, q, are combined during the crossover step to create two
+                                                                                  offspring \u03b8c1 and. The crossover operation chooses values from
+    Overall, KANConvNet is well-suited for intrusion detection in IoV             every relevant position k  {1, 2, ..., 8}, where each k denotes a partic
+settings due to its ability to model the non-linear and time-dependent            ular hyperparameter (e.g., learning rate, batch size, etc.), so that:
+behavior found in vehicular environments. Its design supports inter
+pretability, scalability, and robustness, all of which are essential in real-
+
+                                                                               6
+A. Heidari et al.                             Future Generation Computer Systems 181 (2026) 108448
+
+                   Fig. 3. KANConvNet model.
+                                       7
+A. Heidari et al.                                                                                  Future Generation Computer Systems 181 (2026) 108448
+
+Algorithm 1
+. Fed IoV algorithm.
+
+c1  =  {     k                  }                                             from its respective domain Hk with probability Pm, or retains it with
+         kp       {1, 2, ..., 8}
+       {     k                      }  (23)                                   probability 1 - Pm:
+         qk                      8}
+2c  =             {1,  2,  ...,                                               {
+
+    By recombining successful characteristics from both parents, this         ki   random value from H k    with probability Pm    (24)
+                                                                                   ik                     with probability 1 - Pm
+process maintains genetic variety.
+                                                                                  By allowing the search algorithm to investigate a larger solution
+    The mutation is applied to every hyperparameter in the offspring          space and fine-tune important parameters, this controlled randomness
+                                                                              improves the model's adaptability across many vehicle environments.
+with a small probability Pm, to further encourage variability and escape      Typically, using classification accuracy A(i) as the main criterion, the
+local optima. Specifically, for a given hyperparameter ik in either 1c or     fitness score f(i) assesses the quality of each hyperparameter set based
+2c , the mutation step randomly replaces its value with a new one drawn
+
+                                                                           8
+

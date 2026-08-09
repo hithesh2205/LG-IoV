@@ -1,0 +1,112 @@
+C:\Users\Thrish_Sudha\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+[helpers] Random seed fixed at: 2025
+[init] Federated simulation device: cpu | Dataset: cicids | Mode: fhe
+[preprocess] Loading raw data for 'cicids' from C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\Preprocessed_Dataset
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[cicids]   rows kept: 225711
+[cicids] reading cleaned_Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[cicids]   rows kept: 286096
+[cicids] reading cleaned_Friday-WorkingHours-Morning.pcap_ISCX.csv
+[cicids]   rows kept: 190911
+[cicids] reading cleaned_Monday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 529481
+[cicids] reading cleaned_Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[cicids]   rows kept: 288395
+[cicids] reading cleaned_Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[cicids]   rows kept: 170231
+[cicids] reading cleaned_Tuesday-WorkingHours.pcap_ISCX.csv
+[cicids]   rows kept: 445645
+[cicids] reading cleaned_Wednesday-workingHours.pcap_ISCX.csv
+[cicids]   rows kept: 691406
+[preprocess] cicids split sizes: train=1979514, val=424181, test=424181
+[preprocess] Classes: ('BENIGN', 'ATTACK')
+[preprocess] Class counts (train): [1589924.0, 389590.0]
+[preprocess] Class weights: [0.6225184202194214, 2.5405092239379883]
+[server] Initialized global server with 43,394 parameters. FHE=True
+[init] Registering 10 clients...
+[init] Registered all 10 clients successfully.
+
+--- Federated FHE Round 01/05 ---
+[server] Selected 7/10 active clients (IDs: [6, 1, 5, 9, 0, 4, 7])
+  [client 06] Completed local training on 447335 samples.
+  [client 01] Completed local training on 67605 samples.
+  [client 05] Completed local training on 112102 samples.
+  [client 09] Completed local training on 24844 samples.
+  [client 00] Completed local training on 313360 samples.
+  [client 04] Completed local training on 56326 samples.
+  [client 07] Completed local training on 142091 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 01 Complete | Global Test Loss: 1.5294 | Global Test Acc: 0.8882 | Time: 79.7s
+
+--- Federated FHE Round 02/05 ---
+[server] Selected 7/10 active clients (IDs: [3, 2, 9, 6, 0, 4, 7])
+  [client 03] Completed local training on 10785 samples.
+  [client 02] Completed local training on 130290 samples.
+  [client 09] Completed local training on 24844 samples.
+  [client 06] Completed local training on 447335 samples.
+  [client 00] Completed local training on 313360 samples.
+  [client 04] Completed local training on 56326 samples.
+  [client 07] Completed local training on 142091 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 02 Complete | Global Test Loss: 0.1221 | Global Test Acc: 0.9709 | Time: 76.9s
+
+--- Federated FHE Round 03/05 ---
+[server] Selected 7/10 active clients (IDs: [6, 2, 8, 9, 7, 5, 3])
+  [client 06] Completed local training on 447335 samples.
+  [client 02] Completed local training on 130290 samples.
+  [client 08] Completed local training on 674776 samples.
+  [client 09] Completed local training on 24844 samples.
+  [client 07] Completed local training on 142091 samples.
+  [client 05] Completed local training on 112102 samples.
+  [client 03] Completed local training on 10785 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 03 Complete | Global Test Loss: 0.7650 | Global Test Acc: 0.9477 | Time: 101.8s
+
+--- Federated FHE Round 04/05 ---
+[server] Selected 7/10 active clients (IDs: [8, 1, 9, 0, 6, 5, 7])
+  [client 08] Completed local training on 674776 samples.
+  [client 01] Completed local training on 67605 samples.
+  [client 09] Completed local training on 24844 samples.
+  [client 00] Completed local training on 313360 samples.
+  [client 06] Completed local training on 447335 samples.
+  [client 05] Completed local training on 112102 samples.
+  [client 07] Completed local training on 142091 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 04 Complete | Global Test Loss: 0.6022 | Global Test Acc: 0.9504 | Time: 118.5s
+
+--- Federated FHE Round 05/05 ---
+[server] Selected 7/10 active clients (IDs: [2, 0, 7, 3, 1, 6, 4])
+  [client 02] Completed local training on 130290 samples.
+  [client 00] Completed local training on 313360 samples.
+  [client 07] Completed local training on 142091 samples.
+  [client 03] Completed local training on 10785 samples.
+  [client 01] Completed local training on 67605 samples.
+  [client 06] Completed local training on 447335 samples.
+  [client 04] Completed local training on 56326 samples.
+[server] Multi-Krum filtered 7 encrypted updates down to 6 trusted updates.
+Round 05 Complete | Global Test Loss: 0.0687 | Global Test Acc: 0.9818 | Time: 80.7s
+
+[federated] Simulation (fhe) completed in 457.6 seconds.
+
+==================================================
+           BASELINE BENCHMARK REPORT
+==================================================
+Accuracy:  0.9818
+Macro F1:  0.9713
+Precision: 0.9712
+Recall:    0.9714
+ROC-AUC:   0.9978
+
+Per-Class Metrics:
+Class Name                | Precision  | Recall     | F1-score   | Support 
+--------------------------------------------------------------------
+BENIGN                    | 0.9888     | 0.9886     | 0.9887     | 340698  
+ATTACK                    | 0.9535     | 0.9543     | 0.9539     | 83483   
+
+Confusion Matrix:
+[[336816   3882]
+ [  3818  79665]]
+==================================================
+[helpers] Checkpoint saved: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_model_cicids_fhe.pt
+[federated] Simulation summary saved to: C:\Users\Thrish_Sudha\Desktop\Amrita Files\LGSI IOV\Team\LG_IoV\NewModel\checkpoints\federated_summary_cicids_fhe.json

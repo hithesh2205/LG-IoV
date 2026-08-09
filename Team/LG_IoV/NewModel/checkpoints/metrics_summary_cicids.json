@@ -1,0 +1,8 @@
+{
+  "dataset": "cicids",
+  "parameters": 609282,
+  "training_time_sec": 57.48031830787659,
+  "accuracy": 0.978589700811923,
+  "macro_f1": 0.6320436708670027,
+  "roc_auc": 0.9913738117772931
+}
