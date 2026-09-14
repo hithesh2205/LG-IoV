@@ -7,7 +7,7 @@ there), but every *result*, *report*, and *new script* from this work is here.
 
 ## What's here
 
-- **`dashboard.html`** — live results dashboard (published as a Claude Artifact).
+- **`dashboard.html`** — live results dashboard (published as an interactive HTML artifact).
   Accuracy comparison, real CKKS overhead, run status. Rebuild after each new
   training run with `scripts/generate_dashboard_data.py` then `scripts/build_dashboard.py`.
 - **`dashboard_template.html`** — the dashboard's source template (edit this, not `dashboard.html`).

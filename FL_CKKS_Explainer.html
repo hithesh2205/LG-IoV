@@ -1,0 +1,1264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Happens To A Weight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* ============================================================
+   TOKENS  —  the whole deck runs on one binary:
+   PLAINTEXT = warm gold, readable · CIPHERTEXT = cold violet, sealed
+   ============================================================ */
+:root{
+  --bg:#e9edf2; --stage:#f7f9fb; --sunk:#dfe6ed; --line:#c3cfda; --line-2:#9fb0c0;
+  --ink:#131c26; --ink-2:#4e6274; --ink-3:#8095a8;
+
+  --plain:#b5730a;  --plain-fill:#fdf0d8;  --plain-line:#e2ae5c;
+  --plain-ink:#7d4f04;
+  --ciph:#5b3fc4;   --ciph-fill:#e8e3fb;   --ciph-ink:#412c94;
+  --danger:#bb3f3c; --danger-fill:#fae0df;
+  --ok:#1f7a52;     --ok-fill:#d9efe4;
+  --chrome:#2b6a72;
+
+  --shadow:0 1px 2px rgba(15,35,55,.07), 0 12px 34px rgba(15,35,55,.09);
+  --disp:'Archivo',ui-sans-serif,system-ui,sans-serif;
+  --body:'Public Sans',ui-sans-serif,system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#070b10; --stage:#0e151d; --sunk:#131d27; --line:#243342; --line-2:#3a4d5f;
+    --ink:#e8eff6; --ink-2:#9db0c1; --ink-3:#6d8194;
+    --plain:#f2b75f; --plain-fill:#3a2a10; --plain-line:#7a5a22; --plain-ink:#ffd79a;
+    --ciph:#a48cf5; --ciph-fill:#241d47; --ciph-ink:#c9b9ff;
+    --danger:#e8706c; --danger-fill:#3a1c1c;
+    --ok:#54c191; --ok-fill:#123227;
+    --chrome:#57b3bd;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 40px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#070b10; --stage:#0e151d; --sunk:#131d27; --line:#243342; --line-2:#3a4d5f;
+  --ink:#e8eff6; --ink-2:#9db0c1; --ink-3:#6d8194;
+  --plain:#f2b75f; --plain-fill:#3a2a10; --plain-line:#7a5a22; --plain-ink:#ffd79a;
+  --ciph:#a48cf5; --ciph-fill:#241d47; --ciph-ink:#c9b9ff;
+  --danger:#e8706c; --danger-fill:#3a1c1c;
+  --ok:#54c191; --ok-fill:#123227;
+  --chrome:#57b3bd;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 40px rgba(0,0,0,.45);
+}
+
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--body);
+  overflow:hidden; -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+
+/* ---------- stage: fixed 1280x720 design space, scaled to fit ---------- */
+#shell{ position:relative; width:100vw; height:100vh; overflow:hidden }
+#stage{
+  position:absolute; width:1280px; height:720px; left:50%; top:50%;
+  transform-origin:center center;
+  background:var(--stage); border:1px solid var(--line); border-radius:10px;
+  box-shadow:var(--shadow); overflow:hidden;
+}
+
+/* ---------- slide chrome ---------- */
+.slide{ position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity .28s ease }
+.slide.live{ opacity:1; pointer-events:auto }
+
+.kicker{
+  position:absolute; left:44px; top:34px; font-family:var(--mono);
+  font-size:11.5px; font-weight:500; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--chrome); display:flex; align-items:center; gap:10px;
+}
+.kicker::before{ content:""; width:20px; height:2px; background:var(--chrome) }
+h2.stitle{
+  position:absolute; left:44px; top:58px; right:44px;
+  font-family:var(--disp); font-weight:600; font-size:31px; line-height:1.18;
+  letter-spacing:-.01em; text-wrap:balance;
+}
+.sub{
+  position:absolute; left:44px; top:104px; right:44px;
+  font-size:14.5px; color:var(--ink-2); max-width:76ch;
+}
+.answer{
+  position:absolute; left:44px; right:44px; bottom:30px;
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  font-family:var(--mono); font-size:11.5px;
+}
+.answer .q{
+  border:1px solid var(--line); background:var(--sunk); border-radius:6px;
+  padding:5px 10px; color:var(--ink-2);
+}
+.answer .q b{ color:var(--ink); font-weight:700 }
+.answer .q.p b{ color:var(--plain) }
+.answer .q.c b{ color:var(--ciph) }
+.answer .q.ok b{ color:var(--ok) }
+.answer .q.no b{ color:var(--danger) }
+.answer .q.op b{ color:var(--chrome) }
+
+/* ---------- progressive reveal ---------- */
+[data-in]{ opacity:0; transform:translateY(9px); transition:opacity .38s ease, transform .38s ease }
+[data-in].on{ opacity:1; transform:none }
+[data-in].dim{ opacity:.26 }
+
+/* ---------- the plaintext / ciphertext visual language ---------- */
+.vec{
+  font-family:var(--mono); font-size:12.5px; font-weight:500;
+  border-radius:7px; padding:6px 9px; display:inline-flex; align-items:center; gap:7px;
+  white-space:nowrap; letter-spacing:-.01em;
+}
+.vec.plain{ background:var(--plain-fill); border:1.5px solid var(--plain-line); color:var(--plain-ink) }
+.vec.ciph{ background:var(--ciph-fill); border:1.5px solid var(--ciph); color:var(--ciph-ink) }
+.vec .ic{ font-size:11px; opacity:.85 }
+.scram{ font-family:var(--mono); letter-spacing:.02em }
+
+.badge{
+  font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; padding:3px 7px; border-radius:4px;
+}
+.badge.plain{ background:var(--plain); color:var(--stage) }
+.badge.ciph{ background:var(--ciph); color:#fff }
+
+/* ---------- nodes ---------- */
+.node{ position:absolute; transform:translate(-50%,-50%); text-align:center }
+.veh .box{
+  width:74px; height:60px; border-radius:12px; background:var(--stage);
+  border:2px solid var(--line-2); display:flex; align-items:center; justify-content:center;
+  font-size:26px; margin:0 auto; position:relative;
+  transition:border-color .3s, box-shadow .3s, transform .3s;
+}
+.veh.act .box{ border-color:var(--chrome); box-shadow:0 0 0 5px color-mix(in srgb,var(--chrome) 16%,transparent) }
+.veh.enc .box{ border-color:var(--ciph); box-shadow:0 0 0 5px var(--ciph-fill) }
+.veh .lock{
+  position:absolute; right:-9px; top:-9px; width:23px; height:23px; border-radius:50%;
+  background:var(--ciph); color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center;
+  opacity:0; transform:scale(.3); transition:opacity .3s, transform .3s;
+}
+.veh.enc .lock{ opacity:1; transform:scale(1) }
+.veh .nm{ font-family:var(--mono); font-size:11.5px; font-weight:700; margin-top:7px; color:var(--ink) }
+.veh .dta{ font-family:var(--mono); font-size:9.5px; color:var(--ink-3); line-height:1.35; margin-top:2px }
+
+.srv{
+  position:absolute; transform:translate(-50%,-50%);
+  border-radius:12px; background:var(--stage); border:2px solid var(--line-2);
+  padding:12px 16px; text-align:center; min-width:170px;
+  transition:border-color .3s, box-shadow .3s;
+}
+.srv.act{ border-color:var(--chrome); box-shadow:0 0 0 5px color-mix(in srgb,var(--chrome) 16%,transparent) }
+.srv .ttl{ font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3) }
+.srv .ic{ font-size:24px; margin:2px 0 4px }
+
+svg.wires{ position:absolute; inset:0; width:1280px; height:720px; pointer-events:none; overflow:visible }
+.wire{ fill:none; stroke:var(--line-2); stroke-width:2; stroke-linecap:round }
+.wire.plainw{ stroke:var(--plain-line) }
+.wire.ciphw{ stroke:var(--ciph) }
+.wire.flow{ stroke-dasharray:7 7; animation:march 1s linear infinite }
+@keyframes march{ to{ stroke-dashoffset:-14 } }
+
+.panelbox{
+  position:absolute; border-radius:10px; background:var(--sunk);
+  border:1px solid var(--line); padding:14px 16px;
+}
+.panelbox h4{
+  font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:500; margin-bottom:9px;
+}
+.panelbox.hot{ border-color:var(--chrome); background:color-mix(in srgb,var(--chrome) 7%,var(--sunk)) }
+.panelbox.bad{ border-color:var(--danger); background:var(--danger-fill) }
+.panelbox.good{ border-color:var(--ok); background:var(--ok-fill) }
+.panelbox.ci{ border-color:var(--ciph); background:var(--ciph-fill) }
+
+.eq{ font-family:var(--mono); font-size:15px; line-height:2.05; color:var(--ink) }
+.eq .op{ color:var(--chrome); font-weight:700 }
+.eq .c{ color:var(--ciph); font-weight:700 }
+.eq .p{ color:var(--plain); font-weight:700 }
+.eq small{ font-size:11.5px; color:var(--ink-3) }
+
+.strike{ position:relative; color:var(--ink-3) }
+.strike::after{
+  content:""; position:absolute; left:-3px; right:-3px; top:52%; height:2px;
+  background:var(--danger); transform:scaleX(0); transform-origin:left; transition:transform .45s ease .1s;
+}
+.on .strike::after, .strike.cut::after{ transform:scaleX(1) }
+
+.tbl{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11.5px }
+.tbl th{ text-align:left; font-weight:500; color:var(--ink-3); font-size:9.5px;
+  letter-spacing:.1em; text-transform:uppercase; padding:0 8px 5px 0 }
+.tbl td{ padding:3px 8px 3px 0; font-variant-numeric:tabular-nums; color:var(--ink) }
+.tbl td.w{ color:var(--chrome); font-weight:700 }
+
+/* ---------- controls ---------- */
+#bar{
+  position:absolute; left:0; right:0; bottom:0; height:46px; z-index:60;
+  display:flex; align-items:center; gap:14px; padding:0 18px;
+  background:color-mix(in srgb,var(--bg) 82%,transparent); backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);
+}
+#bar button{
+  font-family:var(--mono); font-size:12px; cursor:pointer; color:var(--ink);
+  border:1px solid var(--line-2); background:var(--stage); border-radius:7px; padding:6px 11px;
+  transition:border-color .15s,color .15s;
+}
+#bar button:hover{ border-color:var(--chrome); color:var(--chrome) }
+#bar button.pri{ background:var(--chrome); border-color:var(--chrome); color:#fff }
+#bar button:disabled{ opacity:.35; cursor:not-allowed }
+#dots{ display:flex; gap:5px; margin-left:auto; align-items:center }
+#dots i{ width:7px; height:7px; border-radius:50%; background:var(--line-2); cursor:pointer; transition:background .2s,transform .2s }
+#dots i.at{ background:var(--chrome); transform:scale(1.45) }
+#dots i.past{ background:var(--ink-3) }
+#pos{ font-family:var(--mono); font-size:11.5px; color:var(--ink-2); min-width:96px }
+:focus-visible{ outline:2px solid var(--chrome); outline-offset:2px }
+
+/* ---------- math overlay ---------- */
+#math{
+  position:absolute; inset:0; z-index:70; background:color-mix(in srgb,var(--bg) 94%,transparent);
+  backdrop-filter:blur(4px); padding:44px 54px; overflow-y:auto; display:none;
+}
+#math.open{ display:block }
+#math h3{ font-family:var(--disp); font-size:24px; margin-bottom:6px }
+#math .lede{ color:var(--ink-2); font-size:13.5px; margin-bottom:20px }
+#math .grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px }
+#math .box{ background:var(--sunk); border:1px solid var(--line); border-radius:10px; padding:16px }
+#math .box h5{ font-family:var(--mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase;
+  color:var(--chrome); margin-bottom:9px }
+#math .box p{ font-size:12.5px; color:var(--ink-2); margin-top:7px; line-height:1.65 }
+#math code{ font-family:var(--mono); font-size:12.5px; color:var(--ink); display:block; line-height:1.9 }
+#math .cls{ position:absolute; right:26px; top:26px }
+
+.warnstrip{
+  position:absolute; border-radius:8px; border:1px dashed var(--danger);
+  background:var(--danger-fill); padding:9px 12px; font-size:11.5px; color:var(--ink);
+}
+.warnstrip b{ font-family:var(--mono); color:var(--danger); font-size:10.5px;
+  letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px }
+.notestrip{
+  position:absolute; border-radius:8px; border:1px solid var(--line);
+  background:var(--sunk); padding:9px 12px; font-size:11.5px; color:var(--ink-2);
+}
+.notestrip b{ font-family:var(--mono); color:var(--chrome); font-size:10.5px;
+  letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px }
+
+/* title slide */
+.t-wrap{ position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:0 90px }
+.t-wrap h1{ font-family:var(--disp); font-weight:700; font-size:52px; line-height:1.1;
+  letter-spacing:-.02em; text-wrap:balance }
+.t-wrap .tl{ font-family:var(--mono); font-size:12px; letter-spacing:.24em;
+  text-transform:uppercase; color:var(--chrome); margin-bottom:20px }
+.t-wrap .td{ font-size:16px; color:var(--ink-2); margin-top:20px; max-width:60ch }
+.keylegend{ display:flex; gap:14px; margin-top:34px; align-items:center; flex-wrap:wrap; justify-content:center }
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage">
+
+<!-- ══════════ 0 · TITLE ══════════ -->
+<div class="slide" data-beats="2">
+  <div class="t-wrap">
+    <div class="tl" data-in="0">Federated learning + CKKS · complete lifecycle</div>
+    <h1 data-in="0">What happens to a weight?</h1>
+    <p class="td" data-in="1">Follow four numbers from the moment the server creates them,
+    out to five vehicles, through encryption, back into an aggregate nobody could read on the way,
+    and around again. No prior knowledge assumed.</p>
+    <div class="keylegend" data-in="1">
+      <span class="vec plain"><span class="ic">👁</span> PLAINTEXT — anyone holding this can read it</span>
+      <span class="vec ciph"><span class="ic">🔒</span> CIPHERTEXT — sealed, but still computable</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 1 · THE DEADLOCK ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">01 · why this is hard</div>
+  <h2 class="stitle">Three rules that fight each other</h2>
+  <p class="sub">Satisfy any two and the problem is easy. All three at once is the project.</p>
+
+  <div class="panelbox" data-in="1" style="left:44px; top:172px; width:370px; height:220px">
+    <h4>Rule 1 · data stays home</h4>
+    <div style="font-size:36px; text-align:center; margin:8px 0">🚗 ✋ ☁️</div>
+    <p style="font-size:13px; color:var(--ink-2)">CAN traffic and GPS reveal a driver's routes and
+    habits. Raw logs can never be uploaded — so the fleet cannot simply pool its data and train
+    one strong detector.</p>
+  </div>
+
+  <div class="panelbox" data-in="2" style="left:452px; top:172px; width:370px; height:220px">
+    <h4>Rule 2 · the update leaks too</h4>
+    <div style="font-size:36px; text-align:center; margin:8px 0">📊 → 🚗</div>
+    <p style="font-size:13px; color:var(--ink-2)">Federated learning sends a 44,164-number model
+    update instead of data. But those numbers can be run backwards to reconstruct the training
+    samples. So the update must be encrypted too.</p>
+  </div>
+
+  <div class="panelbox hot" data-in="3" style="left:860px; top:172px; width:376px; height:220px">
+    <h4>Rule 3 · encryption blinds the referee</h4>
+    <div style="font-size:36px; text-align:center; margin:8px 0">🔒 🙈 ⚠️</div>
+    <p style="font-size:13px; color:var(--ink-2)">Once every update is sealed, the server cannot tell
+    a helpful vehicle from one feeding it poison. <b style="color:var(--chrome)">Solving that without
+    ever unsealing anything is the core of this work.</b></p>
+  </div>
+
+  <div class="notestrip" data-in="3" style="left:44px; top:418px; right:44px">
+    <b>the whole deck in one line</b>
+    Five vehicles will train, seal, send, be scored while still sealed, be combined while still sealed
+    — and only the <i>combined result</i> is ever opened.
+  </div>
+
+  <div class="answer">
+    <span class="q p" data-in="1">raw data · <b>never leaves the vehicle</b></span>
+    <span class="q c" data-in="2">update · <b>must be sealed</b></span>
+    <span class="q no" data-in="3">sealed updates · <b>cannot be checked the normal way</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 2 · W0 PLAINTEXT ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">02 · round 1 begins</div>
+  <h2 class="stitle">The starting global model is plaintext</h2>
+  <p class="sub">The server builds a fresh ChebyKAN detector. Its weights are random and mean nothing
+  yet — there is nothing to hide, and every vehicle must be able to read it.</p>
+
+  <div class="srv act" data-in="1" style="left:640px; top:250px; width:400px">
+    <div class="ttl">Aggregation server</div>
+    <div class="ic">☁️</div>
+    <div style="font-family:var(--mono); font-size:13px; color:var(--ink-2); margin-bottom:8px">
+      global model &nbsp;W⁽⁰⁾
+    </div>
+    <span class="vec plain" style="font-size:15px"><span class="ic">👁</span> [ 0.20, −0.10, 0.35, 0.50 ]</span>
+    <div style="margin-top:10px"><span class="badge plain">plaintext</span></div>
+  </div>
+
+  <div class="panelbox" data-in="2" style="left:150px; top:432px; width:440px">
+    <h4>why plaintext, not encrypted?</h4>
+    <p style="font-size:13px; color:var(--ink-2)">Encryption hides a thing from someone. The global
+    model is hidden from <i>nobody</i> — all five vehicles need to read it to train. Encrypting a
+    broadcast that everyone can open costs time and protects nothing.</p>
+  </div>
+
+  <div class="panelbox" data-in="3" style="left:620px; top:432px; width:510px">
+    <h4>these four numbers stand in for 44,164</h4>
+    <p style="font-size:13px; color:var(--ink-2)">The real ChebyKAN has <b>44,164 parameters</b>.
+    We follow four so you can watch every one of them move. Everything shown scales identically.</p>
+  </div>
+
+  <div class="answer">
+    <span class="q" data-in="1">where · <b>server</b></span>
+    <span class="q p" data-in="1">form · <b>PLAINTEXT</b></span>
+    <span class="q" data-in="2">who can read it · <b>everyone — by design</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 3 · BROADCAST + SELECTION ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">03 · broadcast</div>
+  <h2 class="stitle">All five vehicles receive the identical model</h2>
+  <p class="sub">Each vehicle starts this round from exactly the same four numbers. Any difference
+  that appears later came from that vehicle's own data.</p>
+
+  <svg class="wires" viewBox="0 0 1280 720">
+    <g data-in="2" class="wg">
+      <path class="wire plainw flow" d="M640 232 V275 H200 V400"/>
+      <path class="wire plainw flow" d="M640 232 V275 H420 V400"/>
+      <path class="wire plainw flow" d="M640 232 V275 H640 V400"/>
+      <path class="wire plainw flow" d="M640 232 V275 H860 V400"/>
+      <path class="wire plainw flow" d="M640 232 V275 H1080 V400"/>
+    </g>
+  </svg>
+
+  <div class="srv act" data-in="1" style="left:640px; top:188px">
+    <div class="ttl">Server</div>
+    <div class="ic">☁️</div>
+    <span class="vec plain">W⁽⁰⁾ [0.20, −0.10, 0.35, 0.50]</span>
+  </div>
+
+  <div class="node veh act" data-in="3" style="left:200px; top:440px"><div class="box">🚗</div><div class="nm">C1</div></div>
+  <div class="node veh act" data-in="3" style="left:420px; top:440px"><div class="box">🚗</div><div class="nm">C2</div></div>
+  <div class="node veh act" data-in="3" style="left:640px; top:440px"><div class="box">🚗</div><div class="nm">C3</div></div>
+  <div class="node veh act" data-in="3" style="left:860px; top:440px"><div class="box">🚗</div><div class="nm">C4</div></div>
+  <div class="node veh act" data-in="3" style="left:1080px; top:440px"><div class="box">🚗</div><div class="nm">C5</div></div>
+
+  <div data-in="3" style="position:absolute; left:0; right:0; top:505px; text-align:center">
+    <span class="vec plain">every vehicle now holds W⁽⁰⁾ = [0.20, −0.10, 0.35, 0.50]</span>
+  </div>
+
+  <div class="warnstrip" data-in="3" style="left:220px; top:560px; width:840px">
+    <b>correction — what happened to TOPSIS</b>
+    Earlier slide decks described TOPSIS ranking for choosing which vehicles join a round.
+    <b style="display:inline; color:var(--danger)">It was never implemented</b> — it was a stale
+    comment in the code, removed during the Month-5 audit. Selection today is
+    <b style="display:inline; color:var(--chrome)">random sampling</b> (70% of the fleet per round).
+    Here all five are selected so you can follow every one.
+  </div>
+
+  <div class="answer">
+    <span class="q p" data-in="2">on the wire · <b>PLAINTEXT W⁽⁰⁾</b></span>
+    <span class="q" data-in="3">selection · <b>random sampling, not TOPSIS</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 4 · LOCAL DATA + TRAINING ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">04 · local training</div>
+  <h2 class="stitle">Five different roads produce five different models</h2>
+  <p class="sub">Each vehicle trains the same starting model on its own CAN log. The data stays on
+  the vehicle; only what the model <i>learned</i> will ever move.</p>
+
+  <div data-in="1" style="position:absolute; left:44px; top:150px; right:44px; text-align:center">
+    <span class="vec plain">W⁽⁰⁾ = [0.20, −0.10, 0.35, 0.50] &nbsp;→&nbsp; identical starting point for all five</span>
+  </div>
+
+  <!-- five columns -->
+  <div class="node veh" data-in="2" style="left:200px; top:250px"><div class="box">🚗</div>
+    <div class="nm">C1</div><div class="dta">city traffic<br>DoS flood seen</div></div>
+  <div class="node veh" data-in="2" style="left:420px; top:250px"><div class="box">🚗</div>
+    <div class="nm">C2</div><div class="dta">highway<br>mostly normal</div></div>
+  <div class="node veh" data-in="2" style="left:640px; top:250px"><div class="box">🚗</div>
+    <div class="nm">C3</div><div class="dta">mixed urban<br>fuzzing seen</div></div>
+  <div class="node veh" data-in="2" style="left:860px; top:250px"><div class="box">🚗</div>
+    <div class="nm">C4</div><div class="dta">night routes<br>gear spoof</div></div>
+  <div class="node veh" data-in="2" style="left:1080px; top:250px"><div class="box">🚗</div>
+    <div class="nm">C5</div><div class="dta">suburban<br>RPM spoof</div></div>
+
+  <svg class="wires" viewBox="0 0 1280 720">
+    <g data-in="3">
+      <path class="wire plainw" d="M200 312 V352"/><path class="wire plainw" d="M420 312 V352"/>
+      <path class="wire plainw" d="M640 312 V352"/><path class="wire plainw" d="M860 312 V352"/>
+      <path class="wire plainw" d="M1080 312 V352"/>
+    </g>
+  </svg>
+
+  <div data-in="3" style="position:absolute; left:0; right:0; top:356px; text-align:center;
+      font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--chrome)">
+    ↓ &nbsp; ChebyKAN local training &nbsp; ↓
+  </div>
+
+  <div data-in="3" style="position:absolute; left:60px; top:400px; right:60px;
+      display:flex; flex-direction:column; gap:7px; align-items:center">
+    <span class="vec plain">W₁ = [ 0.24, −0.08, 0.39, 0.47 ]&nbsp;&nbsp;<small style="color:var(--ink-3)">C1</small></span>
+    <span class="vec plain">W₂ = [ 0.22, −0.12, 0.37, 0.52 ]&nbsp;&nbsp;<small style="color:var(--ink-3)">C2</small></span>
+    <span class="vec plain">W₃ = [ 0.26, −0.09, 0.36, 0.49 ]&nbsp;&nbsp;<small style="color:var(--ink-3)">C3</small></span>
+    <span class="vec plain">W₄ = [ 0.23, −0.11, 0.40, 0.48 ]&nbsp;&nbsp;<small style="color:var(--ink-3)">C4</small></span>
+    <span class="vec plain">W₅ = [ 0.25, −0.10, 0.38, 0.51 ]&nbsp;&nbsp;<small style="color:var(--ink-3)">C5</small></span>
+  </div>
+
+  <div class="warnstrip" data-in="3" style="left:820px; top:404px; width:400px; border-style:solid;
+      border-color:var(--ok); background:var(--ok-fill)">
+    <b style="color:var(--ok)">the raw CAN logs never move</b>
+    Not encrypted and sent — simply never sent. At this instant the five plaintext vectors above exist
+    <i>only</i> inside their own vehicle.
+  </div>
+
+  <div class="answer">
+    <span class="q" data-in="2">raw CAN data · <b>on the vehicle only</b></span>
+    <span class="q p" data-in="3">W₁…W₅ · <b>PLAINTEXT, still on the vehicle</b></span>
+    <span class="q ok" data-in="3">server has seen · <b>nothing yet</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 5 · ZOOM: ENCRYPTION OF C1 ══════════ -->
+<div class="slide" data-beats="5">
+  <div class="kicker">05 · zoom in on C1 · encryption</div>
+  <h2 class="stitle">Turning four readable numbers into one sealed block</h2>
+  <p class="sub">This is the single most important transformation in the system. Watch what C1's
+  update becomes before it is allowed onto the radio.</p>
+
+  <div data-in="1" style="position:absolute; left:56px; top:190px; width:250px; text-align:center">
+    <div style="font-family:var(--mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px">1 · what C1 has</div>
+    <span class="vec plain" style="font-size:13.5px"><span class="ic">👁</span>[0.24, −0.08,<br>&nbsp;0.39, 0.47]</span>
+    <div style="margin-top:9px"><span class="badge plain">plaintext</span></div>
+  </div>
+
+  <div data-in="2" style="position:absolute; left:330px; top:190px; width:250px; text-align:center">
+    <div style="font-family:var(--mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px">2 · encode</div>
+    <div class="panelbox" style="position:static; text-align:left">
+      <div class="eq" style="font-size:12px">
+        scale by Δ = 2⁴⁰<br>
+        pack into <b class="op">one polynomial</b><br>
+        <small>4,096 numbers fit in a single slot-vector</small>
+      </div>
+    </div>
+    <div style="font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:8px">m(x) = 0.24 + (−0.08)x + 0.39x² + 0.47x³</div>
+  </div>
+
+  <div data-in="3" style="position:absolute; left:604px; top:190px; width:250px; text-align:center">
+    <div style="font-family:var(--mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px">3 · encrypt</div>
+    <div class="panelbox ci" style="position:static; text-align:left">
+      <div class="eq" style="font-size:12px">
+        <span class="c">c₀</span> = b·u + e₁ + m<br>
+        <span class="c">c₁</span> = a·u + e₂<br>
+        <small>a, b public · e random noise</small>
+      </div>
+    </div>
+    <div style="font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:8px">two big polynomials, not four numbers</div>
+  </div>
+
+  <div data-in="4" style="position:absolute; left:878px; top:190px; width:340px; text-align:center">
+    <div style="font-family:var(--mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px">4 · what leaves C1</div>
+    <span class="vec ciph" style="font-size:13px"><span class="ic">🔒</span> Enc(W₁) = (c₀, c₁)</span>
+    <div class="panelbox ci" style="position:static; margin-top:10px; text-align:left">
+      <div class="scram" style="font-size:10.5px; color:var(--ciph-ink); line-height:1.75; word-break:break-all">
+        8f3a…c02e 41bd…97f5 e6a2…1b40<br>0d77…aa39 5c18…6e2b b904…f7c1
+      </div>
+    </div>
+    <div style="margin-top:9px"><span class="badge ciph">ciphertext</span></div>
+  </div>
+
+  <svg class="wires" viewBox="0 0 1280 720">
+    <path class="wire plainw" d="M310 250 H326" data-in="2"/>
+    <path class="wire" d="M584 250 H600" data-in="3"/>
+    <path class="wire ciphw" d="M858 250 H874" data-in="4"/>
+  </svg>
+
+  <div class="warnstrip" data-in="4" style="left:56px; top:470px; width:560px">
+    <b>a ciphertext is not "encrypted 0.24"</b>
+    There is no sealed box per weight. All four values (in reality all 44,164) are folded together into
+    one algebraic object. You cannot point at part of it and say "that's the third weight".
+  </div>
+
+  <div class="panelbox good" data-in="4" style="left:648px; top:470px; width:570px">
+    <h4 style="color:var(--ok)">and yet it is still computable</h4>
+    <p style="font-size:13px; color:var(--ink-2)">The remarkable property: you can <b>add</b> two of
+    these sealed blocks, or <b>multiply</b> one by a number, and the seal survives. Open the result and
+    you get exactly the answer you'd have got in the clear. That is what makes the next four slides
+    possible.</p>
+  </div>
+
+  <div class="answer">
+    <span class="q p" data-in="1">inside C1 · <b>PLAINTEXT</b></span>
+    <span class="q c" data-in="4">on the wire · <b>CIPHERTEXT</b></span>
+    <span class="q ok" data-in="4">private key · <b>stays on C1</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 6 · ALL FIVE SEAL + PAYLOAD ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">06 · transmission</div>
+  <h2 class="stitle">All five seal their update and transmit</h2>
+  <p class="sub">Same operation on every vehicle. What now travels over the V2X link is five blocks
+  of noise-looking data.</p>
+
+  <div class="node veh enc" data-in="1" style="left:200px; top:230px"><div class="box">🚗<div class="lock">🔒</div></div><div class="nm">C1</div></div>
+  <div class="node veh enc" data-in="1" style="left:420px; top:230px"><div class="box">🚗<div class="lock">🔒</div></div><div class="nm">C2</div></div>
+  <div class="node veh enc" data-in="1" style="left:640px; top:230px"><div class="box">🚗<div class="lock">🔒</div></div><div class="nm">C3</div></div>
+  <div class="node veh enc" data-in="1" style="left:860px; top:230px"><div class="box">🚗<div class="lock">🔒</div></div><div class="nm">C4</div></div>
+  <div class="node veh enc" data-in="1" style="left:1080px; top:230px"><div class="box">🚗<div class="lock">🔒</div></div><div class="nm">C5</div></div>
+
+  <div data-in="2" style="position:absolute; top:296px; left:0; right:0; display:flex; justify-content:center; gap:12px">
+    <span class="vec ciph" style="font-size:11px">🔒 Enc(W₁)</span>
+    <span class="vec ciph" style="font-size:11px">🔒 Enc(W₂)</span>
+    <span class="vec ciph" style="font-size:11px">🔒 Enc(W₃)</span>
+    <span class="vec ciph" style="font-size:11px">🔒 Enc(W₄)</span>
+    <span class="vec ciph" style="font-size:11px">🔒 Enc(W₅)</span>
+  </div>
+
+  <svg class="wires" viewBox="0 0 1280 720">
+    <g data-in="3">
+      <path class="wire ciphw flow" d="M200 336 V400 H640 V440"/>
+      <path class="wire ciphw flow" d="M420 336 V400 H640 V440"/>
+      <path class="wire ciphw flow" d="M640 336 V440"/>
+      <path class="wire ciphw flow" d="M860 336 V400 H640 V440"/>
+      <path class="wire ciphw flow" d="M1080 336 V400 H640 V440"/>
+    </g>
+  </svg>
+
+  <div class="srv" data-in="3" style="left:640px; top:475px">
+    <div class="ttl">Server</div><div class="ic">☁️</div>
+    <div style="font-family:var(--mono); font-size:11px; color:var(--ciph)">receiving 5 ciphertexts</div>
+  </div>
+
+  <div class="panelbox ci" data-in="3" style="left:44px; top:440px; width:330px">
+    <h4 style="color:var(--ciph)">what it costs to seal it</h4>
+    <table class="tbl">
+      <tr><td>44,164 params, plain</td><td style="color:var(--plain)">0.176 MB</td></tr>
+      <tr><td>after CKKS, naive</td><td style="color:var(--ciph)">3.51 MB</td></tr>
+      <tr><td>after our packing</td><td class="w">2.47 MB</td></tr>
+    </table>
+    <p style="font-size:11.5px; color:var(--ink-2); margin-top:8px">Sealing makes the update
+    <b>14× larger</b>. Our packing module removed 29.6% of that at zero accuracy cost.</p>
+  </div>
+
+  <div class="warnstrip" data-in="3" style="left:906px; top:440px; width:330px">
+    <b>the real open problem</b>
+    One DSRC frame is 2.7 KB, so a single update is ~915 frames. A 50-vehicle round moves ~180 MB.
+    This does not fit a vehicle network — the fix is roadside units pre-combining updates.
+  </div>
+
+  <div class="answer">
+    <span class="q c" data-in="2">form · <b>CIPHERTEXT ×5</b></span>
+    <span class="q" data-in="3">payload · <b>2.47 MB per vehicle</b></span>
+    <span class="q ok" data-in="3">readable by · <b>nobody in transit</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 7 · WHAT THE SERVER SEES ══════════ -->
+<div class="slide" data-beats="3">
+  <div class="kicker">07 · inside the server</div>
+  <h2 class="stitle">What the server actually holds</h2>
+  <p class="sub">This slide is the entire privacy claim. Left: what it would love to have. Right: what
+  it really has.</p>
+
+  <div class="panelbox bad" data-in="1" style="left:80px; top:180px; width:480px; height:300px">
+    <h4 style="color:var(--danger)">the server does NOT have</h4>
+    <div style="display:flex; flex-direction:column; gap:9px; margin-top:6px" class="on">
+      <span class="strike vec plain" style="opacity:.5">W₁ = [0.24, −0.08, 0.39, 0.47]</span>
+      <span class="strike vec plain" style="opacity:.5">W₂ = [0.22, −0.12, 0.37, 0.52]</span>
+      <span class="strike vec plain" style="opacity:.5">W₃ = [0.26, −0.09, 0.36, 0.49]</span>
+      <span class="strike vec plain" style="opacity:.5">W₄ = [0.23, −0.11, 0.40, 0.48]</span>
+      <span class="strike vec plain" style="opacity:.5">W₅ = [0.25, −0.10, 0.38, 0.51]</span>
+    </div>
+    <p style="font-size:12.5px; color:var(--ink-2); margin-top:14px">It has no key that opens any one
+    of these, and never will. Not "it promises not to look" — it mathematically cannot.</p>
+  </div>
+
+  <div class="panelbox ci" data-in="2" style="left:600px; top:180px; width:600px; height:300px">
+    <h4 style="color:var(--ciph)">the server DOES have</h4>
+    <div style="display:flex; flex-direction:column; gap:7px; margin-top:6px">
+      <span class="vec ciph" style="font-size:11.5px">🔒 C₁ = (c₀¹, c₁¹) &nbsp;<span class="scram" style="opacity:.6">8f3a…c02e 41bd…97f5</span></span>
+      <span class="vec ciph" style="font-size:11.5px">🔒 C₂ = (c₀², c₁²) &nbsp;<span class="scram" style="opacity:.6">2e91…7d44 ba05…3fc8</span></span>
+      <span class="vec ciph" style="font-size:11.5px">🔒 C₃ = (c₀³, c₁³) &nbsp;<span class="scram" style="opacity:.6">d47c…5a13 90ef…21ab</span></span>
+      <span class="vec ciph" style="font-size:11.5px">🔒 C₄ = (c₀⁴, c₁⁴) &nbsp;<span class="scram" style="opacity:.6">61b8…ee07 3c2d…d95f</span></span>
+      <span class="vec ciph" style="font-size:11.5px">🔒 C₅ = (c₀⁵, c₁⁵) &nbsp;<span class="scram" style="opacity:.6">a30f…4b6c 7e51…08d2</span></span>
+    </div>
+    <p style="font-size:12.5px; color:var(--ink-2); margin-top:14px">Five pairs of polynomials. To the
+    server these are indistinguishable from random numbers — <b>and it must now decide which of them
+    to trust.</b></p>
+  </div>
+
+  <div class="notestrip" data-in="2" style="left:80px; top:508px; right:80px">
+    <b>this is checked, not asserted</b>
+    A counter in the code increments on every decryption of an individual update, and the run aborts if
+    it is ever non-zero. Across all four datasets × 5 rounds it has stayed at <b style="display:inline; color:var(--ok)">0</b>.
+  </div>
+
+  <div class="answer">
+    <span class="q no" data-in="1">individual W₁…W₅ · <b>invisible to server</b></span>
+    <span class="q c" data-in="2">what it holds · <b>5 opaque ciphertexts</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 8 · WHY MULTI-KRUM FAILS ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">08 · the referee problem</div>
+  <h2 class="stitle">The standard defence stops working here</h2>
+  <p class="sub">Multi-Krum is the textbook way to spot a poisoning client. On sealed data it breaks —
+  and understanding exactly why explains our whole design.</p>
+
+  <div class="panelbox" data-in="1" style="left:60px; top:172px; width:330px; height:290px">
+    <h4>Multi-Krum, normally</h4>
+    <div class="eq" style="font-size:13px; line-height:2.3">
+      client updates<br>
+      <span class="op">↓</span> pairwise distances<br>
+      <span class="op">↓</span> rank them<br>
+      <span class="op">↓</span> pick the smallest<br>
+      <span class="op">↓</span> drop the rest<br>
+      <span class="op">↓</span> average survivors
+    </div>
+  </div>
+
+  <div class="panelbox ci" data-in="2" style="left:420px; top:172px; width:360px; height:290px">
+    <h4 style="color:var(--ciph)">what sealed data allows</h4>
+    <div class="eq" style="font-size:14px; line-height:2.2">
+      <span style="color:var(--ok)">✓</span> add two ciphertexts<br>
+      <span style="color:var(--ok)">✓</span> subtract<br>
+      <span style="color:var(--ok)">✓</span> multiply by a number<br>
+      <span style="color:var(--ok)">✓</span> multiply two ciphertexts<br>
+      <span style="color:var(--danger)">✗</span> <b>compare two values</b><br>
+      <span style="color:var(--danger)">✗</span> <b>sort / rank</b><br>
+      <span style="color:var(--danger)">✗</span> <b>pick the smallest</b>
+    </div>
+  </div>
+
+  <div class="panelbox bad" data-in="3" style="left:810px; top:172px; width:410px; height:290px">
+    <h4 style="color:var(--danger)">so Multi-Krum cannot run</h4>
+    <p style="font-size:13px; color:var(--ink-2); line-height:1.7">Its middle three steps are
+    <i>all</i> comparison. Arithmetic survives encryption; decisions do not.</p>
+    <p style="font-size:13px; color:var(--ink-2); line-height:1.7; margin-top:10px">Our Month-4 code
+    "solved" this by <b style="color:var(--danger)">decrypting every client's update</b> to run the
+    comparison — which destroyed the exact property the project exists for. That was defect D4, and
+    fixing it is what Month 5 was about.</p>
+  </div>
+
+  <div class="notestrip" data-in="3" style="left:60px; top:490px; right:60px">
+    <b>the reframe that unlocks it</b>
+    Don't ask "which client is furthest from the other clients" — that needs everyone's plaintext.
+    Ask <b style="display:inline; color:var(--chrome)">"how far is this client from the model we already
+    published?"</b> — and the server already holds that model in the clear.
+  </div>
+
+  <div class="answer">
+    <span class="q ok" data-in="2">arithmetic on ciphertext · <b>works</b></span>
+    <span class="q no" data-in="2">comparison / ranking · <b>impossible</b></span>
+    <span class="q" data-in="3">therefore · <b>change the question</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 9 · FheFL SCORING ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">09 · FheFL scoring · the real formula</div>
+  <h2 class="stitle">Scoring every vehicle without opening any of them</h2>
+  <p class="sub">Distance is measured against W⁽⁰⁾, which the server has in plaintext. That makes the
+  whole calculation possible on sealed data.</p>
+
+  <div class="panelbox hot" data-in="1" style="left:44px; top:166px; width:560px">
+    <h4>step 1 · encrypted distance to the published model &nbsp;(FheFL eq. 11)</h4>
+    <div class="eq" style="font-size:14px">
+      [<span class="c">d ᵘ</span>] = gᵀg + [ (<span class="c">f ᵘ</span> − 2g)ᵀ · <span class="c">f ᵘ</span> ]
+    </div>
+    <p style="font-size:12px; color:var(--ink-2); margin-top:8px">
+      <span class="p">g</span> = W⁽⁰⁾, plaintext at the server &nbsp;·&nbsp;
+      <span class="c">f ᵘ</span> = that vehicle's sealed update. Every operation is add / multiply,
+      so it runs <b>entirely on ciphertext</b>. Measured cost: 18 ms per ciphertext.
+    </p>
+  </div>
+
+  <div class="panelbox" data-in="2" style="left:44px; top:310px; width:560px">
+    <h4>step 2 · turn distance into trust &nbsp;(eq. 7)</h4>
+    <div class="eq" style="font-size:15px">
+      <span class="op">p ᵘ</span> = 1 − <span class="c">d ᵘ</span> ⁄ Σⱼ <span class="c">d ʲ</span>
+      &nbsp;&nbsp;<small>so that Σ p = U − 1 = 4</small>
+    </div>
+    <p style="font-size:12px; color:var(--ink-2); margin-top:8px">Far from the published model → small
+    weight. Close to it → large weight. <b>Nobody is thrown away</b>, unlike Multi-Krum — a vehicle
+    that met a genuinely new attack is the most valuable update in the round.</p>
+  </div>
+
+  <div class="panelbox" data-in="3" style="left:632px; top:166px; width:604px">
+    <h4>the five scores, computed from the numbers in this deck</h4>
+    <table class="tbl" style="margin-top:2px">
+      <tr><th>vehicle</th><th>‖Wᵤ − W⁽⁰⁾‖²</th><th>p ᵘ</th><th>final weight</th><th></th></tr>
+      <tr><td>C1</td><td>0.0045</td><td>0.741</td><td class="w">0.1853</td><td style="color:var(--ink-3)">moved most</td></tr>
+      <tr><td>C2</td><td>0.0016</td><td>0.908</td><td class="w">0.2270</td><td style="color:var(--ok)">closest → trusted most</td></tr>
+      <tr><td>C3</td><td>0.0039</td><td>0.776</td><td class="w">0.1940</td><td></td></tr>
+      <tr><td>C4</td><td>0.0039</td><td>0.776</td><td class="w">0.1940</td><td></td></tr>
+      <tr><td>C5</td><td>0.0035</td><td>0.799</td><td class="w">0.1997</td><td></td></tr>
+      <tr><td colspan="2" style="color:var(--ink-3)">Σ</td><td style="color:var(--ink-3)">4.000</td><td class="w">1.0000</td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="warnstrip" data-in="4" style="left:632px; top:376px; width:604px">
+    <b>the one thing the server does learn</b>
+    To compute p it must see the <i>distance numbers</i> — 5 scalars per round, against 44,164 hidden
+    parameters. That is the measured, quantified privacy cost of this design, and it is stated in
+    every report rather than glossed over. A stricter mode that hides even these is specified and
+    costed, but not yet built.
+  </div>
+
+  <div class="warnstrip" data-in="4" style="left:44px; top:452px; width:560px">
+    <b>known weakness — we say this before we're asked</b>
+    Scoring by closeness <i>rewards staying close</i>. A patient attacker sending small, consistently
+    biased updates would score well every round. The experiment to measure that is scheduled for
+    Month 6.
+  </div>
+
+  <div class="answer">
+    <span class="q c" data-in="1">updates during scoring · <b>still sealed</b></span>
+    <span class="q ok" data-in="3">outliers · <b>down-weighted, not dropped</b></span>
+    <span class="q" data-in="4">server learns · <b>5 distance scalars</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 10 · HOMOMORPHIC AGGREGATION ══════════ -->
+<div class="slide" data-beats="5">
+  <div class="kicker">10 · the core operation</div>
+  <h2 class="stitle">Combining five sealed models into one</h2>
+  <p class="sub">The server now does arithmetic on data it cannot read. Nothing is opened at any point
+  on this slide.</p>
+
+  <div data-in="1" style="position:absolute; left:44px; top:170px; width:470px">
+    <div class="panelbox ci" style="position:static">
+      <h4 style="color:var(--ciph)">the simple idea first — a plain average</h4>
+      <div class="eq" style="font-size:13px">
+        <span class="c">Enc(W₁)</span> <span class="op">+</span> <span class="c">Enc(W₂)</span> <span class="op">+</span> … <span class="op">+</span> <span class="c">Enc(W₅)</span><br>
+        <span class="op">=</span> <span class="c">Enc(W₁ + W₂ + … + W₅)</span><br>
+        <span class="op">× 1/5</span> <span class="op">→</span> <span class="c">Enc( mean )</span>
+      </div>
+      <p style="font-size:12px; color:var(--ink-2); margin-top:8px">Add the sealed blocks; the seal
+      survives, and what is inside has been added too. This is the whole magic of homomorphic
+      encryption in one line.</p>
+    </div>
+  </div>
+
+  <div data-in="2" style="position:absolute; left:44px; top:400px; width:470px">
+    <div class="panelbox hot" style="position:static">
+      <h4>what actually runs — trust-weighted, not a plain average</h4>
+      <div class="eq" style="font-size:13.5px">
+        <span class="c">Enc(Wᴳ¹)</span> <span class="op">=</span> Σᵤ <span class="op">pᵘ</span> · <span class="c">Enc(Wᵤ)</span>
+      </div>
+      <p style="font-size:12px; color:var(--ink-2); margin-top:8px">A plain 1/5 average is just this
+      formula when every vehicle is equally trusted. The scores from the previous slide slot straight
+      in — multiplying a ciphertext by a plain number is allowed.</p>
+    </div>
+  </div>
+
+  <!-- visual: 5 sealed blocks folding into one -->
+  <div data-in="3" style="position:absolute; left:600px; top:180px; right:44px">
+    <div style="display:flex; gap:9px; justify-content:center; flex-wrap:wrap">
+      <span class="vec ciph" style="font-size:10.5px">🔒 Enc(W₁)<br>×0.1853</span>
+      <span class="vec ciph" style="font-size:10.5px">🔒 Enc(W₂)<br>×0.2270</span>
+      <span class="vec ciph" style="font-size:10.5px">🔒 Enc(W₃)<br>×0.1940</span>
+      <span class="vec ciph" style="font-size:10.5px">🔒 Enc(W₄)<br>×0.1940</span>
+      <span class="vec ciph" style="font-size:10.5px">🔒 Enc(W₅)<br>×0.1997</span>
+    </div>
+  </div>
+
+  <svg class="wires" viewBox="0 0 1280 720">
+    <g data-in="4">
+      <path class="wire ciphw flow" d="M660 235 V280 H940 V320"/>
+      <path class="wire ciphw flow" d="M800 235 V280 H940 V320"/>
+      <path class="wire ciphw flow" d="M940 235 V320"/>
+      <path class="wire ciphw flow" d="M1080 235 V280 H940 V320"/>
+      <path class="wire ciphw flow" d="M1200 235 V280 H940 V320"/>
+    </g>
+  </svg>
+
+  <div data-in="4" style="position:absolute; left:600px; top:330px; right:44px; text-align:center">
+    <span class="vec ciph" style="font-size:16px">🔒 Enc( Wᴳ¹ )</span>
+    <div style="margin-top:9px"><span class="badge ciph">still sealed</span></div>
+  </div>
+
+  <div class="panelbox good" data-in="4" style="left:600px; top:412px; right:44px">
+    <h4 style="color:var(--ok)">what is mathematically inside that block</h4>
+    <div class="eq" style="font-size:13px; color:var(--ok)">Wᴳ¹ ≈ [ 0.2394, −0.1008, 0.3796, 0.4952 ]</div>
+    <p style="font-size:12px; color:var(--ink-2); margin-top:6px">Shown so <i>you</i> can follow the
+    arithmetic. <b>The server has not computed this vector</b> — it computed the sealed block. Those
+    four numbers do not exist anywhere in its memory.</p>
+  </div>
+
+  <div class="answer">
+    <span class="q c" data-in="3">inputs · <b>5 CIPHERTEXTS</b></span>
+    <span class="q op" data-in="4">operation · <b>add + scalar multiply</b></span>
+    <span class="q ok" data-in="4">decryptions so far · <b>0</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 11 · OPEN THE AGGREGATE ONLY ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">11 · the only unsealing in the entire round</div>
+  <h2 class="stitle">Opening the sum — and only the sum</h2>
+  <p class="sub">One decryption happens per round. Understanding why it is safe is the last piece of
+  the design.</p>
+
+  <div data-in="1" style="position:absolute; left:60px; top:180px; width:420px; text-align:center">
+    <span class="vec ciph" style="font-size:14px">🔒 Enc(Wᴳ¹)</span>
+    <div style="font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+        color:var(--chrome); margin:14px 0">↓ &nbsp; decrypt &nbsp; ↓</div>
+    <span class="vec plain" style="font-size:14px">👁 [0.2394, −0.1008, 0.3796, 0.4952]</span>
+    <div style="margin-top:10px"><span class="badge plain">plaintext W⁽¹⁾</span></div>
+  </div>
+
+  <div class="panelbox" data-in="2" style="left:520px; top:172px; width:700px">
+    <h4>why the server can open the sum but never one vehicle</h4>
+    <div class="eq" style="font-size:13px; line-height:2.1">
+      each vehicle holds a <b class="op">share</b> of the key: &nbsp; s = s₁ + s₂ + s₃ + s₄ + s₅<br>
+      vehicles mask their share in pairs: &nbsp; ssᵤ = sᵤ + Σ<sub>j≠u</sub> s<sub>u,j</sub><br>
+      the masks are <b class="op">equal and opposite</b>, so they cancel <b class="op">only in the total</b>
+    </div>
+    <p style="font-size:12.5px; color:var(--ink-2); margin-top:10px">The server can assemble a key that
+    opens the <b>aggregate</b>, and no key that opens any individual. To unmask one honest vehicle it
+    would have to collude with <b>all four others</b>.</p>
+  </div>
+
+  <div class="panelbox good" data-in="3" style="left:520px; top:362px; width:340px">
+    <h4 style="color:var(--ok)">round counters</h4>
+    <table class="tbl">
+      <tr><td>individual updates opened</td><td style="color:var(--ok); font-weight:700">0</td></tr>
+      <tr><td>aggregates opened</td><td>1</td></tr>
+      <tr><td>distance scalars seen</td><td>5</td></tr>
+    </table>
+  </div>
+
+  <div class="warnstrip" data-in="3" style="left:880px; top:362px; width:340px">
+    <b>honest boundary</b>
+    The CKKS arithmetic above is <b style="display:inline">real</b>. The key-sharing layer is currently
+    an algebraic model — TenSEAL has no multi-key API. Making it real cryptography is the Month-6
+    OpenFHE migration, and until then we do not call it "full multi-key CKKS".
+  </div>
+
+  <div class="notestrip" data-in="3" style="left:60px; top:452px; width:420px">
+    <b>and the aggregate is public anyway</b>
+    Every vehicle is about to be sent this model. It is the shared result — the thing the whole fleet
+    is collaborating to produce. Hiding it from the participants would be pointless.
+  </div>
+
+  <div class="answer">
+    <span class="q c" data-in="1">before · <b>CIPHERTEXT</b></span>
+    <span class="q p" data-in="1">after · <b>PLAINTEXT W⁽¹⁾</b></span>
+    <span class="q ok" data-in="3">individual updates opened · <b>0</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 12 · BROADCAST BACK + RESYNC ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">12 · closing the loop</div>
+  <h2 class="stitle">Every vehicle throws away its own model and adopts the shared one</h2>
+  <p class="sub">This is how a vehicle benefits from attacks it never saw. C2 never encountered a DoS
+  flood — but C1 did, and after this step C2 can detect it.</p>
+
+  <svg class="wires" viewBox="0 0 1280 720">
+    <g data-in="2">
+      <path class="wire plainw flow" d="M640 228 V268 H200 V392"/>
+      <path class="wire plainw flow" d="M640 228 V268 H420 V392"/>
+      <path class="wire plainw flow" d="M640 228 V268 H640 V392"/>
+      <path class="wire plainw flow" d="M640 228 V268 H860 V392"/>
+      <path class="wire plainw flow" d="M640 228 V268 H1080 V392"/>
+    </g>
+  </svg>
+
+  <div class="srv act" data-in="1" style="left:640px; top:186px">
+    <div class="ttl">Server</div><div class="ic">☁️</div>
+    <span class="vec plain" style="font-size:11.5px">W⁽¹⁾ [0.2394, −0.1008, 0.3796, 0.4952]</span>
+  </div>
+
+  <div class="node veh" data-in="3" style="left:200px; top:432px"><div class="box">🚗</div><div class="nm">C1</div></div>
+  <div class="node veh" data-in="3" style="left:420px; top:432px"><div class="box">🚗</div><div class="nm">C2</div></div>
+  <div class="node veh" data-in="3" style="left:640px; top:432px"><div class="box">🚗</div><div class="nm">C3</div></div>
+  <div class="node veh" data-in="3" style="left:860px; top:432px"><div class="box">🚗</div><div class="nm">C4</div></div>
+  <div class="node veh" data-in="3" style="left:1080px; top:432px"><div class="box">🚗</div><div class="nm">C5</div></div>
+
+  <div data-in="3" style="position:absolute; left:0; right:0; top:496px; text-align:center">
+    <div style="font-family:var(--mono); font-size:11.5px; color:var(--ink-2)">
+      old local model W₁…W₅ &nbsp;<b style="color:var(--danger)">discarded</b>&nbsp; → replaced by W⁽¹⁾
+    </div>
+  </div>
+
+  <div class="panelbox" data-in="3" style="left:170px; top:530px; width:440px">
+    <h4>this is the part people usually miss</h4>
+    <p style="font-size:12.5px; color:var(--ink-2)">Vehicles do <b>not</b> keep improving their own
+    private model forever. Each round they <i>resynchronise</i> onto the shared one. That is what makes
+    it one collaborative detector rather than five isolated ones.</p>
+  </div>
+
+  <div class="notestrip" data-in="3" style="left:640px; top:530px; width:470px">
+    <b>why the broadcast is plaintext</b>
+    We encrypted this in Month 4 and removed it in Month 5. Every vehicle must read it, so any key that
+    opens it is already in every vehicle — encrypting it cost time and protected nothing. What must
+    stay sealed is each vehicle's <i>individual</i> update, and that never stopped being sealed.
+  </div>
+
+  <div class="answer">
+    <span class="q p" data-in="2">on the wire · <b>PLAINTEXT W⁽¹⁾</b></span>
+    <span class="q" data-in="3">local models · <b>overwritten by the global</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 13 · ROUND 2 ══════════ -->
+<div class="slide" data-beats="4">
+  <div class="kicker">13 · and again</div>
+  <h2 class="stitle">Round 2 starts from Wᴳ¹ — and nothing else changes</h2>
+  <p class="sub">The cycle is identical every round. Only the starting model is better each time.</p>
+
+  <div data-in="1" style="position:absolute; left:44px; top:180px; width:580px">
+    <div class="panelbox" style="position:static">
+      <h4>round 1 — what you just watched</h4>
+      <div class="eq" style="font-size:12.5px; line-height:1.95">
+        <span class="p">W⁽⁰⁾</span> plaintext broadcast<br>
+        <span class="op">↓</span> local ChebyKAN training on private CAN data<br>
+        <span class="op">↓</span> CKKS encryption on each vehicle<br>
+        <span class="op">↓</span> <span class="c">Enc(Wᵤ)</span> over the V2X link<br>
+        <span class="op">↓</span> encrypted distance → trust weights pᵘ<br>
+        <span class="op">↓</span> Σ pᵘ · <span class="c">Enc(Wᵤ)</span> — still sealed<br>
+        <span class="op">↓</span> open the aggregate only → <span class="p">W⁽¹⁾</span>
+      </div>
+    </div>
+  </div>
+
+  <div data-in="2" style="position:absolute; left:656px; top:180px; width:580px">
+    <div class="panelbox hot" style="position:static">
+      <h4>round 2 — same machine, better input</h4>
+      <div class="eq" style="font-size:12.5px; line-height:1.95">
+        <span class="p">W⁽¹⁾</span> plaintext broadcast<br>
+        <span class="op">↓</span> local training <small>(distances now measured against W⁽¹⁾)</small><br>
+        <span class="op">↓</span> CKKS encryption<br>
+        <span class="op">↓</span> <span class="c">Enc(W′ᵤ)</span><br>
+        <span class="op">↓</span> trust weights p′ᵘ<br>
+        <span class="op">↓</span> sealed weighted sum<br>
+        <span class="op">↓</span> → <span class="p">W⁽²⁾</span> &nbsp;… and so on
+      </div>
+    </div>
+  </div>
+
+  <div data-in="3" style="position:absolute; left:44px; top:436px; right:44px">
+    <div class="panelbox good" style="position:static">
+      <h4 style="color:var(--ok)">what this buys, measured on the real system</h4>
+      <div style="display:flex; gap:34px; flex-wrap:wrap; align-items:flex-start; margin-top:4px">
+        <div style="flex:1; min-width:210px">
+          <div style="font-family:var(--mono); font-size:20px; font-weight:700; color:var(--ok)">0.9977</div>
+          <div style="font-size:12px; color:var(--ink-2)">encrypted accuracy on Car-Hacking</div>
+        </div>
+        <div style="flex:1; min-width:210px">
+          <div style="font-family:var(--mono); font-size:20px; font-weight:700">0.9981</div>
+          <div style="font-size:12px; color:var(--ink-2)">plaintext accuracy — the difference is
+          smaller than the random-seed variation</div>
+        </div>
+        <div style="flex:1; min-width:210px">
+          <div style="font-family:var(--mono); font-size:20px; font-weight:700; color:var(--ok)">0</div>
+          <div style="font-size:12px; color:var(--ink-2)">individual updates ever opened, across all
+          datasets and rounds</div>
+        </div>
+        <div style="flex:1; min-width:210px">
+          <div style="font-family:var(--mono); font-size:20px; font-weight:700">~1e−8</div>
+          <div style="font-size:12px; color:var(--ink-2)">numerical error CKKS introduces — far below
+          normal training noise</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="answer">
+    <span class="q ok" data-in="3">headline · <b>encryption costs no accuracy</b></span>
+    <span class="q" data-in="3">and · <b>the server never saw one vehicle's update</b></span>
+  </div>
+</div>
+
+<!-- ══════════ 14 · FULL PICTURE ══════════ -->
+<div class="slide" data-beats="3">
+  <div class="kicker">14 · everything at once</div>
+  <h2 class="stitle">The complete round</h2>
+
+  <svg class="wires" viewBox="0 0 1280 720">
+    <g data-in="1">
+      <path class="wire plainw" d="M640 176 V206 H150 V236"/>
+      <path class="wire plainw" d="M640 176 V206 H395 V236"/>
+      <path class="wire plainw" d="M640 176 V206 H640 V236"/>
+      <path class="wire plainw" d="M640 176 V206 H885 V236"/>
+      <path class="wire plainw" d="M640 176 V206 H1130 V236"/>
+    </g>
+    <g data-in="2">
+      <path class="wire ciphw" d="M150 366 V400 H640 V430"/>
+      <path class="wire ciphw" d="M395 366 V400 H640 V430"/>
+      <path class="wire ciphw" d="M640 366 V430"/>
+      <path class="wire ciphw" d="M885 366 V400 H640 V430"/>
+      <path class="wire ciphw" d="M1130 366 V400 H640 V430"/>
+    </g>
+    <g data-in="2">
+      <path class="wire plainw" d="M1215 520 H1250 V150 H660" stroke-dasharray="6 6"/>
+      <polygon points="668,150 660,146 660,154" fill="var(--plain-line)"/>
+    </g>
+  </svg>
+
+  <div class="srv" data-in="1" style="left:640px; top:148px">
+    <span class="vec plain" style="font-size:11.5px">W⁽⁰⁾ — plaintext global model</span>
+  </div>
+
+  <div class="node veh" data-in="1" style="left:150px; top:270px"><div class="box" style="width:60px;height:48px;font-size:20px">🚗</div><div class="nm">C1</div></div>
+  <div class="node veh" data-in="1" style="left:395px; top:270px"><div class="box" style="width:60px;height:48px;font-size:20px">🚗</div><div class="nm">C2</div></div>
+  <div class="node veh" data-in="1" style="left:640px; top:270px"><div class="box" style="width:60px;height:48px;font-size:20px">🚗</div><div class="nm">C3</div></div>
+  <div class="node veh" data-in="1" style="left:885px; top:270px"><div class="box" style="width:60px;height:48px;font-size:20px">🚗</div><div class="nm">C4</div></div>
+  <div class="node veh" data-in="1" style="left:1130px; top:270px"><div class="box" style="width:60px;height:48px;font-size:20px">🚗</div><div class="nm">C5</div></div>
+
+  <div data-in="1" style="position:absolute; left:0; right:0; top:322px; text-align:center;
+      font-family:var(--mono); font-size:10.5px; color:var(--ink-3); line-height:1.6">
+    private CAN data · ChebyKAN training · CKKS encryption
+  </div>
+
+  <div data-in="2" style="position:absolute; left:0; right:0; top:344px; display:flex; justify-content:center; gap:24px">
+    <span class="vec ciph" style="font-size:10px">🔒Enc(W₁)</span>
+    <span class="vec ciph" style="font-size:10px">🔒Enc(W₂)</span>
+    <span class="vec ciph" style="font-size:10px">🔒Enc(W₃)</span>
+    <span class="vec ciph" style="font-size:10px">🔒Enc(W₄)</span>
+    <span class="vec ciph" style="font-size:10px">🔒Enc(W₅)</span>
+  </div>
+
+  <div class="panelbox ci" data-in="2" style="left:340px; top:440px; width:600px">
+    <h4 style="color:var(--ciph)">server · never opens an individual update</h4>
+    <div class="eq" style="font-size:12.5px; line-height:1.9; text-align:center">
+      encrypted distance to W⁽⁰⁾ &nbsp;<span class="op">→</span>&nbsp; trust weights pᵘ<br>
+      <span class="op">↓</span><br>
+      <span class="c">Enc(Wᴳ¹)</span> = Σᵤ pᵘ · <span class="c">Enc(Wᵤ)</span> &nbsp;<small>homomorphic</small><br>
+      <span class="op">↓</span> open the aggregate only<br>
+      <span class="p">W⁽¹⁾ = [0.2394, −0.1008, 0.3796, 0.4952]</span>
+    </div>
+  </div>
+
+  <div data-in="2" style="position:absolute; right:44px; top:500px; width:170px; text-align:center;
+      font-family:var(--mono); font-size:10.5px; color:var(--plain); line-height:1.6">
+    ↻ broadcast W⁽¹⁾<br>vehicles resync<br>next round
+  </div>
+
+  <div class="answer">
+    <span class="q p" data-in="1">gold · <b>plaintext, readable</b></span>
+    <span class="q c" data-in="2">violet · <b>ciphertext, sealed</b></span>
+    <span class="q ok" data-in="2">the invariant · <b>0 individual updates opened</b></span>
+  </div>
+</div>
+
+<!-- ══════════ MATH OVERLAY ══════════ -->
+<div id="math">
+  <button class="cls" id="mathClose" style="font-family:var(--mono); font-size:12px; cursor:pointer;
+    border:1px solid var(--line-2); background:var(--stage); color:var(--ink); border-radius:7px; padding:6px 12px">close ✕</button>
+  <h3>Math details</h3>
+  <p class="lede">Deliberately kept out of the main flow. None of this is needed to follow the story.</p>
+  <div class="grid">
+    <div class="box">
+      <h5>the ring</h5>
+      <code>R_q = Z_q[x] / (x^N + 1)&nbsp;&nbsp;N = 8192</code>
+      <p>All values are polynomials of degree &lt; N with integer coefficients mod q. Our chain is
+      [60, 40, 40, 60] bits = 200 bits total, giving 128-bit security and 2 multiplication levels.</p>
+    </div>
+    <div class="box">
+      <h5>encode</h5>
+      <code>real vector → ×Δ → integer polynomial<br>Δ = 2⁴⁰ &nbsp; slots = N/2 = 4096</code>
+      <p>4,096 real numbers pack into one ciphertext, so 44,164 parameters need 11 ciphertexts —
+      not 44,164. This packing is what makes the scheme affordable at all.</p>
+    </div>
+    <div class="box">
+      <h5>encrypt / decrypt</h5>
+      <code>b = −a·s + e&nbsp;&nbsp;(public key = (a,b))<br>c₀ = b·u + e₁ + m&nbsp;&nbsp;c₁ = a·u + e₂<br>m′ = c₀ + c₁·s&nbsp;&nbsp;then ÷ Δ</code>
+      <p>Security rests on Ring-LWE: recovering s from b = a·s + e is believed hard even for quantum
+      computers. Removing e would make it trivial linear algebra.</p>
+    </div>
+    <div class="box">
+      <h5>noise and depth</h5>
+      <code>each ct×ct multiply consumes one level</code>
+      <p>A chain of L primes allows L−2 multiplications. Run out and the ciphertext no longer decrypts.
+      Homomorphic addition costs ~0.03 ms; ciphertext×ciphertext costs ~15 ms — a 490× gap, which is
+      why the protocol is designed to need as few multiplies as possible.</p>
+    </div>
+    <div class="box">
+      <h5>FheFL scoring, exact</h5>
+      <code>[dᵘ] = gᵀg + [(fᵘ − 2g)ᵀ·fᵘ]&nbsp;&nbsp;(eq. 11)<br>pᵘ = 1 − dᵘ / Σⱼ dʲ&nbsp;&nbsp;(eq. 7)&nbsp;&nbsp;Σpᵘ = U−1<br>gᵢ = (1/(U−1)) Σᵤ pᵘ · fᵘ&nbsp;&nbsp;(eq. 9)</code>
+      <p>Source: Rahulamathavan et al., arXiv:2306.05112. Implemented in
+      <code style="display:inline">federated/server.py :: aggregate_round</code>.</p>
+    </div>
+    <div class="box">
+      <h5>multi-key sharing</h5>
+      <code>s = Σᵤ sᵤ&nbsp;&nbsp;ssᵤ = sᵤ + Σ_{j≠u} s_{u,j}<br>s_{i,j} = −s_{j,i} ⟹ Σᵤ ssᵤ = s</code>
+      <p>Masks cancel only in the total, so the server assembles a key for the aggregate and none for
+      an individual. Recovering one honest vehicle requires colluding with U−1 others. Our addition to
+      the paper: masks are re-derived per round for whoever actually reported, so a vehicle in a tunnel
+      no longer corrupts decryption.</p>
+    </div>
+    <div class="box">
+      <h5>measured cost, per client update</h5>
+      <code>encrypt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;42 ms<br>distance&nbsp;&nbsp;&nbsp;118–230 ms<br>aggregate&nbsp;&nbsp;5–52 ms<br>wire&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.47 MB&nbsp;&nbsp;(14.7× plaintext)</code>
+      <p>N=8192, 11 ciphertexts, 44,164 parameters, measured on the development host.</p>
+    </div>
+    <div class="box">
+      <h5>the honest boundary</h5>
+      <p>The CKKS arithmetic is real (TenSEAL). The multi-key <i>key management</i> is an algebraic
+      model, because TenSEAL exposes no multi-key API. OpenFHE was selected to replace it and that
+      migration is the Month-6 priority. Until it lands, nothing here should be described as
+      "full multi-key CKKS".</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /stage -->
+
+<div id="bar">
+  <button id="prev">← prev</button>
+  <button id="next" class="pri">next →</button>
+  <button id="play">▶ auto</button>
+  <span id="pos"></span>
+  <button id="mathBtn">math details</button>
+  <button id="theme">◐</button>
+  <div id="dots"></div>
+</div>
+</div><!-- /shell -->
+
+<script>
+(function(){
+  "use strict";
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var slides = [].slice.call(document.querySelectorAll(".slide"));
+  var stage  = document.getElementById("stage");
+  var si = 0, bi = 0, timer = null;
+
+  /* ---- scale the 1280x720 stage to fit the window ---- */
+  function fit(){
+    var w = innerWidth, h = innerHeight - 46;
+    var s = Math.min(w / 1300, h / 740);
+    stage.style.transform = "translate(-50%,-50%) scale(" + s + ")";
+    stage.style.marginTop = "-23px";
+  }
+  addEventListener("resize", fit); fit();
+
+  /* ---- dots ---- */
+  var dots = document.getElementById("dots");
+  slides.forEach(function(_, i){
+    var d = document.createElement("i");
+    d.addEventListener("click", function(){ go(i, 0); });
+    dots.appendChild(d);
+  });
+
+  function beatsOf(i){ return parseInt(slides[i].getAttribute("data-beats"), 10) || 1; }
+
+  function render(){
+    slides.forEach(function(sl, i){ sl.classList.toggle("live", i === si); });
+    var cur = slides[si];
+    [].forEach.call(cur.querySelectorAll("[data-in]"), function(el){
+      el.classList.toggle("on", parseInt(el.getAttribute("data-in"), 10) <= bi);
+    });
+    [].forEach.call(dots.children, function(d, i){
+      d.classList.toggle("at", i === si);
+      d.classList.toggle("past", i < si);
+    });
+    document.getElementById("pos").textContent =
+      "slide " + (si + 1) + "/" + slides.length + " · step " + (bi + 1) + "/" + beatsOf(si);
+    document.getElementById("prev").disabled = (si === 0 && bi === 0);
+    document.getElementById("next").disabled = (si === slides.length - 1 && bi === beatsOf(si) - 1);
+  }
+
+  function go(s, b){
+    si = Math.max(0, Math.min(slides.length - 1, s));
+    bi = Math.max(0, Math.min(beatsOf(si) - 1, b));
+    render();
+  }
+  function next(){
+    if (bi < beatsOf(si) - 1) { bi++; }
+    else if (si < slides.length - 1) { si++; bi = 0; }
+    else { stop(); return false; }
+    render(); return true;
+  }
+  function prev(){
+    if (bi > 0) { bi--; }
+    else if (si > 0) { si--; bi = beatsOf(si) - 1; }
+    render();
+  }
+  function stop(){
+    if (timer) { clearInterval(timer); timer = null; }
+    document.getElementById("play").textContent = "▶ auto";
+  }
+  function play(){
+    if (timer) { stop(); return; }
+    document.getElementById("play").textContent = "❚❚ pause";
+    timer = setInterval(function(){ if (!next()) stop(); }, reduce ? 700 : 2600);
+  }
+
+  document.getElementById("next").addEventListener("click", function(){ stop(); next(); });
+  document.getElementById("prev").addEventListener("click", function(){ stop(); prev(); });
+  document.getElementById("play").addEventListener("click", play);
+
+  var math = document.getElementById("math");
+  document.getElementById("mathBtn").addEventListener("click", function(){ math.classList.toggle("open"); });
+  document.getElementById("mathClose").addEventListener("click", function(){ math.classList.remove("open"); });
+
+  document.getElementById("theme").addEventListener("click", function(){
+    var r = document.documentElement, c = r.getAttribute("data-theme");
+    r.setAttribute("data-theme",
+      c === "dark" ? "light" : c === "light" ? "dark"
+      : (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark"));
+  });
+
+  addEventListener("keydown", function(e){
+    if (e.key === "Escape"){ math.classList.remove("open"); return; }
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown"){ e.preventDefault(); stop(); next(); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp"){ e.preventDefault(); stop(); prev(); }
+    else if (e.key === "Home"){ stop(); go(0,0); }
+    else if (e.key === "End"){ stop(); go(slides.length-1, beatsOf(slides.length-1)-1); }
+    else if (e.key === "m" || e.key === "M"){ math.classList.toggle("open"); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

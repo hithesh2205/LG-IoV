@@ -121,7 +121,7 @@ Stated up front so nothing below reads as an overclaim:
 ```
 5th Month Progress/     ← the complete Month 1–5 snapshot (start here)
 Team/LG_IoV/            ← working tree: NewModel (live), Model (gen 1 archived)
-Claude's work/          ← FHE comparison results and HTML explainers
+FHE_Comparison/         ← FHE vs no-FHE comparison results and HTML explainers
 Base line/              ← React architecture visualiser
 compare/                ← deck extraction utilities
 *.pdf, *.pptx           ← meeting decks and reference papers

@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encrypted Fleet Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+  :root{
+    --bg:#eef2f4; --panel:#ffffff; --panel-2:#e5ecef; --raise:#f7f9fa;
+    --ink:#15212b; --ink-muted:#576976; --ink-faint:#8395a1;
+    --hair:#d0dae0; --hair-strong:#b6c4cc;
+    --accent:#0d7a75; --accent-soft:#d3ece9; --accent-ink:#0a5d59;
+    --ok:#2f8f63; --ok-soft:#d8ede2;
+    --warn:#b0702a; --warn-soft:#f2e4d1;
+    --crit:#bd4d4b; --crit-soft:#f2dcdb;
+    --shadow:0 1px 2px rgba(20,45,55,.06), 0 10px 30px rgba(20,45,55,.07);
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code','Segoe UI Mono',Menlo,Consolas,monospace;
+    --sans:'IBM Plex Sans',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a0e13; --panel:#121b23; --panel-2:#0e161d; --raise:#17222b;
+      --ink:#e7eef4; --ink-muted:#93a4b2; --ink-faint:#6c7e8c;
+      --hair:#233039; --hair-strong:#324351;
+      --accent:#3ed8d0; --accent-soft:#123536; --accent-ink:#8ceee9;
+      --ok:#5fbd92; --ok-soft:#12302a;
+      --warn:#e0a45c; --warn-soft:#322415;
+      --crit:#e2635f; --crit-soft:#331b1c;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 14px 34px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0e13; --panel:#121b23; --panel-2:#0e161d; --raise:#17222b;
+    --ink:#e7eef4; --ink-muted:#93a4b2; --ink-faint:#6c7e8c;
+    --hair:#233039; --hair-strong:#324351;
+    --accent:#3ed8d0; --accent-soft:#123536; --accent-ink:#8ceee9;
+    --ok:#5fbd92; --ok-soft:#12302a;
+    --warn:#e0a45c; --warn-soft:#322415;
+    --crit:#e2635f; --crit-soft:#331b1c;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 14px 34px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{transition:none!important;animation:none!important} }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1140px; margin:0 auto; padding:0 24px}
+  h1,h2,h3{font-family:var(--mono); font-weight:600; text-wrap:balance; line-height:1.2; margin:0}
+  p{margin:0}
+  a{color:var(--accent-ink)}
+  .mono{font-family:var(--mono)}
+
+  header.top{
+    position:sticky; top:0; z-index:40;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--hair);
+  }
+  .top .wrap{display:flex; align-items:center; gap:20px; min-height:60px; flex-wrap:wrap}
+  .brand{font-family:var(--mono); font-weight:600; font-size:15px; letter-spacing:.02em; white-space:nowrap}
+  .brand b{color:var(--accent-ink)}
+  .privacy-readout{
+    display:flex; align-items:center; gap:10px; margin-left:auto;
+    font-family:var(--mono); font-size:12px; color:var(--ink-muted);
+    border:1px solid var(--hair); border-radius:999px; padding:5px 12px;
+    background:var(--panel);
+  }
+  .privacy-readout .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+  .privacy-readout b{color:var(--ok)}
+  .theme-btn{
+    border:1px solid var(--hair); background:var(--panel); color:var(--ink-muted);
+    width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1;
+  }
+  .theme-btn:hover{color:var(--ink); border-color:var(--hair-strong)}
+
+  .hero{padding:76px 0 40px}
+  .hero .eyebrow{margin-bottom:20px}
+  .hero h1{font-size:clamp(30px,5vw,52px); letter-spacing:-.01em}
+  .hero .lede{margin-top:22px; font-size:clamp(17px,2.2vw,21px); color:var(--ink-muted); max-width:64ch}
+  .hero .lede b{color:var(--ink); font-weight:600}
+  .scroll-cue{margin-top:34px; display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--mono); font-size:13px; color:var(--ink-faint)}
+  .scroll-cue span{width:26px;height:1px;background:var(--hair-strong)}
+
+  section{padding:56px 0; border-top:1px solid var(--hair); scroll-margin-top:72px}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-ink);
+    display:flex; align-items:center; gap:12px;
+  }
+  .eyebrow::before{content:""; width:22px; height:2px; background:var(--accent); flex:none}
+  section > .wrap > h2{font-size:clamp(22px,3vw,30px); margin:16px 0 0}
+  .section-lede{margin-top:14px; color:var(--ink-muted); max-width:70ch}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--hair); border-radius:14px;
+    box-shadow:var(--shadow);
+  }
+
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px}
+  @media (max-width:820px){ .cards{grid-template-columns:1fr} }
+  .card{padding:22px}
+  .card .n{font-family:var(--mono); font-size:12px; color:var(--ink-faint); letter-spacing:.1em}
+  .card h3{font-size:16px; margin:10px 0 8px}
+  .card p{font-size:14.5px; color:var(--ink-muted)}
+  .card.solve{border-color:var(--accent); background:linear-gradient(180deg,var(--accent-soft),var(--panel) 60%)}
+  .card.solve h3{color:var(--accent-ink)}
+
+  .sim-grid{display:grid; grid-template-columns:1.55fr 1fr; gap:18px; margin-top:26px}
+  @media (max-width:900px){ .sim-grid{grid-template-columns:1fr} }
+  .stage{
+    position:relative; min-height:440px; border-radius:14px; overflow:hidden;
+    background:var(--panel-2); border:1px solid var(--hair);
+  }
+  .stage .grid-bg{
+    position:absolute; inset:0; opacity:.5;
+    background-image:linear-gradient(var(--hair) 1px,transparent 1px),linear-gradient(90deg,var(--hair) 1px,transparent 1px);
+    background-size:44px 44px;
+    -webkit-mask-image:radial-gradient(circle at 62% 50%, #000, transparent 78%);
+            mask-image:radial-gradient(circle at 62% 50%, #000, transparent 78%);
+  }
+  .veh{
+    position:absolute; width:96px; transform:translate(-50%,-50%);
+    text-align:center; transition:filter .3s;
+  }
+  .veh .body{
+    position:relative; margin:0 auto; width:52px; height:52px; border-radius:12px;
+    background:var(--panel); border:1.5px solid var(--hair-strong);
+    display:flex; align-items:center; justify-content:center; font-size:20px;
+    transition:border-color .3s, box-shadow .3s, transform .3s;
+  }
+  .veh .lock{
+    position:absolute; right:-8px; top:-8px; width:20px; height:20px; border-radius:50%;
+    background:var(--accent); color:#04201f; font-size:11px; display:flex; align-items:center; justify-content:center;
+    opacity:0; transform:scale(.4); transition:opacity .3s, transform .3s;
+  }
+  .veh.enc .lock{opacity:1; transform:scale(1)}
+  .veh.train .body{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+  .veh .tag{margin-top:6px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); line-height:1.3}
+  .veh.mal .body{border-color:var(--warn)}
+  .veh.mal .tag{color:var(--warn)}
+  .veh .wbar{margin-top:5px; height:5px; border-radius:3px; background:var(--panel-2); overflow:hidden; border:1px solid var(--hair)}
+  .veh .wbar i{display:block; height:100%; width:0; background:var(--ok); transition:width .7s ease}
+  .veh.mal .wbar i{background:var(--warn)}
+
+  .server{
+    position:absolute; right:16px; top:50%; transform:translateY(-50%);
+    width:220px; padding:16px; border-radius:12px; background:var(--panel);
+    border:1.5px solid var(--hair-strong); transition:border-color .3s, box-shadow .3s;
+  }
+  .server.active{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+  @media (max-width:900px){ .server{position:static; transform:none; width:auto; margin:14px} }
+  .server h4{font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-muted); margin:0 0 10px}
+  .server .row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-family:var(--mono); font-size:12px; padding:4px 0; border-top:1px dashed var(--hair)}
+  .server .row:first-of-type{border-top:0}
+  .server .row .v{font-weight:600; font-variant-numeric:tabular-nums}
+  .server .row.key .v, .server .row.key .k{color:var(--ok)}
+
+  .packet{
+    position:absolute; width:12px; height:12px; border-radius:3px; z-index:5;
+    background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);
+    opacity:0; transition:transform 1s cubic-bezier(.4,0,.2,1), opacity .3s;
+    pointer-events:none;
+  }
+  .packet.back{background:var(--ink-muted); box-shadow:0 0 0 3px var(--panel-2)}
+
+  .sim-side{display:flex; flex-direction:column; gap:14px}
+  .controls{padding:16px}
+  .controls .btns{display:flex; gap:8px; flex-wrap:wrap}
+  button.act{
+    font-family:var(--mono); font-size:13px; font-weight:500; cursor:pointer;
+    border:1px solid var(--hair-strong); background:var(--panel); color:var(--ink);
+    padding:9px 14px; border-radius:8px; transition:background .15s,border-color .15s,color .15s;
+  }
+  button.act:hover{border-color:var(--accent); color:var(--accent-ink)}
+  button.act.primary{background:var(--accent); border-color:var(--accent); color:#04201f}
+  button.act.primary:hover{filter:brightness(1.05); color:#04201f}
+  button.act:disabled{opacity:.4; cursor:not-allowed}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .phase-line{
+    margin-top:14px; font-family:var(--mono); font-size:12.5px; min-height:52px;
+    padding:10px 12px; border-radius:8px; background:var(--panel-2); border:1px solid var(--hair);
+  }
+  .phase-line b{color:var(--accent-ink)}
+  .roundpill{font-family:var(--mono); font-size:12px; color:var(--ink-muted)}
+
+  .acc-card{padding:16px}
+  .acc-card h4{font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-muted); margin:0 0 4px}
+  .acc-card .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:8px}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; color:var(--ink-muted); margin-top:10px}
+  .legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:middle}
+
+  .note{
+    margin-top:18px; font-size:13px; color:var(--ink-faint); font-family:var(--mono);
+    border-left:2px solid var(--hair-strong); padding-left:12px; max-width:82ch; line-height:1.7;
+  }
+
+  .calc{margin-top:26px; padding:22px; display:grid; grid-template-columns:1fr 1fr; gap:24px}
+  @media (max-width:900px){ .calc{grid-template-columns:1fr} }
+  .calc h4{font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-muted); margin:0 0 12px}
+  .wt-inputs{display:flex; flex-direction:column; gap:10px}
+  .wt-inputs label{display:flex; align-items:center; gap:12px; font-family:var(--mono); font-size:13px}
+  .wt-inputs input[type=number]{
+    width:90px; font-family:var(--mono); font-size:14px; padding:6px 8px;
+    border:1px solid var(--hair-strong); border-radius:6px; background:var(--raise); color:var(--ink);
+  }
+  .params{font-family:var(--mono); font-size:12px; color:var(--ink-muted); margin-top:14px; line-height:1.9}
+  .params b{color:var(--ink)}
+  .toggle-row{display:flex; align-items:center; gap:10px; margin-top:14px; font-family:var(--mono); font-size:12px}
+  .switch{position:relative; width:42px; height:22px; border-radius:999px; background:var(--panel-2); border:1px solid var(--hair-strong); cursor:pointer; flex:none}
+  .switch::after{content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--ink-muted); transition:transform .18s, background .18s}
+  .switch[aria-checked=true]{background:var(--accent-soft); border-color:var(--accent)}
+  .switch[aria-checked=true]::after{transform:translateX(20px); background:var(--accent)}
+  .ct-out{font-family:var(--mono); font-size:12.5px; line-height:1.85}
+  .ct-out table{width:100%; border-collapse:collapse; margin-bottom:12px}
+  .ct-out th,.ct-out td{text-align:left; padding:5px 8px; border-bottom:1px solid var(--hair)}
+  .ct-out th{color:var(--ink-faint); font-weight:500; font-size:11px; text-transform:uppercase; letter-spacing:.06em}
+  .ct-out td.n{font-variant-numeric:tabular-nums}
+  .ct-out .agg td{border-top:2px solid var(--hair-strong); border-bottom:0; color:var(--accent-ink); font-weight:600}
+  .verdict{margin-top:10px; padding:12px 14px; border-radius:8px; background:var(--ok-soft); border:1px solid var(--ok); font-family:var(--mono); font-size:12.5px}
+  .verdict b{font-variant-numeric:tabular-nums}
+
+  .cmp{margin-top:24px; display:flex; flex-direction:column; gap:14px}
+  .cmp-row{padding:16px 18px}
+  .cmp-row .head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:10px}
+  .cmp-row .head .name{font-family:var(--mono); font-weight:600; font-size:14px}
+  .cmp-row .head .delta{font-family:var(--mono); font-size:12px; color:var(--ink-muted)}
+  .bar{display:flex; align-items:center; gap:10px; margin:4px 0; font-family:var(--mono); font-size:12px}
+  .bar .lab{width:66px; color:var(--ink-faint); flex:none}
+  .bar .track{flex:1; height:16px; background:var(--panel-2); border-radius:4px; overflow:hidden; border:1px solid var(--hair)}
+  .bar .track i{display:block; height:100%}
+  .bar.ckks .track i{background:var(--accent)}
+  .bar.plain .track i{background:var(--ink-faint)}
+  .bar .val{width:58px; text-align:right; font-variant-numeric:tabular-nums; flex:none}
+  .cmp-row .cap{margin-top:8px; font-size:12.5px; color:var(--ink-muted)}
+  .cmp-row.flag{border-left:3px solid var(--warn)}
+
+  .ba{margin-top:24px; overflow-x:auto}
+  .ba table{width:100%; border-collapse:collapse; min-width:640px}
+  .ba th,.ba td{text-align:left; padding:12px 14px; border-bottom:1px solid var(--hair); vertical-align:top; font-size:13.5px}
+  .ba th{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-muted)}
+  .ba td.asp{font-family:var(--mono); font-size:12.5px; color:var(--ink); width:150px}
+  .ba td.before{color:var(--ink-muted)}
+  .ba td.after{background:var(--accent-soft); color:var(--ink)}
+  .moves{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px}
+  @media (max-width:820px){ .moves{grid-template-columns:1fr} }
+  .move{padding:16px}
+  .move .d{font-family:var(--mono); font-size:12px; color:var(--ink-faint)}
+  .move .big{font-family:var(--mono); font-size:20px; font-weight:600; margin:6px 0; font-variant-numeric:tabular-nums}
+  .move .big .arrow{color:var(--ink-faint)}
+  .move.up .big em{color:var(--ok); font-style:normal}
+  .move.down .big em{color:var(--warn); font-style:normal}
+  .move p{font-size:12.5px; color:var(--ink-muted)}
+
+  .bw{margin-top:24px; padding:22px}
+  .bw .bwbar{display:flex; align-items:center; gap:12px; margin:10px 0; font-family:var(--mono); font-size:12.5px}
+  .bw .bwbar .lab{width:150px; flex:none; color:var(--ink-muted)}
+  .bw .bwbar .track{flex:1; height:22px; background:var(--panel-2); border:1px solid var(--hair); border-radius:5px; overflow:hidden}
+  .bw .bwbar .track i{display:block; height:100%; background:var(--ink-faint)}
+  .bw .bwbar.ship .track i{background:var(--accent)}
+  .bw .bwbar .val{width:92px; text-align:right; flex:none; font-variant-numeric:tabular-nums}
+  .bw .lines{margin-top:16px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--ink-muted)}
+  .bw .lines b{color:var(--ink)}
+
+  .tl{margin-top:24px; display:flex; flex-direction:column; gap:10px}
+  .tl-row{display:grid; grid-template-columns:120px 1fr 1fr; gap:14px; padding:14px 16px}
+  @media (max-width:820px){ .tl-row{grid-template-columns:1fr} }
+  .tl-row.now{border-color:var(--accent); background:linear-gradient(180deg,var(--accent-soft),var(--panel) 70%)}
+  .tl-row .when{font-family:var(--mono); font-size:13px; font-weight:600}
+  .tl-row .when small{display:block; font-weight:400; color:var(--ink-faint); font-size:11px; margin-top:2px}
+  .track-col h5{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-faint); margin:0 0 6px}
+  .chip{display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11.5px; padding:3px 8px; border-radius:6px; margin:0 6px 6px 0; border:1px solid var(--hair); background:var(--raise)}
+  .chip::before{content:""; width:7px; height:7px; border-radius:50%; flex:none}
+  .chip.done::before{background:var(--ok)}
+  .chip.part::before{background:var(--warn)}
+  .chip.early::before{background:var(--accent)}
+  .chip.plan{opacity:.72}
+  .chip.plan::before{background:var(--ink-faint)}
+  .tl-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; font-family:var(--mono); font-size:11.5px; color:var(--ink-muted)}
+  .tl-legend span{display:inline-flex; align-items:center; gap:7px}
+  .tl-legend i{width:8px; height:8px; border-radius:50%}
+
+  .m6{margin-top:20px; padding:20px}
+  .m6 h4{font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-muted); margin:0 0 12px}
+  .m6 ol{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:14px}
+  .m6 ol b{font-family:var(--mono); font-size:13px}
+
+  footer{padding:40px 0 64px; border-top:1px solid var(--hair); color:var(--ink-faint); font-family:var(--mono); font-size:12px; line-height:1.7}
+  footer b{color:var(--ink-muted)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">Encrypted&nbsp;<b>Fleet Learning</b></div>
+    <div class="privacy-readout" title="Enforced in code and asserted after every round">
+      <span class="dot"></span>
+      SERVER PLAINTEXT ACCESS — individual updates <b>0</b> · aggregates only
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle light / dark">◐</button>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <div class="eyebrow">Month 5–6 progress · interactive walkthrough</div>
+  <h1>A vehicle fleet that learns to spot intrusions — without anyone seeing the data.</h1>
+  <p class="lede">Each vehicle trains a local intrusion detector on its own CAN&nbsp;/&nbsp;V2X traffic,
+  encrypts the model update, and sends it to a server that <b>combines the updates without ever
+  decrypting a single one</b>. This page walks through every piece we have built so far.</p>
+  <div class="scroll-cue"><span></span> scroll to begin</div>
+</div>
+
+<!-- 01 -->
+<section id="deadlock">
+  <div class="wrap">
+    <div class="eyebrow">01 · The deadlock this project breaks</div>
+    <h2>Three facts that pull against each other</h2>
+    <p class="section-lede">Any two of these are easy. All three at once is the problem the project exists to solve.</p>
+    <div class="cards">
+      <div class="panel card">
+        <div class="n">FACT 1</div>
+        <h3>Raw logs can't leave the vehicle</h3>
+        <p>CAN traffic, GPS position and driving behaviour identify a driver's routes and habits.
+        Pooling them to a central server is off the table.</p>
+      </div>
+      <div class="panel card">
+        <div class="n">FACT 2</div>
+        <h3>Sharing the model update isn't safe either</h3>
+        <p>Federated learning shares a 44,164-number update instead of data — but those numbers
+        can be inverted back into training samples. They must be encrypted end to end.</p>
+      </div>
+      <div class="panel card solve">
+        <div class="n">FACT 3 → OUR FIX</div>
+        <h3>Encryption blinds the server to attackers</h3>
+        <p>Once updates are encrypted the server can't tell a helpful vehicle from one feeding
+        poison. We score each vehicle by distance to the shared model — computable <em>on the
+        ciphertext</em> — and down-weight outliers without decrypting them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section id="round">
+  <div class="wrap">
+    <div class="eyebrow">02 · One encrypted federated round</div>
+    <h2>Watch a round run, step by step</h2>
+    <p class="section-lede">7&nbsp;of 10 vehicles are selected this round. One (amber) is a planted
+    poisoning vehicle. The server counters on the right never move off <b>zero</b> individual
+    decryptions.</p>
+
+    <div class="sim-grid">
+      <div class="stage" id="stage" data-phase="idle">
+        <div class="grid-bg"></div>
+        <div class="server" id="server">
+          <h4>Aggregation server</h4>
+          <div class="row key"><span class="k">individual updates decrypted</span><span class="v" id="c-indiv">0</span></div>
+          <div class="row"><span class="k">aggregates decrypted</span><span class="v" id="c-agg">0</span></div>
+          <div class="row"><span class="k">distance scalars seen</span><span class="v" id="c-dist">0</span></div>
+          <div class="row"><span class="k">round</span><span class="v" id="c-round">0 / 5</span></div>
+        </div>
+      </div>
+
+      <div class="sim-side">
+        <div class="panel controls">
+          <div class="btns">
+            <button class="act primary" id="btnStep">Run next step</button>
+            <button class="act" id="btnAuto">Auto-run round</button>
+            <button class="act" id="btnReset">Reset</button>
+          </div>
+          <div class="phase-line" id="phaseLine"><b>Ready.</b> Press &ldquo;Run next step&rdquo;. A full round is six steps.</div>
+          <div class="roundpill" id="roundPill" style="margin-top:8px">round 0 of 5 · idle</div>
+        </div>
+
+        <div class="panel acc-card">
+          <h4>Global model accuracy</h4>
+          <div class="sub">CICIDS-2017 · illustrative trajectory · final = 0.955 ± 0.008 measured (3 seeds)</div>
+          <svg id="accChart" viewBox="0 0 320 130" width="100%" height="130" role="img" aria-label="Accuracy rising across rounds"></svg>
+        </div>
+
+        <div class="panel acc-card">
+          <h4>Trust weight per vehicle · FheFL non-poisoning rate</h4>
+          <div class="sub">set on step 4 — real round-1 distances from the CICIDS run</div>
+          <div class="legend">
+            <span><i style="background:var(--ok)"></i>honest vehicle</span>
+            <span><i style="background:var(--warn)"></i>down-weighted (far from consensus)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">Down-weighted, not excluded: a vehicle that met a genuinely new attack also looks
+    like an outlier, and it is the most valuable update in the round. Multi-Krum (the old method)
+    would have dropped it — and needed to decrypt every update to do so.</p>
+  </div>
+</section>
+
+<!-- 03 -->
+<section id="ckks">
+  <div class="wrap">
+    <div class="eyebrow">03 · CKKS in real numbers</div>
+    <h2>How the server adds numbers it cannot read</h2>
+    <p class="section-lede">A miniature version of the encryption scheme. Change the three vehicle
+    weights and watch the server recover their average from ciphertext alone.</p>
+
+    <div class="panel calc">
+      <div>
+        <h4>Three vehicle weights</h4>
+        <div class="wt-inputs">
+          <label>vehicle A <input type="number" id="wA" value="0.10" step="0.01" min="0" max="1"></label>
+          <label>vehicle B <input type="number" id="wB" value="0.12" step="0.01" min="0" max="1"></label>
+          <label>vehicle C <input type="number" id="wC" value="0.09" step="0.01" min="0" max="1"></label>
+        </div>
+        <div class="params" id="calcParams"></div>
+        <div class="toggle-row">
+          <span class="switch" id="precSwitch" role="switch" aria-checked="false" tabindex="0"></span>
+          <span>use production-grade parameters (larger modulus, smaller noise)</span>
+        </div>
+        <div class="btns" style="margin-top:14px">
+          <button class="act" id="btnReroll">New randomness</button>
+        </div>
+      </div>
+      <div class="ct-out" id="ctOut"></div>
+    </div>
+    <p class="note">Encryption of a weight w:&nbsp; b = −(a·s) + Δ·w + e (mod q); ciphertext = (a, b).
+    Homomorphic add = add the ciphertext parts. Decrypt = (b + a·s) mod q, then ÷ Δ. The real system
+    packs 4,096 weights into each ciphertext and its numerical error is around 10⁻⁸.</p>
+  </div>
+</section>
+
+<!-- 04 -->
+<section id="cost">
+  <div class="wrap">
+    <div class="eyebrow">04 · Encryption is accuracy-free</div>
+    <h2>The encrypted model scores the same as the plaintext one</h2>
+    <p class="section-lede">Real CKKS on one arm, exact plaintext on the other, everything else held
+    identical. 3 seeds · 10 vehicles · 5 rounds. The near-equal bars are the result.</p>
+    <div class="cmp" id="cmp"></div>
+    <p class="note">The gap between the two bars is smaller than the run-to-run variation from the
+    random seed on every dataset. CKKS adds numerical error around 1×10⁻⁸ — six orders of magnitude
+    below the noise already in stochastic gradient descent.</p>
+  </div>
+</section>
+
+<!-- 05 -->
+<section id="verify">
+  <div class="wrap">
+    <div class="eyebrow">05 · We verified the measurement first</div>
+    <h2>Before building on the pipeline, we audited it</h2>
+    <p class="section-lede">Seven issues found, all fixed, each now held by an automated test —
+    105 assertions in total. Several meant earlier results weren't measuring what we thought.</p>
+    <div class="panel ba">
+      <table>
+        <thead><tr><th>Aspect</th><th>Before Month 5</th><th>After Month 5</th></tr></thead>
+        <tbody>
+          <tr><td class="asp">Ground-truth labels</td>
+            <td class="before">Whole attack capture labelled as that attack — even the ~76% with no injection</td>
+            <td class="after">Per-message: a window is &ldquo;attack&rdquo; only if it contains an injected message</td></tr>
+          <tr><td class="asp">Train / test split</td>
+            <td class="before">Random split over windows that overlap 75% — near-duplicates on both sides</td>
+            <td class="after">Whole contiguous blocks assigned to one side; machine-checked for overlap</td></tr>
+          <tr><td class="asp">&ldquo;Encryption&rdquo; in the loop</td>
+            <td class="before">A NumPy array plus 1×10⁻⁹ noise — arithmetically a no-op</td>
+            <td class="after">Real CKKS (TenSEAL); the two backends are bitwise-identical on the aggregation path</td></tr>
+          <tr><td class="asp">Server access to updates</td>
+            <td class="before">Decrypted every vehicle's full update each round to run the outlier filter</td>
+            <td class="after">Decrypts nothing but the aggregate — asserted every round</td></tr>
+          <tr><td class="asp">Transport security</td>
+            <td class="before">Removed — &ldquo;FHE already covers it&rdquo; (it does not)</td>
+            <td class="after">ECDH-P256 + AES-256-GCM + Ed25519 mutual authentication restored</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="moves">
+      <div class="panel move up">
+        <div class="d">CAR-HACKING</div>
+        <div class="big">0.74 <span class="arrow">→</span> <em>0.998</em></div>
+        <p>Up because the task became well-posed. The old labels asked the model to call
+        injection-free traffic &ldquo;DoS&rdquo;.</p>
+      </div>
+      <div class="panel move down">
+        <div class="d">CICIDS-2017</div>
+        <div class="big">0.982 <span class="arrow">→</span> <em>0.955</em></div>
+        <p>Down because the leaky split was removed. The number got smaller and truer.</p>
+      </div>
+      <div class="panel move">
+        <div class="d">CAN-VTC · VeReMi</div>
+        <div class="big" style="font-size:15px; color:var(--ink-muted)">reformulated</div>
+        <p>Not comparable across the change. CAN-VTC is now flood detection; VeReMi needs its
+        sender IDs re-acquired.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section id="v2x">
+  <div class="wrap">
+    <div class="eyebrow">06 · Can it run over a vehicle network?</div>
+    <h2>The honest bottleneck is bandwidth, not speed</h2>
+    <p class="section-lede">Encryption time is fine — about 42&nbsp;ms to encrypt an update, ~120&nbsp;ms
+    for the encrypted outlier score. The size is the problem.</p>
+    <div class="panel bw">
+      <div class="bwbar"><span class="lab">plaintext update</span><span class="track"><i style="width:5%"></i></span><span class="val">0.17 MB</span></div>
+      <div class="bwbar"><span class="lab">naive CKKS</span><span class="track"><i style="width:100%"></i></span><span class="val">3.51 MB</span></div>
+      <div class="bwbar ship"><span class="lab">packed — shipped</span><span class="track"><i style="width:70%"></i></span><span class="val">2.47 MB</span></div>
+      <div class="lines">
+        <div>One vehicle's encrypted update is <b>2.47 MB</b> — about <b>915 DSRC frames</b> (2.7 KB each).</div>
+        <div>Our packing module cut it <b>29.6% with zero accuracy cost</b> by dropping one unused precision level before transmit.</div>
+        <div>A 50-vehicle round still moves <b>~180 MB</b>. It does not fit a V2X budget.</div>
+        <div>Next lever: roadside units <b>pre-aggregate</b> so only one ciphertext per unit reaches the server — an architecture decision to take early.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section id="status">
+  <div class="wrap">
+    <div class="eyebrow">07 · Where we are on the 12-month plan</div>
+    <h2>Months 1–5 delivered; the aggregator is running early</h2>
+    <p class="section-lede">The cryptography and machine-learning tracks are on or ahead of schedule.
+    The remaining gap is on-vehicle deployment, which begins after the OpenFHE C++ migration.</p>
+    <div class="tl" id="tl"></div>
+    <div class="tl-legend">
+      <span><i style="background:var(--ok)"></i>delivered</span>
+      <span><i style="background:var(--warn)"></i>partial</span>
+      <span><i style="background:var(--accent)"></i>started early</span>
+      <span><i style="background:var(--ink-faint)"></i>planned</span>
+    </div>
+
+    <div class="panel m6">
+      <h4>Month 6 priorities</h4>
+      <ol>
+        <li><b>OpenFHE migration</b> — turns the modelled multi-key layer into real threshold cryptography, and gives the C++ core the on-vehicle port needs.</li>
+        <li><b>Two one-line security fixes</b> — bind the round number into the message tag (replay), enforce noise flooding in the deployment profile.</li>
+        <li><b>Patient-attacker experiment</b> — test the known blind spot: small, consistent, biased updates over many rounds.</li>
+        <li><b>Scale 10 → 50 vehicles</b> toward the roadmap target.</li>
+        <li><b>Re-acquire VeReMi</b> with sender IDs so the misbehaviour task can be expressed.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    This walkthrough is <b>illustrative of the measured pipeline</b>. The trust weights and round-1
+    distances in section 2 are the real values from the CICIDS-2017 run (3 seeds · 10 vehicles ·
+    5 rounds). Full detail: <b>5th&nbsp;Month&nbsp;Progress/Documentation/</b> —
+    00_MASTER_DOCUMENTATION.pdf and notes 08–16.
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var root = document.documentElement;
+  document.getElementById("themeBtn").addEventListener("click", function(){
+    var cur = root.getAttribute("data-theme");
+    var next = cur === "dark" ? "light" : cur === "light" ? "dark"
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+    root.setAttribute("data-theme", next);
+  });
+
+  /* ============ SECTION 02 — federated round ============ */
+  var stage = document.getElementById("stage");
+  var server = document.getElementById("server");
+  var phaseLine = document.getElementById("phaseLine");
+  var roundPill = document.getElementById("roundPill");
+
+  var DIST = [15.0, 1.5, 4.8, 0.84, 44.3, 21.6, 4.7];
+  var SUMD = DIST.reduce(function(a,b){ return a+b; }, 0);
+  var TRUST = DIST.map(function(d){ return 1 - d / SUMD; });
+  var ACC = [0.82, 0.93, 0.95, 0.953, 0.955];
+
+  var POS = [
+    {x:16, y:14}, {x:9, y:33}, {x:7, y:54}, {x:11, y:74},
+    {x:22, y:88}, {x:33, y:20}, {x:30, y:66}
+  ];
+  var vehEls = [];
+  POS.forEach(function(p, i){
+    var v = document.createElement("div");
+    v.className = "veh" + (i === 4 ? " mal" : "");
+    v.style.left = p.x + "%";
+    v.style.top = p.y + "%";
+    v.innerHTML =
+      '<div class="body">' + (i === 4 ? "⚠" : "🚗") + '<div class="lock">🔒</div></div>' +
+      '<div class="tag">' + (i === 4 ? "vehicle " + (i+1) + " · planted" : "vehicle " + (i+1)) + '</div>' +
+      '<div class="wbar"><i></i></div>';
+    stage.appendChild(v);
+    vehEls.push(v);
+  });
+
+  var round = 0, phase = 0, autoTimer = null;
+  var C = {
+    indiv: document.getElementById("c-indiv"),
+    agg: document.getElementById("c-agg"),
+    dist: document.getElementById("c-dist"),
+    round: document.getElementById("c-round")
+  };
+
+  function centre(el){
+    var s = stage.getBoundingClientRect(), r = el.getBoundingClientRect();
+    return { x: r.left - s.left + r.width/2, y: r.top - s.top + r.height/2 };
+  }
+  function fly(from, to, back){
+    if (reduce) return;
+    var d = document.createElement("div");
+    d.className = "packet" + (back ? " back" : "");
+    var a = centre(from), b = centre(to);
+    d.style.left = a.x + "px"; d.style.top = a.y + "px";
+    stage.appendChild(d);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      d.style.opacity = ".95";
+      d.style.transform = "translate(" + (b.x - a.x) + "px," + (b.y - a.y) + "px)";
+    }); });
+    setTimeout(function(){ d.style.opacity = "0"; }, 1000);
+    setTimeout(function(){ d.remove(); }, 1450);
+  }
+  function bump(el, by){
+    el.textContent = parseInt(el.textContent, 10) + by;
+    el.style.transition = "none"; el.style.color = "var(--accent-ink)";
+    requestAnimationFrame(function(){ el.style.transition = "color .9s"; el.style.color = ""; });
+  }
+
+  var PHASES = [
+    { tag:"local training",
+      msg:"<b>Step 1 · local training.</b> Each vehicle trains the detector on its own CAN / IP logs. Raw data never moves.",
+      run:function(){
+        stage.setAttribute("data-phase","train");
+        vehEls.forEach(function(v){ v.classList.add("train"); v.classList.remove("enc"); });
+      }},
+    { tag:"encrypt",
+      msg:"<b>Step 2 · encrypt.</b> Each update &mdash; 44,164 numbers &mdash; becomes 11 ciphertexts, 2.47 MB. The private key stays on the vehicle.",
+      run:function(){
+        stage.setAttribute("data-phase","encrypt");
+        vehEls.forEach(function(v){ v.classList.remove("train"); v.classList.add("enc"); });
+      }},
+    { tag:"secure channel",
+      msg:"<b>Step 3 · secure channel.</b> Updates travel under AES-256-GCM over an ECDH-P256 handshake with Ed25519 mutual authentication.",
+      run:function(){
+        stage.setAttribute("data-phase","send");
+        server.classList.add("active");
+        vehEls.forEach(function(v, i){ setTimeout(function(){ fly(v, server, false); }, i*90); });
+      }},
+    { tag:"robust scoring",
+      msg:"<b>Step 4 · robust scoring.</b> The server scores each vehicle by encrypted distance to the shared model. Vehicle 5's poison lands it far out &mdash; its weight drops, it is not removed.",
+      run:function(){
+        stage.setAttribute("data-phase","score");
+        vehEls.forEach(function(v, i){
+          v.querySelector(".wbar i").style.width = Math.round(TRUST[i]*100) + "%";
+          if (TRUST[i] < 0.8) v.classList.add("mal");
+        });
+        bump(C.dist, 7);
+      }},
+    { tag:"homomorphic aggregate",
+      msg:"<b>Step 5 · combine.</b> Weighted sum of the ciphertexts &mdash; &Sigma; p&middot;Enc(update). One ciphertext out. No individual update is ever decrypted.",
+      run:function(){
+        stage.setAttribute("data-phase","aggregate");
+        C.indiv.style.color = "var(--ok)";
+      }},
+    { tag:"decrypt aggregate + broadcast",
+      msg:"<b>Step 6 · decrypt the aggregate only, broadcast.</b> The combined model is decrypted and sent back. Accuracy updates.",
+      run:function(){
+        stage.setAttribute("data-phase","broadcast");
+        bump(C.agg, 1);
+        vehEls.forEach(function(v, i){ setTimeout(function(){ fly(server, v, true); }, i*70); });
+        round = Math.min(round + 1, 5);
+        C.round.textContent = round + " / 5";
+        drawAcc(round);
+        setTimeout(function(){
+          server.classList.remove("active");
+          vehEls.forEach(function(v){ v.classList.remove("enc"); });
+        }, 1200);
+      }}
+  ];
+
+  function setPhaseUI(){
+    var idx = phase % PHASES.length;
+    var p = PHASES[idx];
+    phaseLine.innerHTML = p.msg;
+    roundPill.textContent = "round " + Math.min(round + (idx === 5 ? 0 : 1), 5) +
+      " of 5 · step " + (idx + 1) + "/6 · " + p.tag;
+  }
+  function step(){
+    if (round >= 5 && phase % PHASES.length === 0 && phase !== 0){
+      phaseLine.innerHTML = "<b>Done.</b> Five rounds complete. Accuracy converged; the planted vehicle stayed down-weighted every round. Press Reset to run again.";
+      return;
+    }
+    PHASES[phase % PHASES.length].run();
+    setPhaseUI();
+    phase++;
+  }
+  function auto(){
+    var btn = document.getElementById("btnAuto");
+    if (autoTimer){ clearInterval(autoTimer); autoTimer = null; btn.textContent = "Auto-run round"; return; }
+    btn.textContent = "Pause";
+    var target = phase + 6;
+    autoTimer = setInterval(function(){
+      step();
+      if (phase >= target || (round >= 5 && phase % PHASES.length === 0)){
+        clearInterval(autoTimer); autoTimer = null; btn.textContent = "Auto-run round";
+      }
+    }, reduce ? 300 : 1500);
+  }
+  function reset(){
+    if (autoTimer){ clearInterval(autoTimer); autoTimer = null; document.getElementById("btnAuto").textContent = "Auto-run round"; }
+    round = 0; phase = 0;
+    C.indiv.textContent = "0"; C.indiv.style.color = "";
+    C.agg.textContent = "0"; C.dist.textContent = "0"; C.round.textContent = "0 / 5";
+    stage.setAttribute("data-phase","idle");
+    server.classList.remove("active");
+    vehEls.forEach(function(v, i){
+      v.classList.remove("train","enc");
+      if (i === 4) v.classList.add("mal"); else v.classList.remove("mal");
+      v.querySelector(".wbar i").style.width = "0";
+    });
+    phaseLine.innerHTML = "<b>Ready.</b> Press &ldquo;Run next step&rdquo;. A full round is six steps.";
+    roundPill.textContent = "round 0 of 5 · idle";
+    drawAcc(0);
+  }
+  document.getElementById("btnStep").addEventListener("click", step);
+  document.getElementById("btnAuto").addEventListener("click", auto);
+  document.getElementById("btnReset").addEventListener("click", reset);
+
+  var accSvg = document.getElementById("accChart");
+  function drawAcc(n){
+    var W = 320, H = 130, padL = 34, padR = 10, padT = 12, padB = 22;
+    var x0 = padL, x1 = W - padR, y0 = H - padB, y1 = padT;
+    function X(i){ return x0 + (x1 - x0) * (i / 5); }
+    function Y(v){ return y0 + (y1 - y0) * ((v - 0.5) / 0.5); }
+    var s = "";
+    [0.5, 0.75, 1.0].forEach(function(v){
+      s += '<line x1="'+x0+'" y1="'+Y(v)+'" x2="'+x1+'" y2="'+Y(v)+'" stroke="var(--hair)" stroke-width="1"/>';
+      s += '<text x="'+(x0-6)+'" y="'+(Y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--ink-faint)" font-family="var(--mono)">'+v.toFixed(2)+'</text>';
+    });
+    s += '<line x1="'+x0+'" y1="'+Y(0.85)+'" x2="'+x1+'" y2="'+Y(0.85)+'" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3"/>';
+    s += '<text x="'+x1+'" y="'+(Y(0.85)-4)+'" text-anchor="end" font-size="8" fill="var(--warn)" font-family="var(--mono)">majority baseline</text>';
+    for (var i = 1; i <= 5; i++){
+      s += '<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="9" fill="var(--ink-faint)" font-family="var(--mono)">r'+i+'</text>';
+    }
+    if (n > 0){
+      var pts = [];
+      for (var k = 1; k <= n; k++) pts.push(X(k) + "," + Y(ACC[k-1]));
+      s += '<polyline points="'+pts.join(" ")+'" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+      for (var j = 1; j <= n; j++){
+        var last = j === n;
+        s += '<circle cx="'+X(j)+'" cy="'+Y(ACC[j-1])+'" r="'+(last?4:2.6)+'" fill="var(--accent)"/>';
+        if (last) s += '<text x="'+(X(j)-6)+'" y="'+(Y(ACC[j-1])-8)+'" text-anchor="end" font-size="10" fill="var(--accent-ink)" font-family="var(--mono)" font-weight="600">'+ACC[j-1].toFixed(3)+'</text>';
+      }
+    }
+    accSvg.innerHTML = s;
+  }
+  drawAcc(0);
+
+  /* ============ SECTION 03 — CKKS toy calculator ============ */
+  var S = [4, 9];
+  var calcParams = document.getElementById("calcParams");
+  var ctOut = document.getElementById("ctOut");
+  var precSwitch = document.getElementById("precSwitch");
+  var seed = 20260827;
+
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function runCalc(){
+    var precise = precSwitch.getAttribute("aria-checked") === "true";
+    var Q = precise ? 1000000007 : 100003;
+    var DELTA = precise ? 1000000 : 1000;
+    var NOISE = precise ? 1 : 9;
+    function mod(x){ return ((x % Q) + Q) % Q; }
+    var rnd = mulberry32(seed);
+    var ws = [
+      parseFloat(document.getElementById("wA").value) || 0,
+      parseFloat(document.getElementById("wB").value) || 0,
+      parseFloat(document.getElementById("wC").value) || 0
+    ];
+    var names = ["A", "B", "C"];
+    var cts = ws.map(function(w){
+      var a = [Math.floor(rnd() * Q), Math.floor(rnd() * Q)];
+      var e = Math.floor(rnd() * (2 * NOISE + 1)) - NOISE;
+      var b = mod(-(a[0]*S[0] + a[1]*S[1]) + Math.round(DELTA * w) + e);
+      return { w:w, a:a, e:e, b:b };
+    });
+    var A = [ mod(cts[0].a[0] + cts[1].a[0] + cts[2].a[0]),
+              mod(cts[0].a[1] + cts[1].a[1] + cts[2].a[1]) ];
+    var B = mod(cts[0].b + cts[1].b + cts[2].b);
+    var m = mod(B + A[0]*S[0] + A[1]*S[1]);
+    if (m > Q/2) m -= Q;
+    var recovered = m / DELTA / 3;
+    var truth = (ws[0] + ws[1] + ws[2]) / 3;
+    var err = Math.abs(recovered - truth);
+
+    calcParams.innerHTML =
+      "secret key s = <b>[4, 9]</b><br>modulus q = <b>" + Q.toLocaleString() + "</b><br>" +
+      "scaling &Delta; = <b>" + DELTA.toLocaleString() + "</b><br>noise |e| &le; <b>" + NOISE + "</b>";
+
+    var rows = cts.map(function(c, i){
+      return '<tr><td>veh ' + names[i] + '</td><td class="n">' + c.w.toFixed(2) +
+        '</td><td class="n">[' + c.a[0] + ', ' + c.a[1] + ']</td><td class="n">' + c.e +
+        '</td><td class="n">' + c.b + '</td></tr>';
+    }).join("");
+
+    ctOut.innerHTML =
+      '<table><thead><tr><th>party</th><th>w</th><th>a</th><th>e</th><th>b</th></tr></thead><tbody>' +
+      rows +
+      '<tr class="agg"><td>&Sigma; server</td><td></td><td class="n">[' + A[0] + ', ' + A[1] +
+        ']</td><td></td><td class="n">' + B + '</td></tr>' +
+      '</tbody></table>' +
+      '<div>decrypted aggregate &divide; &Delta; &divide; 3 &nbsp;=&nbsp; <b>' +
+        recovered.toFixed(precise ? 8 : 5) + '</b></div>' +
+      '<div>true mean (no encryption) &nbsp;=&nbsp; <b>' + truth.toFixed(precise ? 8 : 5) + '</b></div>' +
+      '<div class="verdict">error = <b>' + err.toExponential(1) +
+        '</b> &nbsp;·&nbsp; the server added three ciphertexts and never saw ' +
+        ws[0].toFixed(2) + ', ' + ws[1].toFixed(2) + ' or ' + ws[2].toFixed(2) + '.</div>';
+  }
+  ["wA","wB","wC"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", runCalc);
+  });
+  document.getElementById("btnReroll").addEventListener("click", function(){
+    seed = (seed * 1664525 + 1013904223) >>> 0; runCalc();
+  });
+  function togglePrec(){
+    precSwitch.setAttribute("aria-checked",
+      precSwitch.getAttribute("aria-checked") === "true" ? "false" : "true");
+    runCalc();
+  }
+  precSwitch.addEventListener("click", togglePrec);
+  precSwitch.addEventListener("keydown", function(e){
+    if (e.key === " " || e.key === "Enter"){ e.preventDefault(); togglePrec(); }
+  });
+  runCalc();
+
+  /* ============ SECTION 04 — FHE vs no-FHE bars ============ */
+  var CMP = [
+    ["CAN-VTC", 1.0000, 1.0000,
+     "DoS flood &mdash; one feature separates it at 13&sigma;. This measures flood detection, not generalisation.", true],
+    ["Car-Hacking", 0.9977, 0.9981,
+     "The CAN benchmark we stand behind &mdash; 5 real classes, 12&ndash;24% injection density, no file-identity shortcut.", false],
+    ["CICIDS-2017", 0.9555, 0.9542,
+     "Enterprise IP traffic, not vehicular &mdash; a transfer / sanity check.", false],
+    ["VeReMi", 0.4839, 0.4851,
+     "Near-chance floor &mdash; the cleaned export lost sender IDs, so the misbehaviour signal cannot be expressed. Re-acquisition required.", true]
+  ];
+  function wpct(v){ return ((v - 0.4) / 0.6 * 100).toFixed(1); }
+  document.getElementById("cmp").innerHTML = CMP.map(function(r){
+    var d = r[1] - r[2];
+    var ds = (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(4);
+    return '<div class="panel cmp-row' + (r[4] ? ' flag' : '') + '">' +
+      '<div class="head"><span class="name">' + r[0] + '</span>' +
+        '<span class="delta">&Delta; ' + ds + ' · within seed noise</span></div>' +
+      '<div class="bar ckks"><span class="lab">CKKS</span><span class="track"><i style="width:' +
+        wpct(r[1]) + '%"></i></span><span class="val">' + r[1].toFixed(4) + '</span></div>' +
+      '<div class="bar plain"><span class="lab">plaintext</span><span class="track"><i style="width:' +
+        wpct(r[2]) + '%"></i></span><span class="val">' + r[2].toFixed(4) + '</span></div>' +
+      '<div class="cap">' + r[3] + '</div>' +
+    '</div>';
+  }).join("");
+
+  /* ============ SECTION 07 — timeline ============ */
+  var TL = [
+    ["Months 1–2", "Foundations",
+      [["CKKS scheme & parameters","done"],["Security specification","done"]],
+      [["Threat model","done"],["4 datasets acquired","done"]], false],
+    ["Months 3–4", "Optimisation & training",
+      [["Library evaluation → OpenFHE","done"],["Packing & encoding module","done"],["NTT reference","done"]],
+      [["46-D feature extractor","done"],["Preprocessing engine","done"],["Model accuracy report","done"]], false],
+    ["Months 5–6", "Serialisation & porting",
+      [["Real CKKS in the loop","done"],["FheFL robust aggregation","done"],["Multi-key key-sharing","part"],["Transport channel","done"],["Serialisation + V2X protocol","plan"]],
+      [["Model quantization","plan"],["On-device inference engine","plan"]], true],
+    ["Months 7–8", "Aggregation & FL logic",
+      [["Verified homomorphic aggregator","early"],["Noise-budget tool","plan"]],
+      [["Adaptive non-IID handling","plan"]], false],
+    ["Months 9–10", "Integration & red-team",
+      [["End-to-end encryption pipeline","plan"]],
+      [["Attack-vector injection","plan"],["False-positive tuning","plan"]], false],
+    ["Months 11–12", "Audit & closure",
+      [["Privacy & differential audit","plan"]],
+      [["Privacy–utility analysis","plan"],["Final IDS FHE library","plan"]], false]
+  ];
+  function chips(list){
+    return list.map(function(c){ return '<span class="chip ' + c[1] + '">' + c[0] + '</span>'; }).join("");
+  }
+  document.getElementById("tl").innerHTML = TL.map(function(r){
+    return '<div class="panel tl-row' + (r[4] ? ' now' : '') + '">' +
+      '<div class="when">' + r[0] + '<small>' + r[1] + (r[4] ? ' · now' : '') + '</small></div>' +
+      '<div class="track-col"><h5>FHE track</h5>' + chips(r[2]) + '</div>' +
+      '<div class="track-col"><h5>IDS track</h5>' + chips(r[3]) + '</div>' +
+    '</div>';
+  }).join("");
+})();
+</script>
+</body>
+</html>

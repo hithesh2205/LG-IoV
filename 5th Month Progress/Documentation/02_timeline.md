@@ -60,7 +60,7 @@ clients / 200–300 rounds to **10 clients / 3 rounds**.
 
 ## Month 5 (current) — FHE vs no-FHE comparison
 
-**Artifacts:** `Claude's work/FHE_Comparison/`
+**Artifacts:** `FHE_Comparison/`
 
 - `PlaintextVector` added as a drop-in for `SimulatedCKKSVector` so FHE can be
   toggled while the aggregation code path stays identical — good experiment design.
