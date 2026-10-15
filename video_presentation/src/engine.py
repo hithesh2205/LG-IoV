@@ -408,6 +408,56 @@ def ease(p):
     return 1 - (1 - p) ** 3
 
 
+def ease_io(p):
+    p = min(max(p, 0.0), 1.0)
+    return 0.5 - 0.5 * math.cos(math.pi * p)
+
+
+def back_out(p):
+    s = 1.70158
+    p -= 1
+    return p * p * ((s + 1) * p + s) + 1
+
+
+def clamp01(p):
+    return min(max(p, 0.0), 1.0)
+
+
+def lerp(a, b, p):
+    return a + (b - a) * p
+
+
+def along(pts, p):
+    """Point at fraction p of the arc length of polyline pts [(x, y), ...]."""
+    if len(pts) == 1:
+        return pts[0]
+    segs = [math.dist(a, b) for a, b in zip(pts, pts[1:])]
+    total = sum(segs) or 1.0
+    d = clamp01(p) * total
+    for (a, b), L in zip(zip(pts, pts[1:]), segs):
+        if d <= L or L == 0:
+            f = d / L if L else 0
+            return (lerp(a[0], b[0], f), lerp(a[1], b[1], f))
+        d -= L
+    return pts[-1]
+
+
+_scaled_cache = {}
+
+
+def scaled(img, k):
+    """Cached resize used by pop/scale animations."""
+    key = (id(img), round(k, 2))
+    im = _scaled_cache.get(key)
+    if im is None:
+        w, h = max(1, int(img.width * k)), max(1, int(img.height * k))
+        im = img.resize((w, h), Image.BILINEAR)
+        if len(_scaled_cache) > 4000:
+            _scaled_cache.clear()
+        _scaled_cache[key] = im
+    return im
+
+
 @dataclass
 class El:
     img: Image.Image
@@ -415,10 +465,12 @@ class El:
     y: float
     t_in: float
     t_out: float | None = None
-    anim: str = "up"          # fade | up | down | left | right | wipe | wipe_rl | wipe_tb
+    anim: str = "up"          # fade | up | down | left | right | pop | wipe | wipe_rl | wipe_tb
     dur: float = 0.5
     out_dur: float = 0.35
     z: int = 0
+    sfx: str | None = None
+    top: bool = False         # draw above the moving (Dyn) layer
 
     def state(self, t):
         if t < self.t_in:
@@ -433,6 +485,7 @@ class El:
             op *= 1 - q
         dx = dy = 0
         wipe = 1.0
+        k = 100
         a = self.anim
         if a == "up":
             dy = (1 - e) * 26
@@ -442,16 +495,24 @@ class El:
             dx = -(1 - e) * 40
         elif a == "right":
             dx = (1 - e) * 40
+        elif a == "pop":
+            k = int(round((0.55 + 0.45 * back_out(p)) * 100))
+            op = min(1.0, p * 3) * (op / e if e > 0 else 0)
         elif a.startswith("wipe"):
             wipe = e
             op = (1.0 if p > 0 else 0.0) * (op / e if e > 0 else 0)
-        return (int(round(op * 255)), int(round(dx)), int(round(dy)), int(round(wipe * 400)))
+        return (int(round(op * 255)), int(round(dx)), int(round(dy)), int(round(wipe * 400)), k)
 
     def draw(self, frame, st):
-        op, dx, dy, wq = st
+        op, dx, dy, wq, k = st
         if op <= 0:
             return
         img, x, y = self.img, self.x + dx, self.y + dy
+        if k != 100:
+            sm = scaled(img, k / 100)
+            x += (img.width - sm.width) / 2
+            y += (img.height - sm.height) / 2
+            img = sm
         if wq < 400:
             f = wq / 400
             if self.anim == "wipe":
@@ -467,26 +528,30 @@ class El:
 
 @dataclass
 class Dyn:
-    """Element redrawn every frame by fn(local_t) -> list[(img, x, y)]."""
+    """Element redrawn every frame. fn(t) gets SCENE-local time and returns a list of
+    (img, x, y) or (img, x, y, opacity 0..1) tuples."""
     fn: Callable
     t_in: float
     t_out: float | None = None
-    fade: float = 0.4
+    fade: float = 0.25
     z: int = 0
+    sfx: str | None = None
 
     def state(self, t):
         if t < self.t_in or (self.t_out is not None and t >= self.t_out + self.fade):
             return None
-        op = min(1.0, (t - self.t_in) / self.fade)
+        op = min(1.0, (t - self.t_in) / self.fade) if self.fade > 0 else 1.0
         if self.t_out is not None and t > self.t_out:
             op *= 1 - (t - self.t_out) / self.fade
-        return (int(op * 255), round((t - self.t_in) * FPS))
+        return (int(op * 255), round(t * FPS))
 
     def draw(self, frame, st):
-        op, _ = st
-        lt = st[1] / FPS
-        for img, x, y in self.fn(lt):
-            blit(frame, with_opacity(img, op), x, y)
+        op, f = st
+        for item in self.fn(f / FPS):
+            img, x, y = item[:3]
+            o = (op / 255) * (item[3] if len(item) > 3 else 1.0)
+            if o > 0.004:
+                blit(frame, with_opacity(img, int(round(o * 255))), x, y)
 
 
 @dataclass
@@ -497,14 +562,73 @@ class SceneBuild:
     dur: float
     els: list = field(default_factory=list)
 
-    def add(self, img, x, y, at, anim="up", out=None, anchor="la", dur=0.5, z=0):
+    def _out(self, out):
+        return out if out is not None else self.dur - 0.45
+
+    def add(self, img, x, y, at, anim="up", out=None, anchor="la", dur=0.5, z=0, sfx=None, top=False):
         x, y = anchor_xy(img, x, y, anchor)
-        el = El(img, x, y, at, out if out is not None else self.dur - 0.45, anim, dur, z=z)
+        el = El(img, x, y, at, self._out(out), anim, dur, z=z, sfx=sfx, top=top)
         self.els.append(el)
         return el
 
-    def dyn(self, fn, at, out=None, z=0):
-        self.els.append(Dyn(fn, at, out if out is not None else self.dur - 0.45, z=z))
+    def dyn(self, fn, at, out=None, z=0, sfx=None, fade=0.25):
+        d = Dyn(fn, at, self._out(out), fade=fade, z=z, sfx=sfx)
+        self.els.append(d)
+        return d
+
+    # ---- motion helpers -------------------------------------------------
+    def move(self, img, pts, t0, t1, at=None, out=None, ease_fn=ease_io, anchor="mm", sfx=None, z=0):
+        """Show img at pts[0] from `at`, travel along pts during t0..t1, then rest at the end."""
+        ax = {"l": 0, "m": img.width / 2, "r": img.width}[anchor[0]]
+        ay = {"a": 0, "m": img.height / 2, "b": img.height}[anchor[1]]
+
+        def fn(t):
+            x, y = along(pts, ease_fn(clamp01((t - t0) / max(t1 - t0, 1e-6))))
+            return [(img, x - ax, y - ay)]
+        return self.dyn(fn, at if at is not None else t0, out, z=z, sfx=sfx)
+
+    def loop_move(self, img, pts, period, at, out=None, n=1, z=0):
+        """n copies travelling pts repeatedly, evenly staggered; they fade at both ends."""
+        ax, ay = img.width / 2, img.height / 2
+
+        def fn(t):
+            items = []
+            for i in range(n):
+                p = ((t - at) / period + i / n) % 1.0
+                x, y = along(pts, p)
+                o = min(1.0, p / 0.12, (1 - p) / 0.12)
+                items.append((img, x - ax, y - ay, o))
+            return items
+        return self.dyn(fn, at, out, z=z)
+
+    def counter(self, x, y, t0, t1, v0, v1, fmt="{:,.0f}", size=60, kind="bold", color="text",
+                anchor="la", at=None, out=None, sfx=None):
+        cache = {}
+
+        def fn(t):
+            v = lerp(v0, v1, ease(clamp01((t - t0) / max(t1 - t0, 1e-6))))
+            s = fmt.format(v)
+            im = cache.get(s)
+            if im is None:
+                im = cache[s] = text_img(s, size, kind, color)
+            px, py = anchor_xy(im, x, y, anchor)
+            return [(im, px, py)]
+        return self.dyn(fn, at if at is not None else t0, out, sfx=sfx)
+
+    def pulse(self, cx, cy, r, color="teal", at=0, out=None, period=1.2, width=4):
+        rings = []
+        for i in range(12):
+            k = i / 11
+            rr = r * (1 + 0.6 * k)
+            cv = Canvas(2 * rr + 10, 2 * rr + 10, ss=2)
+            cv.circle(rr + 5, rr + 5, rr, outline=alpha(color, int(230 * (1 - k))), width=width)
+            rings.append(cv.img())
+
+        def fn(t):
+            k = ((t - at) / period) % 1.0
+            im = rings[min(11, int(k * 12))]
+            return [(im, cx - im.width / 2, cy - im.height / 2)]
+        return self.dyn(fn, at, out)
 
 
 # ------------------------------------------------------------------ renderer

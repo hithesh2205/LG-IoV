@@ -14,7 +14,7 @@ import tempfile
 import wave
 from pathlib import Path
 
-VOICE = "Microsoft David Desktop"   # alternatives: "Microsoft Zira Desktop", "Microsoft Hazel Desktop"
+VOICE = "Microsoft Zira Desktop"    # female (US). Alternatives: "Microsoft Hazel Desktop" (female, UK), "Microsoft David Desktop"
 RATE = 1                            # SAPI rate, -10 (slow) .. 10 (fast); 1 lands the video at ~5:50
 
 _PS = r"""
