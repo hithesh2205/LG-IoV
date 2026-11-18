@@ -176,6 +176,9 @@ class FederatedServer:
         ctx = context
         if backend == "ckks" and ctx is None:
             ctx = build_ckks_context()
+        elif backend in ("openfhe", "openfhe-threshold") and ctx is None:
+            from .openfhe_backend import build_openfhe_context
+            ctx = build_openfhe_context(backend, n_parties=n_clients)
 
         multikey = MultiKeyContext(
             n_users=n_clients, seed=seed,
@@ -226,7 +229,10 @@ class FederatedServer:
         # the FheFL dropout fix (see multikey_ckks.MultiKeyContext.begin_round).
         participants = [int(p["client_id"]) for p in client_packages]
         agg_key = None
-        if self.multikey is not None and len(participants) >= 2:
+        # The algebraic mask model stands in for multi-key CKKS on TenSEAL only.
+        # Under "openfhe-threshold" the real joint key replaces it.
+        if (self.multikey is not None and len(participants) >= 2
+                and self.backend == "ckks"):
             self.multikey.begin_round(participants)
             masked = {
                 u: self.multikey.shares[u].masked_share(
@@ -272,6 +278,7 @@ class FederatedServer:
 
         load_flat_into_model(self.model, aggregated)
 
+        keyset = getattr(self.context, "keyset", None)
         return {
             "n_clients": n_clients,
             "distances": distances.tolist(),
@@ -279,6 +286,10 @@ class FederatedServer:
             "aggregate_key_norm": float(np.linalg.norm(agg_key)) if agg_key is not None else None,
             "ciphertext_bytes_per_client": int(
                 client_packages[0]["encrypted_update"].serialized_bytes()),
+            # Threshold backend only: bytes of one vehicle's decryption share
+            # for one ciphertext, and vehicles that must be re-keyed.
+            "decryption_share_bytes": keyset.last_share_bytes if keyset else None,
+            "vehicles_needing_rekey": sorted(keyset.needs_rekey) if keyset else None,
         }
 
     @staticmethod

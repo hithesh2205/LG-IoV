@@ -153,7 +153,17 @@ def run_one_seed(args, cfg, seed: int) -> Dict:
     full_train_ds = CanFeatureDataset(split["X_train"], split["y_train"])
 
     # ── 2. crypto context ────────────────────────────────────────────────
-    context = build_ckks_context() if args.backend == "ckks" else None
+    if args.backend == "ckks":
+        context = build_ckks_context()
+    elif args.backend in ("openfhe", "openfhe-threshold"):
+        from federated.openfhe_backend import build_openfhe_context
+        context = build_openfhe_context(
+            args.backend, n_parties=n_clients, threshold=args.threshold)
+        if args.backend == "openfhe-threshold":
+            print(f"[crypto] OpenFHE threshold CKKS: joint key over {n_clients} "
+                  f"vehicles, {context.keyset.t}-of-{n_clients} Shamir recovery")
+    else:
+        context = None
 
     server = FederatedServer.initialize(
         dataset=args.dataset, n_classes=n_classes,
@@ -286,7 +296,12 @@ def main() -> int:
         description="Federated IDS training with FheFL multi-key CKKS")
     p.add_argument("--dataset", choices=["can_vtc", "car_hack", "cicids", "veremi"],
                    default="car_hack")
-    p.add_argument("--backend", choices=["ckks", "exact", "none"], default="ckks")
+    p.add_argument("--backend",
+                   choices=["ckks", "exact", "none", "openfhe", "openfhe-threshold"],
+                   default="ckks")
+    p.add_argument("--threshold", type=int, default=None,
+                   help="openfhe-threshold only: t of the t-of-n Shamir recovery "
+                        "(default: majority, n // 2 + 1)")
     p.add_argument("--disclosure", choices=["practical", "strict"], default="practical")
     p.add_argument("--clients", type=int, default=10)
     p.add_argument("--rounds", type=int, default=5)

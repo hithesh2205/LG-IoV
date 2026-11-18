@@ -130,7 +130,8 @@ class FederatedClient:
 
         flat = flatten_model(self.model)
         enc = encrypt_update(flat, backend=self.backend, context=self.context,
-                             levels_to_drop=self.levels_to_drop)
+                             levels_to_drop=self.levels_to_drop,
+                             owner=self.client_id)
 
         return {
             "client_id": self.client_id,

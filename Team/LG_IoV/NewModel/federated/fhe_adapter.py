@@ -52,7 +52,9 @@ except Exception:                       # pragma: no cover
     _TENSEAL_AVAILABLE = False
 
 
-BACKENDS = ("ckks", "exact", "none")
+#: "openfhe" / "openfhe-threshold" live in federated/openfhe_backend.py, which
+#: is imported lazily: the openfhe package ships Linux wheels only (run via WSL).
+BACKENDS = ("ckks", "exact", "none", "openfhe", "openfhe-threshold")
 
 #: CKKS parameters for the default *practical* profile.
 #:
@@ -359,14 +361,25 @@ def encrypt_update(
     backend: str = "ckks",
     context: Optional["ts.Context"] = None,
     levels_to_drop: int = 0,
+    owner: Optional[int] = None,
 ):
     """Encrypt one client's flattened update under the chosen backend.
 
     ``levels_to_drop=1`` shrinks the transmitted ciphertext by ~29.6 % and is
     safe for the FheFL round; see ``federated/packing.py``.
+
+    ``owner`` (the client id) is recorded on OpenFHE ciphertexts so the key
+    holders can refuse to decrypt anything that is not a multi-vehicle sum.
     """
     if backend not in BACKENDS:
         raise ValueError(f"backend must be one of {BACKENDS}, got {backend!r}")
+    if backend in ("openfhe", "openfhe-threshold"):
+        from .openfhe_backend import OpenFHEVector
+        if context is None:
+            raise ValueError(f"backend={backend!r} requires an OpenFHEContext")
+        return OpenFHEVector(
+            context, data=flat, levels_to_drop=levels_to_drop,
+            contributors=frozenset({owner}) if owner is not None else None)
     if backend == "ckks":
         if context is None:
             raise ValueError("backend='ckks' requires a CKKS context")

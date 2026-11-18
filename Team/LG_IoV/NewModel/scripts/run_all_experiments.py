@@ -104,27 +104,39 @@ def run(dataset: str, backend: str, extra: list) -> dict:
 
 
 def main() -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--backends", nargs="+", default=BACKENDS,
+                    help="default: ckks none (the Month-5 sweep). The OpenFHE "
+                         "sweep is: --backends openfhe openfhe-threshold "
+                         "--summary openfhe_summary.json (run under WSL)")
+    ap.add_argument("--datasets", nargs="+", default=list(DATASETS))
+    ap.add_argument("--summary", default="month5_summary.json",
+                    help="combined output file name inside results/")
+    args = ap.parse_args()
+
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     all_results = []
-    for dataset, extra in DATASETS.items():
-        for backend in BACKENDS:
-            all_results.append(run(dataset, backend, extra))
+    for dataset in args.datasets:
+        for backend in args.backends:
+            all_results.append(run(dataset, backend, DATASETS[dataset]))
 
-    combined = RESULTS_DIR / "month5_summary.json"
+    combined = RESULTS_DIR / args.summary
     with open(combined, "w", encoding="utf-8") as f:
         json.dump({
             "seeds": SEEDS,
             "rounds": int(ROUNDS),
             "clients": int(CLIENTS),
+            "backends": args.backends,
             "results": all_results,
         }, f, indent=2)
 
     print(f"\n{'=' * 70}\nSWEEP COMPLETE\n{'=' * 70}")
     for r in all_results:
         if r.get("status") != "ok":
-            print(f"  {r['dataset']:9s} {r['backend']:6s}  FAILED")
+            print(f"  {r['dataset']:9s} {r['backend']:17s}  FAILED")
             continue
-        print(f"  {r['dataset']:9s} {r['backend']:6s}  "
+        print(f"  {r['dataset']:9s} {r['backend']:17s}  "
               f"acc {r['accuracy_mean']:.4f}+/-{r['accuracy_std']:.4f}  "
               f"f1 {r['macro_f1_mean']:.4f}  auc {r['roc_auc_mean']:.4f}")
     print(f"\nsaved {combined}")

@@ -60,6 +60,13 @@
 | [15_ntt_implementation.md](15_ntt_implementation.md) | High-Performance NTT Implementation | Month 3–4 | 🟡 reference validated (11.22×); ARM/NEON kernel blocked on hardware |
 | [16_hardware_baseline.md](16_hardware_baseline.md) | Baseline Performance Benchmarking on Hardware | Month 1–2 | 🟡 harness + host baseline; target-board run blocked on procurement |
 
+### Decision records (added after the Month-5 snapshot)
+| File | Contents |
+|---|---|
+| [17_multikey_scheme_decision.md](17_multikey_scheme_decision.md) | xMK-CKKS vs threshold CKKS (28 Aug 2026) — **superseded by 18** |
+| [18_dmk_ckks_decision.md](18_dmk_ckks_decision.md) | DMK-CKKS adopted at the 8 Oct 2026 meeting: its source papers (PFLMA, MK-CKKS), the options and their trade-offs, implementation plan |
+| [19_openfhe_migration.md](19_openfhe_migration.md) | OpenFHE migration M1–M3 (18 Nov 2026): why the profile moved to a 55-bit first prime, TenSEAL parity, threshold CKKS, answers to open items S1–S4 / Q5 / Q8, smudging limit |
+
 ---
 
 ## Reading notes
