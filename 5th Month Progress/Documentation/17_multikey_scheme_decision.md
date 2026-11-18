@@ -4,6 +4,11 @@
 **Version:** 1.0 · 2026-08-28
 **Supersedes the key-management half of:** [06_multikey_ckks_plan.md](06_multikey_ckks_plan.md)
 
+> **Superseded on 8 Oct 2026.** The weekly meeting replaced xMK-CKKS with
+> DMK-CKKS — see [18_dmk_ckks_decision.md](18_dmk_ckks_decision.md). The analysis
+> below of dropout (§5), collusion (§6.2) and Byzantine robustness (§7) still
+> applies; doc 18 builds on it.
+
 ---
 
 ## 1. What this document decides
