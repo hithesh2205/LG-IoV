@@ -1,0 +1,6 @@
+# Non-IID Experiment Configuration
+partition:
+  mode: "non_iid"
+  alpha: 0.3          # Dirichlet concentration parameter
+  n_clients: 5
+  seed: 2025

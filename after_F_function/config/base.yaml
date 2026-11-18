@@ -1,0 +1,40 @@
+# Base Configuration for ChebyKAN + Federated Learning + CKKS
+model:
+  name: "ChebyshevKAN"
+  n_features: 46
+  hidden_dim: 64
+  num_layers: 2
+  degree: 4
+  dropout: 0.2
+
+data:
+  dataset: "car_hack"        # "car_hack", "can_vtc"
+  window: 64
+  stride: 16
+  block_size_messages: 6400
+  clip_low: 0.005
+  clip_high: 0.995
+  val_split: 0.15
+  test_split: 0.15
+  max_rows_per_class: 60000   # cap per capture for efficient reproducible runs
+  multi_class: true
+
+federated:
+  clients: 5
+  rounds: 3
+  local_epochs: 1
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  optimizer: "adamw"
+  learning_rate_global_eta: 1.0  # global learning rate eta for w_{t+1} = w_t + eta * F
+  sampling_rate: 1.0             # all registered clients participate per round
+  seed: 2025
+  device: "cpu"
+
+crypto:
+  backend: "ckks"                # "ckks" or "none"
+  poly_modulus_degree: 8192      # 4,096 slots
+  coeff_mod_bit_sizes: [60, 40, 40, 60]
+  global_scale_bits: 40
+  levels_to_drop: 0

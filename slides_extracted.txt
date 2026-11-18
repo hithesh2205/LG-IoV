@@ -1,0 +1,136 @@
+========================================
+SLIDE 1 (ppt/slides/slide1.xml)
+========================================
+Privacy Preserving Collaborative IDS for Internet of Vehicle Networks
+---
+
+
+========================================
+SLIDE 2 (ppt/slides/slide2.xml)
+========================================
+Content:
+---
+1. High-Level Cryptographic Architecture (Client vs. Server Trust Domains)
+2. Architectural Comparison: Plaintext FedAvg vs. Homomorphic Function F
+3. Formal Mathematical Formulation of Function F (Weighted Aggregation)
+4. Mathematical Proof of Correctness (Decryption Linearity)
+5. ChebyKAN Weight Representation & Edge Formulation
+6. CKKS SIMD Slot Vectorization: Packing 44,164 Weights into 11 Chunks
+7. Downstream Model Reconstruction & Multi-Round Scale Refresh
+8. Few more Homomorphic Functions which can be Evaluated by Server
+9. Cryptographic Viability of Function F & Precision Parity
+---
+
+
+========================================
+SLIDE 3 (ppt/slides/slide3.xml)
+========================================
+Architecture Workflow: Client Domain vs. Untrusted Server
+---
+Client Domain (Possesses Secret Key sk):
+• [1] Local Plaintext Data: 46 CAN statistical features 
+• Local Training: Computes update: Δwk = wk(t+1) − w(t) ∈ ℝ44,164
+• ( Encrypts Locally ): Encrypts via public key pk: ck = Encpk(Δwk)
+• [2] Secure Ciphertext: Transmits (ck, nk) over vehicular 5G / V2X
+Untrusted Server Domain (No Secret Key: sk = ∅):
+• Receives Ciphertext: Ingests { (ck, nk) } blindly without seeing weights
+• Computes Function F: Evaluates weighted FedAvg directly over ciphertexts
+• New Result Ciphertext: Broadcasts aggregated global ciphertext cF
+---
+Downstream Decryption:
+• [4] Broadcasts cF (3.52 MB) -> [5] Vehicles decrypt locally via sk
+• Updates model: w(t+1) = w(t) + 1.0 · Δwglobal
+---
+
+
+========================================
+SLIDE 4 (ppt/slides/slide4.xml)
+========================================
+Architectural Comparison: Plaintext vs. Homomorphic Function F
+---
+Plaintext Federated Learning (Baseline)
+• Weight Exposure: Vehicles transmit raw weight deltas Δwk unencrypted
+• Model Inversion Vulnerability: Eavesdroppers/RSU reconstruct vehicle CAN telemetry
+• Server Computation: Computes standard float division: (1/N) ∑ nk Δwk
+• Trust Assumption: Requires complete trust in roadside servers and communication channels
+• Security Level: Zero cryptographic privacy on model weights
+---
+Homomorphic Function F 
+• Ciphertext Confidentiality: Vehicles transmit strictly encrypted ciphertexts ck
+• Provable Privacy: Individual weights and CAN traffic are mathematically concealed
+• Server Computation: Evaluates F blindly via slot-wise scalar multiplication & addition
+• Zero-Trust Server: RSU holds zero secret keys (sk = ∅); cannot decrypt any update
+---
+
+
+========================================
+SLIDE 5 (ppt/slides/slide5.xml)
+========================================
+Formal Mathematical Formulation of Function F
+---
+1. Mathematical Definition of Function F (Weighted Aggregation)
+• Suppose there are K vehicles participating in federated round t.
+• Vehicle Variables in Round t:
+  - nk: Number of local training records processed on vehicle k
+  - Δwk: Local model update vector: Δwk = wk(t+1) − w(t) ∈ ℝ44,164
+  - ck = Encpk(Δwk): Encrypted update vector (11 CKKS ciphertext chunks)
+The Weighted Aggregation Function:
+   F( {ck, nk}k=1K ) = ( 1 / ∑k=1K nk ) · ∑k=1K nk ck
+Core Computational Rule: Plaintext Scalar Division
+• Multiplication and addition involving ck are performed directly on ciphertexts using CKKS.
+• Division means multiplying by plaintext scalar 1 / ∑k=1K nk, NOT dividing by ciphertext!
+• Bypasses expensive ciphertext division [c1 / c2] entirely.
+---
+
+
+========================================
+SLIDE 6 (ppt/slides/slide6.xml)
+========================================
+Mathematical Proof of Correctness: Decryption Linearity
+---
+Proof of Equivalence by Linearity of CKKS Decryption
+• Decryption of aggregated output ciphertext across slot chunk j:
+   Decsk( cF,j ) = Decsk( ∑k=1K αk ⊙ ck,j )
+• By linearity of CKKS decryption across canonical embeddings:
+   = ∑k=1K αk · Decsk( ck,j )
+• Substituting plaintext scalar fractions αk = nk / N and decrypted updates Δwk,j:
+   = ∑k=1K ( nk / N ) · Δwk,j = ( ∑k=1K nk Δwk,j ) / ( ∑k=1K nk ) = Δwglobal, j
+Experimental Bitwise Parity & Numerical Error Bound
+• Exact Parity: Decsk(cF,j) = Δwglobal, j matches classical unencrypted FedAvg exactly.
+• Measured Numerical Error Bound: εagg = || Decsk(cF) − Δwunencrypted ||∞ = 8.174 × 10-7.
+• Zero Accuracy Loss: Confirmed 99.83% multi-class accuracy with exactly 0.0000% FHE gap.
+---
+
+
+========================================
+SLIDE 7 (ppt/slides/slide7.xml)
+========================================
+ChebyKAN Weight Representation & Edge Formulation
+---
+How Weights are Represented in ChebyKAN
+• Connection Curves: Standard MLPs use scalar multipliers (w · x). ChebyKAN replaces each connection with a learnable Chebyshev polynomial curve: φ(x) = wb · x + ∑k=04 ck · Tk(xnorm)
+• 6 Learnable Parameters per Edge: 1 base linear weight (wb) captures baseline linear trends + 5 Chebyshev coefficients (c0, c1, c2, c3, c4) shape non-linear attack boundaries.
+• Orthonormal Chebyshev Basis: Uses T0=1, T1=x, T2=2x2-1, T3=4x3-3x, T4=8x4-8x2+1 defined over normalized range [-1, 1].
+Native Cryptographic Compatibility (Why ChebyKAN?)
+• Eliminates Non-Polynomial ReLUs: Traditional DNNs rely on ReLU/Sigmoid activations, which cannot be computed under CKKS without expensive high-degree polynomial approximations.
+• Natively Algebraic: ChebyKAN non-linearities are purely algebraic polynomial operations, perfectly matching CKKS homomorphic additions and scalar multiplications.
+---
+
+
+========================================
+SLIDE 8 (ppt/slides/slide8.xml)
+========================================
+ChebyKAN Weight Representation & Edge Formulation
+---
+Network Topology & Exact Parameter Count
+• ChebyKAN Topology: 46 Inputs -> 64 Hidden -> 64 Hidden -> 4 Classes (7,296 total edges)
+• Layer 1 (46 -> 64, 2,944 edges): 14,720 Cheby weights (2,944 × 5) + 2,944 base weights + 64 biases + 128 LayerNorm (γ, β) = 17,856 parameters
+• Layer 2 (64 -> 64, 4,096 edges): 20,480 Cheby weights (4,096 × 5) + 4,096 base weights + 64 biases + 128 LayerNorm (γ, β) = 24,768 parameters
+• Layer 3 (64 -> 4, 256 edges): 1,280 Cheby weights (256 × 5) + 256 base weights + 4 biases = 1,540 parameters
+4 Target Classes & 44,164 Parameters
+• 4 Attack Classes: Normal (Benign), DoS (Flooding), Replay, Spoofing (Gear/RPM)
+• Exact Parameters: 17,856 (L1) + 24,768 (L2) + 1,540 (L3) = EXACTLY 44,164 Parameters
+• Breakdown: 36,480 Chebyshev polynomial weights + 7,296 base linear weights + 388 biases & LayerNorm parameters.
+---
+
+

@@ -1,0 +1,5 @@
+# IID Experiment Configuration
+partition:
+  mode: "iid"
+  n_clients: 5
+  seed: 2025

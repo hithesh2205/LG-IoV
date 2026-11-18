@@ -1,0 +1,62 @@
+[
+  {
+    "Experiment": "iid_plain",
+    "Description": "IID without CKKS (Plaintext Baseline)",
+    "Partition": "iid",
+    "Backend": "none",
+    "Test_Accuracy": 0.9982896237172177,
+    "Test_F1_Macro": 0.9972037522424863,
+    "Test_Precision_Macro": 0.9992951127819549,
+    "Test_Recall_Macro": 0.995133024611657,
+    "Test_Loss": 0.01524817033562259,
+    "Total_Duration_s": 12.69,
+    "Avg_Round_s": 3.15,
+    "Avg_Agg_s": 0.0015,
+    "Total_Comm_MB": 2.55
+  },
+  {
+    "Experiment": "iid_ckks",
+    "Description": "IID with CKKS (Homomorphic Baseline)",
+    "Partition": "iid",
+    "Backend": "ckks",
+    "Test_Accuracy": 0.9982896237172177,
+    "Test_F1_Macro": 0.9972037522424863,
+    "Test_Precision_Macro": 0.9992951127819549,
+    "Test_Recall_Macro": 0.995133024611657,
+    "Test_Loss": 0.015248007553418782,
+    "Total_Duration_s": 30.4,
+    "Avg_Round_s": 8.71,
+    "Avg_Agg_s": 7.0829,
+    "Total_Comm_MB": 52.6
+  },
+  {
+    "Experiment": "non_iid_plain",
+    "Description": "Non-IID without CKKS (Plaintext Heterogeneous)",
+    "Partition": "non_iid",
+    "Backend": "none",
+    "Test_Accuracy": 0.9982896237172177,
+    "Test_F1_Macro": 0.9972037522424863,
+    "Test_Precision_Macro": 0.9992951127819549,
+    "Test_Recall_Macro": 0.995133024611657,
+    "Test_Loss": 0.014413624363282362,
+    "Total_Duration_s": 4.94,
+    "Avg_Round_s": 0.61,
+    "Avg_Agg_s": 0.002,
+    "Total_Comm_MB": 2.55
+  },
+  {
+    "Experiment": "non_iid_ckks",
+    "Description": "Non-IID with CKKS (Homomorphic Heterogeneous)",
+    "Partition": "non_iid",
+    "Backend": "ckks",
+    "Test_Accuracy": 0.9982896237172177,
+    "Test_F1_Macro": 0.9972037522424863,
+    "Test_Precision_Macro": 0.9992951127819549,
+    "Test_Recall_Macro": 0.995133024611657,
+    "Test_Loss": 0.014417052833801996,
+    "Total_Duration_s": 25.35,
+    "Avg_Round_s": 7.04,
+    "Avg_Agg_s": 6.1509,
+    "Total_Comm_MB": 52.6
+  }
+]
